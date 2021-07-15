@@ -1,68 +1,94 @@
+import 'dart:async';
+
 import 'package:test/test.dart' as dart_test;
 import 'package:meta/meta.dart';
 
-@sealed
-class Expectation<ExpectedType, ReturnType> {
-  Expectation._(
+part 'future_expect.dart';
+part 'stream_expect.dart';
+part 'bool_expect.dart';
+part 'num_expect.dart';
+part 'error_expect.dart';
+part 'function_expect.dart';
+part 'string_expect.dart';
+
+Expectation<Actual> expect<Actual>(Actual value) {
+  return Expectation._(value);
+}
+
+abstract class ExpectationBase<Actual, Return, Param> {
+  ExpectationBase(
     this.actual, {
     dart_test.Matcher Function(dart_test.Matcher)? matcherBuilder,
-    required ReturnType Function(Object? actual, dart_test.Matcher)
-        expectBuilder,
-  })  : _matcherBuilder = matcherBuilder ?? ((matcher) => matcher),
-        _expectBuilder = expectBuilder;
+  }) : _matcherBuilder = matcherBuilder ?? ((matcher) => matcher);
 
-  final Object? actual;
+  final Actual actual;
 
   final dart_test.Matcher Function(dart_test.Matcher) _matcherBuilder;
-  final ReturnType Function(Object? actual, dart_test.Matcher) _expectBuilder;
-
-  /// Reverse the expectation
-  Expectation<ExpectedType, ReturnType> get not => Expectation._(
-        actual,
-        matcherBuilder: (matcher) => dart_test.isNot(_matcherBuilder(matcher)),
-        expectBuilder: _expectBuilder,
-      );
 
   /// Expect that [actual] matches with a Matcher from the Dart SDK.
-  ReturnType toMatch(dart_test.Matcher match) {
-    return _expectBuilder(actual, _matcherBuilder(match));
+  @protected
+  Return runMatcher(dart_test.Matcher match);
+
+  @protected
+  ExpectationBase<Actual, Return, Param> _copyWith({
+    dart_test.Matcher Function(dart_test.Matcher)? matcherBuilder,
+  });
+
+  /// Apply transformations to a matcher.
+  @protected
+  dart_test.Matcher createMatcher(dart_test.Matcher match) {
+    return _matcherBuilder(match);
   }
 
+  /// Reverse the expectation
+  ExpectationBase<Actual, Return, Param> get not => _copyWith(
+        matcherBuilder: (matcher) => dart_test.isNot(_matcherBuilder(matcher)),
+      );
+
   /// Compares [actual] with [expected] using [identical].
-  ReturnType toBe(ExpectedType expected) {
-    return toMatch(dart_test.same(expected));
+  Return toBe(Param expected) {
+    return runMatcher(
+      createMatcher(dart_test.same(expected)),
+    );
   }
 
   /// Compares [actual] with [expected] using the operator `==`.
-  ReturnType toEqual(ExpectedType expected) {
-    return toMatch(dart_test.equals(expected));
+  Return toEqual(Param expected) {
+    return runMatcher(
+      createMatcher(dart_test.equals(expected)),
+    );
+  }
+
+  Return isNull() {
+    return runMatcher(
+      createMatcher(dart_test.isNull),
+    );
+  }
+
+  Return toMatch(Pattern pattern) {
+    return runMatcher(
+      createMatcher(dart_test.matches(pattern)),
+    );
   }
 }
 
-Expectation<ExpectedType, void> expect<ExpectedType>(ExpectedType value) {
-  return Expectation._(
-    value,
-    expectBuilder: (actual, matcher) => dart_test.expect(actual, matcher),
-  );
-}
+@sealed
+class Expectation<Actual> extends ExpectationBase<Actual, void, Actual> {
+  Expectation._(
+    Actual actual, {
+    dart_test.Matcher Function(dart_test.Matcher)? matcherBuilder,
+  }) : super(actual, matcherBuilder: matcherBuilder);
 
-extension AsyncExpectation<ExpectedType>
-    on Expectation<Future<ExpectedType>, void> {
-  /// Reverse the expectation
-  Expectation<ExpectedType, Future<void>> get resolve => Expectation._(
-        actual,
-        matcherBuilder: (matcher) =>
-            dart_test.completion(_matcherBuilder(matcher)),
-        expectBuilder: (actual, matcher) =>
-            dart_test.expectLater(actual, matcher),
-      );
+  @override
+  void runMatcher(dart_test.Matcher match) {
+    runMatcher(createMatcher(match));
+  }
 
-  /// Reverse the expectation
-  Expectation<ExpectedType, Future<void>> get reject => Expectation._(
-        actual,
-        matcherBuilder: (matcher) =>
-            dart_test.throwsA(_matcherBuilder(matcher)),
-        expectBuilder: (actual, matcher) =>
-            dart_test.expectLater(actual, matcher),
-      );
+  @override
+  ExpectationBase<Actual, void, Actual> _copyWith({
+    dart_test.Matcher Function(dart_test.Matcher)? matcherBuilder,
+  }) {
+    // TODO: implement _copyWith
+    throw UnimplementedError();
+  }
 }
