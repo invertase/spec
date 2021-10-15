@@ -21,6 +21,6 @@ jobs:
       - name: Add pub cache to PATH
         run: echo "PUB_CACHE="$HOME/.pub-cache"" >> $GITHUB_ENV
 
-      - run: dart pub global activate -s path packages/cli_test.dart
+      - run: dart pub global activate -s path packages/cli_test
 
       - run: my_test
