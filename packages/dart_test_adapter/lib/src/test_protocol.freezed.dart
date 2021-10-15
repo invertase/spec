@@ -1,5 +1,6 @@
+// coverage:ignore-file
 // GENERATED CODE - DO NOT MODIFY BY HAND
-// ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides
+// ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target
 
 part of 'test_protocol.dart';
 
@@ -13,7 +14,7 @@ final _privateConstructorUsedError = UnsupportedError(
     'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more informations: https://github.com/rrousselGit/freezed#custom-getters-and-methods');
 
 TestEvent _$TestEventFromJson(Map<String, dynamic> json) {
-  switch (json['type'] as String) {
+  switch (json['type'] as String?) {
     case 'start':
       return TestEventStart.fromJson(json);
     case 'done':
@@ -31,7 +32,7 @@ TestEvent _$TestEventFromJson(Map<String, dynamic> json) {
     case 'print':
       return TestEventMessage.fromJson(json);
     case 'error':
-      return TestEventError.fromJson(json);
+      return TestEventTestError.fromJson(json);
     case 'debug':
       return TestEventDebug.fromJson(json);
 
@@ -120,13 +121,13 @@ class _$TestEventTearOff {
     );
   }
 
-  TestEventError error(
+  TestEventTestError error(
       {required int time,
       required int testID,
       required String error,
       required String stackTrace,
       required bool isFailure}) {
-    return TestEventError(
+    return TestEventTestError(
       time: time,
       testID: testID,
       error: error,
@@ -192,6 +193,30 @@ mixin _$TestEvent {
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult Function(
+            String protocolVersion, int pid, int time, String? runnerVersion)?
+        start,
+    TResult Function(bool? success, int time)? done,
+    TResult Function(int count, int time)? allSuites,
+    TResult Function(Suite suite, int time)? suite,
+    TResult Function(Group group, int time)? group,
+    TResult Function(Test test, int time)? testStart,
+    TResult Function(int time, int testID, bool hidden, bool skipped,
+            TestDoneStatus result)?
+        testDone,
+    TResult Function(int time, int testID, String messageType, String message)?
+        print,
+    TResult Function(int time, int testID, String error, String stackTrace,
+            bool isFailure)?
+        error,
+    TResult Function(
+            int time, int suiteID, String? observatory, String? remoteDebugger)?
+        debug,
+    TResult Function(int time)? unknown,
+  }) =>
+      throw _privateConstructorUsedError;
+  @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
     TResult Function(
             String protocolVersion, int pid, int time, String? runnerVersion)?
@@ -226,9 +251,24 @@ mixin _$TestEvent {
     required TResult Function(TestEventTestStart value) testStart,
     required TResult Function(TestEventTestDone value) testDone,
     required TResult Function(TestEventMessage value) print,
-    required TResult Function(TestEventError value) error,
+    required TResult Function(TestEventTestError value) error,
     required TResult Function(TestEventDebug value) debug,
     required TResult Function(TestEventUnknown value) unknown,
+  }) =>
+      throw _privateConstructorUsedError;
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult Function(TestEventStart value)? start,
+    TResult Function(TestEventDone value)? done,
+    TResult Function(TestEventAllSuites value)? allSuites,
+    TResult Function(TestEventSuite value)? suite,
+    TResult Function(TestEventGroup value)? group,
+    TResult Function(TestEventTestStart value)? testStart,
+    TResult Function(TestEventTestDone value)? testDone,
+    TResult Function(TestEventMessage value)? print,
+    TResult Function(TestEventTestError value)? error,
+    TResult Function(TestEventDebug value)? debug,
+    TResult Function(TestEventUnknown value)? unknown,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
@@ -241,7 +281,7 @@ mixin _$TestEvent {
     TResult Function(TestEventTestStart value)? testStart,
     TResult Function(TestEventTestDone value)? testDone,
     TResult Function(TestEventMessage value)? print,
-    TResult Function(TestEventError value)? error,
+    TResult Function(TestEventTestError value)? error,
     TResult Function(TestEventDebug value)? debug,
     TResult Function(TestEventUnknown value)? unknown,
     required TResult orElse(),
@@ -339,7 +379,7 @@ class _$TestEventStart implements TestEventStart {
       this.runnerVersion});
 
   factory _$TestEventStart.fromJson(Map<String, dynamic> json) =>
-      _$_$TestEventStartFromJson(json);
+      _$$TestEventStartFromJson(json);
 
   @override
   final String protocolVersion;
@@ -414,6 +454,33 @@ class _$TestEventStart implements TestEventStart {
 
   @override
   @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult Function(
+            String protocolVersion, int pid, int time, String? runnerVersion)?
+        start,
+    TResult Function(bool? success, int time)? done,
+    TResult Function(int count, int time)? allSuites,
+    TResult Function(Suite suite, int time)? suite,
+    TResult Function(Group group, int time)? group,
+    TResult Function(Test test, int time)? testStart,
+    TResult Function(int time, int testID, bool hidden, bool skipped,
+            TestDoneStatus result)?
+        testDone,
+    TResult Function(int time, int testID, String messageType, String message)?
+        print,
+    TResult Function(int time, int testID, String error, String stackTrace,
+            bool isFailure)?
+        error,
+    TResult Function(
+            int time, int suiteID, String? observatory, String? remoteDebugger)?
+        debug,
+    TResult Function(int time)? unknown,
+  }) {
+    return start?.call(protocolVersion, pid, time, runnerVersion);
+  }
+
+  @override
+  @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
     TResult Function(
             String protocolVersion, int pid, int time, String? runnerVersion)?
@@ -454,11 +521,29 @@ class _$TestEventStart implements TestEventStart {
     required TResult Function(TestEventTestStart value) testStart,
     required TResult Function(TestEventTestDone value) testDone,
     required TResult Function(TestEventMessage value) print,
-    required TResult Function(TestEventError value) error,
+    required TResult Function(TestEventTestError value) error,
     required TResult Function(TestEventDebug value) debug,
     required TResult Function(TestEventUnknown value) unknown,
   }) {
     return start(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult Function(TestEventStart value)? start,
+    TResult Function(TestEventDone value)? done,
+    TResult Function(TestEventAllSuites value)? allSuites,
+    TResult Function(TestEventSuite value)? suite,
+    TResult Function(TestEventGroup value)? group,
+    TResult Function(TestEventTestStart value)? testStart,
+    TResult Function(TestEventTestDone value)? testDone,
+    TResult Function(TestEventMessage value)? print,
+    TResult Function(TestEventTestError value)? error,
+    TResult Function(TestEventDebug value)? debug,
+    TResult Function(TestEventUnknown value)? unknown,
+  }) {
+    return start?.call(this);
   }
 
   @override
@@ -472,7 +557,7 @@ class _$TestEventStart implements TestEventStart {
     TResult Function(TestEventTestStart value)? testStart,
     TResult Function(TestEventTestDone value)? testDone,
     TResult Function(TestEventMessage value)? print,
-    TResult Function(TestEventError value)? error,
+    TResult Function(TestEventTestError value)? error,
     TResult Function(TestEventDebug value)? debug,
     TResult Function(TestEventUnknown value)? unknown,
     required TResult orElse(),
@@ -485,7 +570,7 @@ class _$TestEventStart implements TestEventStart {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$_$TestEventStartToJson(this)..['type'] = 'start';
+    return _$$TestEventStartToJson(this)..['type'] = 'start';
   }
 }
 
@@ -554,7 +639,7 @@ class _$TestEventDone implements TestEventDone {
   _$TestEventDone({required this.success, required this.time});
 
   factory _$TestEventDone.fromJson(Map<String, dynamic> json) =>
-      _$_$TestEventDoneFromJson(json);
+      _$$TestEventDoneFromJson(json);
 
   @override
 
@@ -623,6 +708,33 @@ class _$TestEventDone implements TestEventDone {
 
   @override
   @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult Function(
+            String protocolVersion, int pid, int time, String? runnerVersion)?
+        start,
+    TResult Function(bool? success, int time)? done,
+    TResult Function(int count, int time)? allSuites,
+    TResult Function(Suite suite, int time)? suite,
+    TResult Function(Group group, int time)? group,
+    TResult Function(Test test, int time)? testStart,
+    TResult Function(int time, int testID, bool hidden, bool skipped,
+            TestDoneStatus result)?
+        testDone,
+    TResult Function(int time, int testID, String messageType, String message)?
+        print,
+    TResult Function(int time, int testID, String error, String stackTrace,
+            bool isFailure)?
+        error,
+    TResult Function(
+            int time, int suiteID, String? observatory, String? remoteDebugger)?
+        debug,
+    TResult Function(int time)? unknown,
+  }) {
+    return done?.call(success, time);
+  }
+
+  @override
+  @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
     TResult Function(
             String protocolVersion, int pid, int time, String? runnerVersion)?
@@ -663,11 +775,29 @@ class _$TestEventDone implements TestEventDone {
     required TResult Function(TestEventTestStart value) testStart,
     required TResult Function(TestEventTestDone value) testDone,
     required TResult Function(TestEventMessage value) print,
-    required TResult Function(TestEventError value) error,
+    required TResult Function(TestEventTestError value) error,
     required TResult Function(TestEventDebug value) debug,
     required TResult Function(TestEventUnknown value) unknown,
   }) {
     return done(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult Function(TestEventStart value)? start,
+    TResult Function(TestEventDone value)? done,
+    TResult Function(TestEventAllSuites value)? allSuites,
+    TResult Function(TestEventSuite value)? suite,
+    TResult Function(TestEventGroup value)? group,
+    TResult Function(TestEventTestStart value)? testStart,
+    TResult Function(TestEventTestDone value)? testDone,
+    TResult Function(TestEventMessage value)? print,
+    TResult Function(TestEventTestError value)? error,
+    TResult Function(TestEventDebug value)? debug,
+    TResult Function(TestEventUnknown value)? unknown,
+  }) {
+    return done?.call(this);
   }
 
   @override
@@ -681,7 +811,7 @@ class _$TestEventDone implements TestEventDone {
     TResult Function(TestEventTestStart value)? testStart,
     TResult Function(TestEventTestDone value)? testDone,
     TResult Function(TestEventMessage value)? print,
-    TResult Function(TestEventError value)? error,
+    TResult Function(TestEventTestError value)? error,
     TResult Function(TestEventDebug value)? debug,
     TResult Function(TestEventUnknown value)? unknown,
     required TResult orElse(),
@@ -694,7 +824,7 @@ class _$TestEventDone implements TestEventDone {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$_$TestEventDoneToJson(this)..['type'] = 'done';
+    return _$$TestEventDoneToJson(this)..['type'] = 'done';
   }
 }
 
@@ -763,7 +893,7 @@ class _$TestEventAllSuites implements TestEventAllSuites {
   _$TestEventAllSuites({required this.count, required this.time});
 
   factory _$TestEventAllSuites.fromJson(Map<String, dynamic> json) =>
-      _$_$TestEventAllSuitesFromJson(json);
+      _$$TestEventAllSuitesFromJson(json);
 
   @override
   final int count;
@@ -826,6 +956,33 @@ class _$TestEventAllSuites implements TestEventAllSuites {
 
   @override
   @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult Function(
+            String protocolVersion, int pid, int time, String? runnerVersion)?
+        start,
+    TResult Function(bool? success, int time)? done,
+    TResult Function(int count, int time)? allSuites,
+    TResult Function(Suite suite, int time)? suite,
+    TResult Function(Group group, int time)? group,
+    TResult Function(Test test, int time)? testStart,
+    TResult Function(int time, int testID, bool hidden, bool skipped,
+            TestDoneStatus result)?
+        testDone,
+    TResult Function(int time, int testID, String messageType, String message)?
+        print,
+    TResult Function(int time, int testID, String error, String stackTrace,
+            bool isFailure)?
+        error,
+    TResult Function(
+            int time, int suiteID, String? observatory, String? remoteDebugger)?
+        debug,
+    TResult Function(int time)? unknown,
+  }) {
+    return allSuites?.call(count, time);
+  }
+
+  @override
+  @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
     TResult Function(
             String protocolVersion, int pid, int time, String? runnerVersion)?
@@ -866,11 +1023,29 @@ class _$TestEventAllSuites implements TestEventAllSuites {
     required TResult Function(TestEventTestStart value) testStart,
     required TResult Function(TestEventTestDone value) testDone,
     required TResult Function(TestEventMessage value) print,
-    required TResult Function(TestEventError value) error,
+    required TResult Function(TestEventTestError value) error,
     required TResult Function(TestEventDebug value) debug,
     required TResult Function(TestEventUnknown value) unknown,
   }) {
     return allSuites(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult Function(TestEventStart value)? start,
+    TResult Function(TestEventDone value)? done,
+    TResult Function(TestEventAllSuites value)? allSuites,
+    TResult Function(TestEventSuite value)? suite,
+    TResult Function(TestEventGroup value)? group,
+    TResult Function(TestEventTestStart value)? testStart,
+    TResult Function(TestEventTestDone value)? testDone,
+    TResult Function(TestEventMessage value)? print,
+    TResult Function(TestEventTestError value)? error,
+    TResult Function(TestEventDebug value)? debug,
+    TResult Function(TestEventUnknown value)? unknown,
+  }) {
+    return allSuites?.call(this);
   }
 
   @override
@@ -884,7 +1059,7 @@ class _$TestEventAllSuites implements TestEventAllSuites {
     TResult Function(TestEventTestStart value)? testStart,
     TResult Function(TestEventTestDone value)? testDone,
     TResult Function(TestEventMessage value)? print,
-    TResult Function(TestEventError value)? error,
+    TResult Function(TestEventTestError value)? error,
     TResult Function(TestEventDebug value)? debug,
     TResult Function(TestEventUnknown value)? unknown,
     required TResult orElse(),
@@ -897,7 +1072,7 @@ class _$TestEventAllSuites implements TestEventAllSuites {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$_$TestEventAllSuitesToJson(this)..['type'] = 'allSuites';
+    return _$$TestEventAllSuitesToJson(this)..['type'] = 'allSuites';
   }
 }
 
@@ -970,7 +1145,7 @@ class _$TestEventSuite implements TestEventSuite {
   _$TestEventSuite(this.suite, {required this.time});
 
   factory _$TestEventSuite.fromJson(Map<String, dynamic> json) =>
-      _$_$TestEventSuiteFromJson(json);
+      _$$TestEventSuiteFromJson(json);
 
   @override
   final Suite suite;
@@ -1033,6 +1208,33 @@ class _$TestEventSuite implements TestEventSuite {
 
   @override
   @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult Function(
+            String protocolVersion, int pid, int time, String? runnerVersion)?
+        start,
+    TResult Function(bool? success, int time)? done,
+    TResult Function(int count, int time)? allSuites,
+    TResult Function(Suite suite, int time)? suite,
+    TResult Function(Group group, int time)? group,
+    TResult Function(Test test, int time)? testStart,
+    TResult Function(int time, int testID, bool hidden, bool skipped,
+            TestDoneStatus result)?
+        testDone,
+    TResult Function(int time, int testID, String messageType, String message)?
+        print,
+    TResult Function(int time, int testID, String error, String stackTrace,
+            bool isFailure)?
+        error,
+    TResult Function(
+            int time, int suiteID, String? observatory, String? remoteDebugger)?
+        debug,
+    TResult Function(int time)? unknown,
+  }) {
+    return suite?.call(this.suite, time);
+  }
+
+  @override
+  @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
     TResult Function(
             String protocolVersion, int pid, int time, String? runnerVersion)?
@@ -1073,11 +1275,29 @@ class _$TestEventSuite implements TestEventSuite {
     required TResult Function(TestEventTestStart value) testStart,
     required TResult Function(TestEventTestDone value) testDone,
     required TResult Function(TestEventMessage value) print,
-    required TResult Function(TestEventError value) error,
+    required TResult Function(TestEventTestError value) error,
     required TResult Function(TestEventDebug value) debug,
     required TResult Function(TestEventUnknown value) unknown,
   }) {
     return suite(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult Function(TestEventStart value)? start,
+    TResult Function(TestEventDone value)? done,
+    TResult Function(TestEventAllSuites value)? allSuites,
+    TResult Function(TestEventSuite value)? suite,
+    TResult Function(TestEventGroup value)? group,
+    TResult Function(TestEventTestStart value)? testStart,
+    TResult Function(TestEventTestDone value)? testDone,
+    TResult Function(TestEventMessage value)? print,
+    TResult Function(TestEventTestError value)? error,
+    TResult Function(TestEventDebug value)? debug,
+    TResult Function(TestEventUnknown value)? unknown,
+  }) {
+    return suite?.call(this);
   }
 
   @override
@@ -1091,7 +1311,7 @@ class _$TestEventSuite implements TestEventSuite {
     TResult Function(TestEventTestStart value)? testStart,
     TResult Function(TestEventTestDone value)? testDone,
     TResult Function(TestEventMessage value)? print,
-    TResult Function(TestEventError value)? error,
+    TResult Function(TestEventTestError value)? error,
     TResult Function(TestEventDebug value)? debug,
     TResult Function(TestEventUnknown value)? unknown,
     required TResult orElse(),
@@ -1104,7 +1324,7 @@ class _$TestEventSuite implements TestEventSuite {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$_$TestEventSuiteToJson(this)..['type'] = 'suite';
+    return _$$TestEventSuiteToJson(this)..['type'] = 'suite';
   }
 }
 
@@ -1176,7 +1396,7 @@ class _$TestEventGroup implements TestEventGroup {
   _$TestEventGroup(this.group, {required this.time});
 
   factory _$TestEventGroup.fromJson(Map<String, dynamic> json) =>
-      _$_$TestEventGroupFromJson(json);
+      _$$TestEventGroupFromJson(json);
 
   @override
   final Group group;
@@ -1239,6 +1459,33 @@ class _$TestEventGroup implements TestEventGroup {
 
   @override
   @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult Function(
+            String protocolVersion, int pid, int time, String? runnerVersion)?
+        start,
+    TResult Function(bool? success, int time)? done,
+    TResult Function(int count, int time)? allSuites,
+    TResult Function(Suite suite, int time)? suite,
+    TResult Function(Group group, int time)? group,
+    TResult Function(Test test, int time)? testStart,
+    TResult Function(int time, int testID, bool hidden, bool skipped,
+            TestDoneStatus result)?
+        testDone,
+    TResult Function(int time, int testID, String messageType, String message)?
+        print,
+    TResult Function(int time, int testID, String error, String stackTrace,
+            bool isFailure)?
+        error,
+    TResult Function(
+            int time, int suiteID, String? observatory, String? remoteDebugger)?
+        debug,
+    TResult Function(int time)? unknown,
+  }) {
+    return group?.call(this.group, time);
+  }
+
+  @override
+  @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
     TResult Function(
             String protocolVersion, int pid, int time, String? runnerVersion)?
@@ -1279,11 +1526,29 @@ class _$TestEventGroup implements TestEventGroup {
     required TResult Function(TestEventTestStart value) testStart,
     required TResult Function(TestEventTestDone value) testDone,
     required TResult Function(TestEventMessage value) print,
-    required TResult Function(TestEventError value) error,
+    required TResult Function(TestEventTestError value) error,
     required TResult Function(TestEventDebug value) debug,
     required TResult Function(TestEventUnknown value) unknown,
   }) {
     return group(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult Function(TestEventStart value)? start,
+    TResult Function(TestEventDone value)? done,
+    TResult Function(TestEventAllSuites value)? allSuites,
+    TResult Function(TestEventSuite value)? suite,
+    TResult Function(TestEventGroup value)? group,
+    TResult Function(TestEventTestStart value)? testStart,
+    TResult Function(TestEventTestDone value)? testDone,
+    TResult Function(TestEventMessage value)? print,
+    TResult Function(TestEventTestError value)? error,
+    TResult Function(TestEventDebug value)? debug,
+    TResult Function(TestEventUnknown value)? unknown,
+  }) {
+    return group?.call(this);
   }
 
   @override
@@ -1297,7 +1562,7 @@ class _$TestEventGroup implements TestEventGroup {
     TResult Function(TestEventTestStart value)? testStart,
     TResult Function(TestEventTestDone value)? testDone,
     TResult Function(TestEventMessage value)? print,
-    TResult Function(TestEventError value)? error,
+    TResult Function(TestEventTestError value)? error,
     TResult Function(TestEventDebug value)? debug,
     TResult Function(TestEventUnknown value)? unknown,
     required TResult orElse(),
@@ -1310,7 +1575,7 @@ class _$TestEventGroup implements TestEventGroup {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$_$TestEventGroupToJson(this)..['type'] = 'group';
+    return _$$TestEventGroupToJson(this)..['type'] = 'group';
   }
 }
 
@@ -1383,7 +1648,7 @@ class _$TestEventTestStart implements TestEventTestStart {
   _$TestEventTestStart(this.test, {required this.time});
 
   factory _$TestEventTestStart.fromJson(Map<String, dynamic> json) =>
-      _$_$TestEventTestStartFromJson(json);
+      _$$TestEventTestStartFromJson(json);
 
   @override
   final Test test;
@@ -1446,6 +1711,33 @@ class _$TestEventTestStart implements TestEventTestStart {
 
   @override
   @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult Function(
+            String protocolVersion, int pid, int time, String? runnerVersion)?
+        start,
+    TResult Function(bool? success, int time)? done,
+    TResult Function(int count, int time)? allSuites,
+    TResult Function(Suite suite, int time)? suite,
+    TResult Function(Group group, int time)? group,
+    TResult Function(Test test, int time)? testStart,
+    TResult Function(int time, int testID, bool hidden, bool skipped,
+            TestDoneStatus result)?
+        testDone,
+    TResult Function(int time, int testID, String messageType, String message)?
+        print,
+    TResult Function(int time, int testID, String error, String stackTrace,
+            bool isFailure)?
+        error,
+    TResult Function(
+            int time, int suiteID, String? observatory, String? remoteDebugger)?
+        debug,
+    TResult Function(int time)? unknown,
+  }) {
+    return testStart?.call(test, time);
+  }
+
+  @override
+  @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
     TResult Function(
             String protocolVersion, int pid, int time, String? runnerVersion)?
@@ -1486,11 +1778,29 @@ class _$TestEventTestStart implements TestEventTestStart {
     required TResult Function(TestEventTestStart value) testStart,
     required TResult Function(TestEventTestDone value) testDone,
     required TResult Function(TestEventMessage value) print,
-    required TResult Function(TestEventError value) error,
+    required TResult Function(TestEventTestError value) error,
     required TResult Function(TestEventDebug value) debug,
     required TResult Function(TestEventUnknown value) unknown,
   }) {
     return testStart(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult Function(TestEventStart value)? start,
+    TResult Function(TestEventDone value)? done,
+    TResult Function(TestEventAllSuites value)? allSuites,
+    TResult Function(TestEventSuite value)? suite,
+    TResult Function(TestEventGroup value)? group,
+    TResult Function(TestEventTestStart value)? testStart,
+    TResult Function(TestEventTestDone value)? testDone,
+    TResult Function(TestEventMessage value)? print,
+    TResult Function(TestEventTestError value)? error,
+    TResult Function(TestEventDebug value)? debug,
+    TResult Function(TestEventUnknown value)? unknown,
+  }) {
+    return testStart?.call(this);
   }
 
   @override
@@ -1504,7 +1814,7 @@ class _$TestEventTestStart implements TestEventTestStart {
     TResult Function(TestEventTestStart value)? testStart,
     TResult Function(TestEventTestDone value)? testDone,
     TResult Function(TestEventMessage value)? print,
-    TResult Function(TestEventError value)? error,
+    TResult Function(TestEventTestError value)? error,
     TResult Function(TestEventDebug value)? debug,
     TResult Function(TestEventUnknown value)? unknown,
     required TResult orElse(),
@@ -1517,7 +1827,7 @@ class _$TestEventTestStart implements TestEventTestStart {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$_$TestEventTestStartToJson(this)..['type'] = 'testStart';
+    return _$$TestEventTestStartToJson(this)..['type'] = 'testStart';
   }
 }
 
@@ -1603,7 +1913,7 @@ class _$TestEventTestDone implements TestEventTestDone {
       required this.result});
 
   factory _$TestEventTestDone.fromJson(Map<String, dynamic> json) =>
-      _$_$TestEventTestDoneFromJson(json);
+      _$$TestEventTestDoneFromJson(json);
 
   @override
   final int time;
@@ -1682,6 +1992,33 @@ class _$TestEventTestDone implements TestEventTestDone {
 
   @override
   @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult Function(
+            String protocolVersion, int pid, int time, String? runnerVersion)?
+        start,
+    TResult Function(bool? success, int time)? done,
+    TResult Function(int count, int time)? allSuites,
+    TResult Function(Suite suite, int time)? suite,
+    TResult Function(Group group, int time)? group,
+    TResult Function(Test test, int time)? testStart,
+    TResult Function(int time, int testID, bool hidden, bool skipped,
+            TestDoneStatus result)?
+        testDone,
+    TResult Function(int time, int testID, String messageType, String message)?
+        print,
+    TResult Function(int time, int testID, String error, String stackTrace,
+            bool isFailure)?
+        error,
+    TResult Function(
+            int time, int suiteID, String? observatory, String? remoteDebugger)?
+        debug,
+    TResult Function(int time)? unknown,
+  }) {
+    return testDone?.call(time, testID, hidden, skipped, result);
+  }
+
+  @override
+  @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
     TResult Function(
             String protocolVersion, int pid, int time, String? runnerVersion)?
@@ -1722,11 +2059,29 @@ class _$TestEventTestDone implements TestEventTestDone {
     required TResult Function(TestEventTestStart value) testStart,
     required TResult Function(TestEventTestDone value) testDone,
     required TResult Function(TestEventMessage value) print,
-    required TResult Function(TestEventError value) error,
+    required TResult Function(TestEventTestError value) error,
     required TResult Function(TestEventDebug value) debug,
     required TResult Function(TestEventUnknown value) unknown,
   }) {
     return testDone(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult Function(TestEventStart value)? start,
+    TResult Function(TestEventDone value)? done,
+    TResult Function(TestEventAllSuites value)? allSuites,
+    TResult Function(TestEventSuite value)? suite,
+    TResult Function(TestEventGroup value)? group,
+    TResult Function(TestEventTestStart value)? testStart,
+    TResult Function(TestEventTestDone value)? testDone,
+    TResult Function(TestEventMessage value)? print,
+    TResult Function(TestEventTestError value)? error,
+    TResult Function(TestEventDebug value)? debug,
+    TResult Function(TestEventUnknown value)? unknown,
+  }) {
+    return testDone?.call(this);
   }
 
   @override
@@ -1740,7 +2095,7 @@ class _$TestEventTestDone implements TestEventTestDone {
     TResult Function(TestEventTestStart value)? testStart,
     TResult Function(TestEventTestDone value)? testDone,
     TResult Function(TestEventMessage value)? print,
-    TResult Function(TestEventError value)? error,
+    TResult Function(TestEventTestError value)? error,
     TResult Function(TestEventDebug value)? debug,
     TResult Function(TestEventUnknown value)? unknown,
     required TResult orElse(),
@@ -1753,7 +2108,7 @@ class _$TestEventTestDone implements TestEventTestDone {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$_$TestEventTestDoneToJson(this)..['type'] = 'testDone';
+    return _$$TestEventTestDoneToJson(this)..['type'] = 'testDone';
   }
 }
 
@@ -1838,7 +2193,7 @@ class _$TestEventMessage implements TestEventMessage {
       required this.message});
 
   factory _$TestEventMessage.fromJson(Map<String, dynamic> json) =>
-      _$_$TestEventMessageFromJson(json);
+      _$$TestEventMessageFromJson(json);
 
   @override
   final int time;
@@ -1912,6 +2267,33 @@ class _$TestEventMessage implements TestEventMessage {
 
   @override
   @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult Function(
+            String protocolVersion, int pid, int time, String? runnerVersion)?
+        start,
+    TResult Function(bool? success, int time)? done,
+    TResult Function(int count, int time)? allSuites,
+    TResult Function(Suite suite, int time)? suite,
+    TResult Function(Group group, int time)? group,
+    TResult Function(Test test, int time)? testStart,
+    TResult Function(int time, int testID, bool hidden, bool skipped,
+            TestDoneStatus result)?
+        testDone,
+    TResult Function(int time, int testID, String messageType, String message)?
+        print,
+    TResult Function(int time, int testID, String error, String stackTrace,
+            bool isFailure)?
+        error,
+    TResult Function(
+            int time, int suiteID, String? observatory, String? remoteDebugger)?
+        debug,
+    TResult Function(int time)? unknown,
+  }) {
+    return print?.call(time, testID, messageType, message);
+  }
+
+  @override
+  @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
     TResult Function(
             String protocolVersion, int pid, int time, String? runnerVersion)?
@@ -1952,11 +2334,29 @@ class _$TestEventMessage implements TestEventMessage {
     required TResult Function(TestEventTestStart value) testStart,
     required TResult Function(TestEventTestDone value) testDone,
     required TResult Function(TestEventMessage value) print,
-    required TResult Function(TestEventError value) error,
+    required TResult Function(TestEventTestError value) error,
     required TResult Function(TestEventDebug value) debug,
     required TResult Function(TestEventUnknown value) unknown,
   }) {
     return print(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult Function(TestEventStart value)? start,
+    TResult Function(TestEventDone value)? done,
+    TResult Function(TestEventAllSuites value)? allSuites,
+    TResult Function(TestEventSuite value)? suite,
+    TResult Function(TestEventGroup value)? group,
+    TResult Function(TestEventTestStart value)? testStart,
+    TResult Function(TestEventTestDone value)? testDone,
+    TResult Function(TestEventMessage value)? print,
+    TResult Function(TestEventTestError value)? error,
+    TResult Function(TestEventDebug value)? debug,
+    TResult Function(TestEventUnknown value)? unknown,
+  }) {
+    return print?.call(this);
   }
 
   @override
@@ -1970,7 +2370,7 @@ class _$TestEventMessage implements TestEventMessage {
     TResult Function(TestEventTestStart value)? testStart,
     TResult Function(TestEventTestDone value)? testDone,
     TResult Function(TestEventMessage value)? print,
-    TResult Function(TestEventError value)? error,
+    TResult Function(TestEventTestError value)? error,
     TResult Function(TestEventDebug value)? debug,
     TResult Function(TestEventUnknown value)? unknown,
     required TResult orElse(),
@@ -1983,7 +2383,7 @@ class _$TestEventMessage implements TestEventMessage {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$_$TestEventMessageToJson(this)..['type'] = 'print';
+    return _$$TestEventMessageToJson(this)..['type'] = 'print';
   }
 }
 
@@ -2009,25 +2409,26 @@ abstract class TestEventMessage implements TestEvent {
 }
 
 /// @nodoc
-abstract class $TestEventErrorCopyWith<$Res>
+abstract class $TestEventTestErrorCopyWith<$Res>
     implements $TestEventCopyWith<$Res> {
-  factory $TestEventErrorCopyWith(
-          TestEventError value, $Res Function(TestEventError) then) =
-      _$TestEventErrorCopyWithImpl<$Res>;
+  factory $TestEventTestErrorCopyWith(
+          TestEventTestError value, $Res Function(TestEventTestError) then) =
+      _$TestEventTestErrorCopyWithImpl<$Res>;
   @override
   $Res call(
       {int time, int testID, String error, String stackTrace, bool isFailure});
 }
 
 /// @nodoc
-class _$TestEventErrorCopyWithImpl<$Res> extends _$TestEventCopyWithImpl<$Res>
-    implements $TestEventErrorCopyWith<$Res> {
-  _$TestEventErrorCopyWithImpl(
-      TestEventError _value, $Res Function(TestEventError) _then)
-      : super(_value, (v) => _then(v as TestEventError));
+class _$TestEventTestErrorCopyWithImpl<$Res>
+    extends _$TestEventCopyWithImpl<$Res>
+    implements $TestEventTestErrorCopyWith<$Res> {
+  _$TestEventTestErrorCopyWithImpl(
+      TestEventTestError _value, $Res Function(TestEventTestError) _then)
+      : super(_value, (v) => _then(v as TestEventTestError));
 
   @override
-  TestEventError get _value => super._value as TestEventError;
+  TestEventTestError get _value => super._value as TestEventTestError;
 
   @override
   $Res call({
@@ -2037,7 +2438,7 @@ class _$TestEventErrorCopyWithImpl<$Res> extends _$TestEventCopyWithImpl<$Res>
     Object? stackTrace = freezed,
     Object? isFailure = freezed,
   }) {
-    return _then(TestEventError(
+    return _then(TestEventTestError(
       time: time == freezed
           ? _value.time
           : time // ignore: cast_nullable_to_non_nullable
@@ -2064,16 +2465,16 @@ class _$TestEventErrorCopyWithImpl<$Res> extends _$TestEventCopyWithImpl<$Res>
 
 /// @nodoc
 @JsonSerializable()
-class _$TestEventError implements TestEventError {
-  _$TestEventError(
+class _$TestEventTestError implements TestEventTestError {
+  _$TestEventTestError(
       {required this.time,
       required this.testID,
       required this.error,
       required this.stackTrace,
       required this.isFailure});
 
-  factory _$TestEventError.fromJson(Map<String, dynamic> json) =>
-      _$_$TestEventErrorFromJson(json);
+  factory _$TestEventTestError.fromJson(Map<String, dynamic> json) =>
+      _$$TestEventTestErrorFromJson(json);
 
   @override
   final int time;
@@ -2094,7 +2495,7 @@ class _$TestEventError implements TestEventError {
   @override
   bool operator ==(dynamic other) {
     return identical(this, other) ||
-        (other is TestEventError &&
+        (other is TestEventTestError &&
             (identical(other.time, time) ||
                 const DeepCollectionEquality().equals(other.time, time)) &&
             (identical(other.testID, testID) ||
@@ -2120,8 +2521,8 @@ class _$TestEventError implements TestEventError {
 
   @JsonKey(ignore: true)
   @override
-  $TestEventErrorCopyWith<TestEventError> get copyWith =>
-      _$TestEventErrorCopyWithImpl<TestEventError>(this, _$identity);
+  $TestEventTestErrorCopyWith<TestEventTestError> get copyWith =>
+      _$TestEventTestErrorCopyWithImpl<TestEventTestError>(this, _$identity);
 
   @override
   @optionalTypeArgs
@@ -2149,6 +2550,33 @@ class _$TestEventError implements TestEventError {
     required TResult Function(int time) unknown,
   }) {
     return error(time, testID, this.error, stackTrace, isFailure);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult Function(
+            String protocolVersion, int pid, int time, String? runnerVersion)?
+        start,
+    TResult Function(bool? success, int time)? done,
+    TResult Function(int count, int time)? allSuites,
+    TResult Function(Suite suite, int time)? suite,
+    TResult Function(Group group, int time)? group,
+    TResult Function(Test test, int time)? testStart,
+    TResult Function(int time, int testID, bool hidden, bool skipped,
+            TestDoneStatus result)?
+        testDone,
+    TResult Function(int time, int testID, String messageType, String message)?
+        print,
+    TResult Function(int time, int testID, String error, String stackTrace,
+            bool isFailure)?
+        error,
+    TResult Function(
+            int time, int suiteID, String? observatory, String? remoteDebugger)?
+        debug,
+    TResult Function(int time)? unknown,
+  }) {
+    return error?.call(time, testID, this.error, stackTrace, isFailure);
   }
 
   @override
@@ -2193,11 +2621,29 @@ class _$TestEventError implements TestEventError {
     required TResult Function(TestEventTestStart value) testStart,
     required TResult Function(TestEventTestDone value) testDone,
     required TResult Function(TestEventMessage value) print,
-    required TResult Function(TestEventError value) error,
+    required TResult Function(TestEventTestError value) error,
     required TResult Function(TestEventDebug value) debug,
     required TResult Function(TestEventUnknown value) unknown,
   }) {
     return error(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult Function(TestEventStart value)? start,
+    TResult Function(TestEventDone value)? done,
+    TResult Function(TestEventAllSuites value)? allSuites,
+    TResult Function(TestEventSuite value)? suite,
+    TResult Function(TestEventGroup value)? group,
+    TResult Function(TestEventTestStart value)? testStart,
+    TResult Function(TestEventTestDone value)? testDone,
+    TResult Function(TestEventMessage value)? print,
+    TResult Function(TestEventTestError value)? error,
+    TResult Function(TestEventDebug value)? debug,
+    TResult Function(TestEventUnknown value)? unknown,
+  }) {
+    return error?.call(this);
   }
 
   @override
@@ -2211,7 +2657,7 @@ class _$TestEventError implements TestEventError {
     TResult Function(TestEventTestStart value)? testStart,
     TResult Function(TestEventTestDone value)? testDone,
     TResult Function(TestEventMessage value)? print,
-    TResult Function(TestEventError value)? error,
+    TResult Function(TestEventTestError value)? error,
     TResult Function(TestEventDebug value)? debug,
     TResult Function(TestEventUnknown value)? unknown,
     required TResult orElse(),
@@ -2224,20 +2670,20 @@ class _$TestEventError implements TestEventError {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$_$TestEventErrorToJson(this)..['type'] = 'error';
+    return _$$TestEventTestErrorToJson(this)..['type'] = 'error';
   }
 }
 
-abstract class TestEventError implements TestEvent {
-  factory TestEventError(
+abstract class TestEventTestError implements TestEvent {
+  factory TestEventTestError(
       {required int time,
       required int testID,
       required String error,
       required String stackTrace,
-      required bool isFailure}) = _$TestEventError;
+      required bool isFailure}) = _$TestEventTestError;
 
-  factory TestEventError.fromJson(Map<String, dynamic> json) =
-      _$TestEventError.fromJson;
+  factory TestEventTestError.fromJson(Map<String, dynamic> json) =
+      _$TestEventTestError.fromJson;
 
   @override
   int get time => throw _privateConstructorUsedError;
@@ -2247,7 +2693,7 @@ abstract class TestEventError implements TestEvent {
   bool get isFailure => throw _privateConstructorUsedError;
   @override
   @JsonKey(ignore: true)
-  $TestEventErrorCopyWith<TestEventError> get copyWith =>
+  $TestEventTestErrorCopyWith<TestEventTestError> get copyWith =>
       throw _privateConstructorUsedError;
 }
 
@@ -2310,7 +2756,7 @@ class _$TestEventDebug implements TestEventDebug {
       this.remoteDebugger});
 
   factory _$TestEventDebug.fromJson(Map<String, dynamic> json) =>
-      _$_$TestEventDebugFromJson(json);
+      _$$TestEventDebugFromJson(json);
 
   @override
   final int time;
@@ -2386,6 +2832,33 @@ class _$TestEventDebug implements TestEventDebug {
 
   @override
   @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult Function(
+            String protocolVersion, int pid, int time, String? runnerVersion)?
+        start,
+    TResult Function(bool? success, int time)? done,
+    TResult Function(int count, int time)? allSuites,
+    TResult Function(Suite suite, int time)? suite,
+    TResult Function(Group group, int time)? group,
+    TResult Function(Test test, int time)? testStart,
+    TResult Function(int time, int testID, bool hidden, bool skipped,
+            TestDoneStatus result)?
+        testDone,
+    TResult Function(int time, int testID, String messageType, String message)?
+        print,
+    TResult Function(int time, int testID, String error, String stackTrace,
+            bool isFailure)?
+        error,
+    TResult Function(
+            int time, int suiteID, String? observatory, String? remoteDebugger)?
+        debug,
+    TResult Function(int time)? unknown,
+  }) {
+    return debug?.call(time, suiteID, observatory, remoteDebugger);
+  }
+
+  @override
+  @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
     TResult Function(
             String protocolVersion, int pid, int time, String? runnerVersion)?
@@ -2426,11 +2899,29 @@ class _$TestEventDebug implements TestEventDebug {
     required TResult Function(TestEventTestStart value) testStart,
     required TResult Function(TestEventTestDone value) testDone,
     required TResult Function(TestEventMessage value) print,
-    required TResult Function(TestEventError value) error,
+    required TResult Function(TestEventTestError value) error,
     required TResult Function(TestEventDebug value) debug,
     required TResult Function(TestEventUnknown value) unknown,
   }) {
     return debug(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult Function(TestEventStart value)? start,
+    TResult Function(TestEventDone value)? done,
+    TResult Function(TestEventAllSuites value)? allSuites,
+    TResult Function(TestEventSuite value)? suite,
+    TResult Function(TestEventGroup value)? group,
+    TResult Function(TestEventTestStart value)? testStart,
+    TResult Function(TestEventTestDone value)? testDone,
+    TResult Function(TestEventMessage value)? print,
+    TResult Function(TestEventTestError value)? error,
+    TResult Function(TestEventDebug value)? debug,
+    TResult Function(TestEventUnknown value)? unknown,
+  }) {
+    return debug?.call(this);
   }
 
   @override
@@ -2444,7 +2935,7 @@ class _$TestEventDebug implements TestEventDebug {
     TResult Function(TestEventTestStart value)? testStart,
     TResult Function(TestEventTestDone value)? testDone,
     TResult Function(TestEventMessage value)? print,
-    TResult Function(TestEventError value)? error,
+    TResult Function(TestEventTestError value)? error,
     TResult Function(TestEventDebug value)? debug,
     TResult Function(TestEventUnknown value)? unknown,
     required TResult orElse(),
@@ -2457,7 +2948,7 @@ class _$TestEventDebug implements TestEventDebug {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$_$TestEventDebugToJson(this)..['type'] = 'debug';
+    return _$$TestEventDebugToJson(this)..['type'] = 'debug';
   }
 }
 
@@ -2521,7 +3012,7 @@ class _$TestEventUnknown implements TestEventUnknown {
   _$TestEventUnknown({required this.time});
 
   factory _$TestEventUnknown.fromJson(Map<String, dynamic> json) =>
-      _$_$TestEventUnknownFromJson(json);
+      _$$TestEventUnknownFromJson(json);
 
   @override
   final int time;
@@ -2578,6 +3069,33 @@ class _$TestEventUnknown implements TestEventUnknown {
 
   @override
   @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult Function(
+            String protocolVersion, int pid, int time, String? runnerVersion)?
+        start,
+    TResult Function(bool? success, int time)? done,
+    TResult Function(int count, int time)? allSuites,
+    TResult Function(Suite suite, int time)? suite,
+    TResult Function(Group group, int time)? group,
+    TResult Function(Test test, int time)? testStart,
+    TResult Function(int time, int testID, bool hidden, bool skipped,
+            TestDoneStatus result)?
+        testDone,
+    TResult Function(int time, int testID, String messageType, String message)?
+        print,
+    TResult Function(int time, int testID, String error, String stackTrace,
+            bool isFailure)?
+        error,
+    TResult Function(
+            int time, int suiteID, String? observatory, String? remoteDebugger)?
+        debug,
+    TResult Function(int time)? unknown,
+  }) {
+    return unknown?.call(time);
+  }
+
+  @override
+  @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
     TResult Function(
             String protocolVersion, int pid, int time, String? runnerVersion)?
@@ -2618,11 +3136,29 @@ class _$TestEventUnknown implements TestEventUnknown {
     required TResult Function(TestEventTestStart value) testStart,
     required TResult Function(TestEventTestDone value) testDone,
     required TResult Function(TestEventMessage value) print,
-    required TResult Function(TestEventError value) error,
+    required TResult Function(TestEventTestError value) error,
     required TResult Function(TestEventDebug value) debug,
     required TResult Function(TestEventUnknown value) unknown,
   }) {
     return unknown(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult Function(TestEventStart value)? start,
+    TResult Function(TestEventDone value)? done,
+    TResult Function(TestEventAllSuites value)? allSuites,
+    TResult Function(TestEventSuite value)? suite,
+    TResult Function(TestEventGroup value)? group,
+    TResult Function(TestEventTestStart value)? testStart,
+    TResult Function(TestEventTestDone value)? testDone,
+    TResult Function(TestEventMessage value)? print,
+    TResult Function(TestEventTestError value)? error,
+    TResult Function(TestEventDebug value)? debug,
+    TResult Function(TestEventUnknown value)? unknown,
+  }) {
+    return unknown?.call(this);
   }
 
   @override
@@ -2636,7 +3172,7 @@ class _$TestEventUnknown implements TestEventUnknown {
     TResult Function(TestEventTestStart value)? testStart,
     TResult Function(TestEventTestDone value)? testDone,
     TResult Function(TestEventMessage value)? print,
-    TResult Function(TestEventError value)? error,
+    TResult Function(TestEventTestError value)? error,
     TResult Function(TestEventDebug value)? debug,
     TResult Function(TestEventUnknown value)? unknown,
     required TResult orElse(),
@@ -2649,7 +3185,7 @@ class _$TestEventUnknown implements TestEventUnknown {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$_$TestEventUnknownToJson(this)..['type'] = 'unknown';
+    return _$$TestEventUnknownToJson(this)..['type'] = 'unknown';
   }
 }
 
@@ -2967,8 +3503,7 @@ class _$_Test implements _Test {
       this.root_url,
       required this.metadata});
 
-  factory _$_Test.fromJson(Map<String, dynamic> json) =>
-      _$_$_TestFromJson(json);
+  factory _$_Test.fromJson(Map<String, dynamic> json) => _$$_TestFromJson(json);
 
   @override
 
@@ -3085,7 +3620,7 @@ class _$_Test implements _Test {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$_$_TestToJson(this);
+    return _$$_TestToJson(this);
   }
 }
 
@@ -3287,7 +3822,7 @@ class _$_Suite implements _Suite {
   _$_Suite({required this.id, required this.platform, this.path});
 
   factory _$_Suite.fromJson(Map<String, dynamic> json) =>
-      _$_$_SuiteFromJson(json);
+      _$$_SuiteFromJson(json);
 
   @override
 
@@ -3334,7 +3869,7 @@ class _$_Suite implements _Suite {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$_$_SuiteToJson(this);
+    return _$$_SuiteToJson(this);
   }
 }
 
@@ -3617,7 +4152,7 @@ class _$_Group implements _Group {
       required this.metadata});
 
   factory _$_Group.fromJson(Map<String, dynamic> json) =>
-      _$_$_GroupFromJson(json);
+      _$$_GroupFromJson(json);
 
   @override
 
@@ -3709,7 +4244,7 @@ class _$_Group implements _Group {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$_$_GroupToJson(this);
+    return _$$_GroupToJson(this);
   }
 }
 
@@ -3877,7 +4412,7 @@ class _$_Metadata implements _Metadata {
   _$_Metadata({required this.skip, this.skipReason});
 
   factory _$_Metadata.fromJson(Map<String, dynamic> json) =>
-      _$_$_MetadataFromJson(json);
+      _$$_MetadataFromJson(json);
 
   @override
   final bool skip;
@@ -3913,7 +4448,7 @@ class _$_Metadata implements _Metadata {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$_$_MetadataToJson(this);
+    return _$$_MetadataToJson(this);
   }
 }
 
