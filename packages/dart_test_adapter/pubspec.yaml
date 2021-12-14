@@ -18,11 +18,5 @@ dev_dependencies:
   json_serializable: ^5.0.0
   build_runner: ^2.0.4
 
-dependency_overrides:
-  test:
-    path: /Users/remirousselet/dev/dart-sdk/test/pkgs/test
-  test_core:
-    path: /Users/remirousselet/dev/dart-sdk/test/pkgs/test_core
-
 executables:
   fest: main

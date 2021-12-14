@@ -1,15 +1,15 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:math';
 
 import 'package:args/args.dart';
-import 'package:cli_util/cli_logging.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:dart_test_adapter/dart_test_adapter.dart';
 import 'package:ansi_styles/ansi_styles.dart';
-import 'package:collection/collection.dart';
-import 'package:dart_console/dart_console.dart';
-import 'package:test/expect.dart';
+import 'package:spec_cli/src/container.dart';
+import 'package:spec_cli/src/logger.dart';
+
+import 'vt100.dart';
 
 Future<void> festCommandRunner(List<String> args) async {
   final parser = ArgParser();
@@ -37,7 +37,7 @@ final _$fileChange = StreamProvider<void>((ref) {
   return dir
       .watch(recursive: true)
       .where((e) => !e.path.contains('/.dart_tool/'));
-});
+}, dependencies: [_$workingDirectory]);
 
 extension Ansi on String {
   String get reset => AnsiStyles.reset(this);
@@ -87,18 +87,6 @@ extension Ansi on String {
   String get bgGray => AnsiStyles.bgGray(this);
 }
 
-const _ESC = '\x1B';
-
-abstract class _VT100 {
-  static const String clearScreen = '$_ESC[2J';
-  static const String moveCursorToTopLeft = '$_ESC[H';
-
-  static const String saveCursor = '${_ESC}7';
-  static const String restoreCursor = '${_ESC}8';
-
-  static const String clearScreenFromCursorDown = '$_ESC[J';
-}
-
 class _FailedTestLocation {
   _FailedTestLocation({required this.path, required this.name});
 
@@ -106,16 +94,40 @@ class _FailedTestLocation {
   final String name;
 }
 
-abstract class _TestStatus {
-  static final $result = Provider<TestResult>((ref) => flutterTest());
+@visibleForTesting
+abstract class TestStatus {
+  static final $failedTestsLocationFromPreviousRun =
+      StateProvider<List<_FailedTestLocation>?>((ref) => null);
 
-  static final $failedTestsLocation =
-      StateProvider<List<_FailedTestLocation>>((ref) => []);
+  static final $result = Provider<TestResult>(
+    (ref) {
+      final locations =
+          ref.watch($failedTestsLocationFromPreviousRun.notifier).state;
+
+      final tests = locations
+          ?.map(
+            (location) =>
+                '${location.path}?full-name=${Uri.encodeQueryComponent(location.name)}',
+          )
+          .toList();
+
+      final result = dartTest(
+        tests: tests,
+        workdingDirectory: ref.watch(_$workingDirectory).path,
+      );
+      ref.onDispose(result.dispose);
+      return result;
+    },
+    dependencies: [
+      _$workingDirectory,
+      $failedTestsLocationFromPreviousRun.notifier
+    ],
+  );
 
   static final $suiteCount = FutureProvider<int>((ref) async {
     final allSuites = await ref.watch($result).allSuites();
     return allSuites.count;
-  });
+  }, dependencies: [$result]);
 
   static final $suite = FutureProvider.family<Suite, int>((ref, suiteID) async {
     final suiteEvent = await ref
@@ -124,15 +136,15 @@ abstract class _TestStatus {
         .firstWhere((e) => e.suite.id == suiteID);
 
     return suiteEvent.suite;
-  });
+  }, dependencies: [$result]);
 
   static final $suiteStatus =
       Provider.family<AsyncValue<void>, int>((ref, suiteID) {
     final testIds = ref.watch($testIdsForSuite(suiteID));
 
     return testIds.when(
-      error: (err, stack, _) => AsyncError(err, stackTrace: stack),
-      loading: (_) => AsyncLoading(),
+      error: (err, stack) => AsyncError(err, stackTrace: stack),
+      loading: () => AsyncLoading(),
       data: (testIds) {
         // any loading leads to RUNNING, even if there's an error/success
         final hasLoading =
@@ -153,7 +165,7 @@ abstract class _TestStatus {
         return AsyncData(null);
       },
     );
-  });
+  }, dependencies: [$testIdsForSuite]);
 
   static final $group = FutureProvider.family<Group, int>((ref, groupID) async {
     final groupEvent = await ref
@@ -162,7 +174,7 @@ abstract class _TestStatus {
         .firstWhere((e) => e.group.id == groupID);
 
     return groupEvent.group;
-  });
+  }, dependencies: [$result]);
 
   static final $rootGroup = FutureProvider.family<Group, int>((ref, suiteID) {
     return ref
@@ -170,7 +182,7 @@ abstract class _TestStatus {
         .groups()
         .firstWhere((e) => e.group.parentID == null)
         .then((e) => e.group);
-  });
+  }, dependencies: [$result]);
 
   static final $testIdsForSuite =
       StreamProvider.family<List<int>, int>((ref, suiteID) async* {
@@ -179,7 +191,7 @@ abstract class _TestStatus {
     }).map((event) {
       return event.test.id;
     }).combined();
-  });
+  }, dependencies: [$result]);
 
   static final $test = StreamProvider.family<Test, int>((ref, testID) async* {
     await for (final events in ref.watch($result).testStart().combined()) {
@@ -187,11 +199,11 @@ abstract class _TestStatus {
 
       if (event != null) yield event.test;
     }
-  });
+  }, dependencies: [$result]);
 
   static final $allTests = StreamProvider<List<Test>>((ref) {
     return ref.watch($result).testStart().map((event) => event.test).combined();
-  });
+  }, dependencies: [$result]);
 
   static final $allFailedTests = Provider<AsyncValue<List<Test>>>((ref) {
     return _merge((unwrap) {
@@ -199,7 +211,25 @@ abstract class _TestStatus {
           .where((test) => ref.watch($testStatus(test.id)) is AsyncError)
           .toList();
     });
-  });
+  }, dependencies: [$allTests, $testStatus]);
+
+  static final $currentlyFailedTestsLocation =
+      Provider<AsyncValue<List<_FailedTestLocation>>>((ref) {
+    return _merge((unwrap) {
+      final failedTests = unwrap(ref.watch($allFailedTests));
+
+      return failedTests.map((test) {
+        final suite = unwrap(
+          ref.watch($suite(test.suiteID)),
+        );
+
+        return _FailedTestLocation(
+          path: suite.path!,
+          name: test.name,
+        );
+      }).toList();
+    });
+  }, dependencies: [$allFailedTests, $suite]);
 
   static final $testStatus =
       FutureProvider.family<void, int>((ref, testID) async {
@@ -220,16 +250,16 @@ abstract class _TestStatus {
           .firstWhere((e) => e.testID == testID)
           .then((e) => throw FailedTestException(e)),
     ]);
-  });
+  }, dependencies: [$result]);
 
   static final $suites = StreamProvider<List<Suite>>((ref) {
-    final result = ref.watch(_TestStatus.$result);
+    final result = ref.watch($result);
 
     return result
         .suites()
         .combined()
         .map((event) => event.map((e) => e.suite).toList());
-  });
+  }, dependencies: [$result]);
 
   static final $suiteOutputLabel =
       Provider.family<AsyncValue<String>, int>((ref, suiteID) {
@@ -245,10 +275,10 @@ abstract class _TestStatus {
           loading: (_) => ' RUNS '.black.bgYellow,
         ),
         if (suite.path != null) suite.path!,
-        rootGroup.name,
+        if (rootGroup.name.isNotEmpty) rootGroup.name,
       ].join(' ');
     });
-  });
+  }, dependencies: [$suite, $rootGroup, $suiteStatus]);
 
   static final $spinner = Provider.autoDispose<String>((ref) {
     String charForOffset(int offset) {
@@ -291,36 +321,26 @@ abstract class _TestStatus {
     return _merge((unwrap) {
       final test = unwrap(ref.watch($test(testID)));
 
-      'started test:  ${test.name}';
-
       final status = ref.watch($testStatus(testID));
 
       return status.when(
-        data: (data) => '${'✓'.green} ${test.name}',
-        error: (err, stack, _) {
-          if (err is FailedTestException) {
-            return '''
-${'✕'.red} ${test.name}
+        data: (data) => '  ${'✓'.green} ${test.name}',
+        error: (err, stack) {
+          final error = err is FailedTestException ? err.testError.error : err;
 
-Error:
-${err.testError.error}
+          final stackTrace = err is FailedTestException
+              ? err.testError.stackTrace
+              : stack.toString();
 
-At:
-${err.testError.stackTrace}''';
-          }
           return '''
-${'✕'.red}: ${test.name}
-
-Error:
-$err
-
-At:
-$stack''';
+  ${'✕'.red} ${test.name}
+${error.toString().multilinePadLeft(4)}
+${stackTrace.multilinePadLeft(4)}''';
         },
-        loading: (_) => '${ref.watch($spinner)} ${test.name}',
+        loading: () => '  ${ref.watch($spinner)} ${test.name}',
       );
     });
-  });
+  }, dependencies: [$test, $testStatus, $spinner]);
 
   static final $suiteTestsOutputLabels =
       Provider.autoDispose.family<AsyncValue<String>, int>((ref, suiteID) {
@@ -349,7 +369,7 @@ $stack''';
         if (failingTestLabels.isNotEmpty) failingTestLabels,
       ].join('\n');
     });
-  });
+  }, dependencies: [$testIdsForSuite, $testStatus, $testsOutputLabel]);
 
   static final $output = Provider.autoDispose<AsyncValue<String>>((ref) {
     return _merge((unwrap) {
@@ -357,9 +377,7 @@ $stack''';
 
       final passingSuites = suites
           .where((suite) => ref.watch($suiteStatus(suite.id)) is AsyncData)
-          .map((suite) =>
-              unwrap(ref.watch($suiteOutputLabel(suite.id))) +
-              ' `${suite.platform}`')
+          .map((suite) => unwrap(ref.watch($suiteOutputLabel(suite.id))))
           .join('\n');
       final failingSuites = suites
           .where((suite) => ref.watch($suiteStatus(suite.id)) is AsyncError)
@@ -367,7 +385,6 @@ $stack''';
         return [
           unwrap(ref.watch($suiteOutputLabel(suite.id))),
           unwrap(ref.watch($suiteTestsOutputLabels(suite.id))),
-          ' `${suite.platform}`',
         ];
       }).join('\n');
       final loadingSuites = suites
@@ -376,7 +393,6 @@ $stack''';
         return [
           unwrap(ref.watch($suiteOutputLabel(suite.id))),
           unwrap(ref.watch($suiteTestsOutputLabels(suite.id))),
-          ' `${suite.platform}`',
         ];
       }).join('\n');
 
@@ -386,7 +402,22 @@ $stack''';
         if (failingSuites.isNotEmpty) failingSuites,
       ].join('\n\n');
     });
-  });
+  }, dependencies: [
+    $suites,
+    $suiteStatus,
+    $suiteOutputLabel,
+    $suiteTestsOutputLabels
+  ]);
+}
+
+extension on String {
+  String multilinePadLeft(int tab) {
+    return this.split('\n').map((e) {
+      // Don't add padding on empty lines
+      if (e.isEmpty) return e;
+      return ' ' * tab + e;
+    }).join('\n');
+  }
 }
 
 AsyncValue<T> _merge<T>(T Function(R Function<R>(AsyncValue<R>) unwrap) cb) {
@@ -419,28 +450,6 @@ extension<T> on Stream<T> {
   }
 }
 
-extension on ProviderContainer {
-  Stream<T> listenAsStream<T>(ProviderBase<AsyncValue<T>> provider) {
-    final controller = StreamController<T>();
-
-    late ProviderSubscription<AsyncValue<T>> sub;
-
-    controller.onListen = () => sub = listen<AsyncValue<T>>(
-          provider,
-          (value) {
-            value.when(
-              data: controller.add,
-              error: (error, stack, _) => controller.addError(error, stack),
-              loading: (_) {},
-            );
-          },
-        );
-    controller.onCancel = () => sub.close();
-
-    return controller.stream;
-  }
-}
-
 class FailedTestException implements Exception {
   FailedTestException(this.testError);
   final TestEventTestError testError;
@@ -448,62 +457,85 @@ class FailedTestException implements Exception {
 
 Future<void> fest({
   bool watch = false,
-  Logger? logger,
-}) async {
-  logger ??= Logger.standard();
+  String? workingDirectory,
+}) {
+  return runScoped((ref) async {
+    if (watch) {
+      stdout.write('${VT100.clearScreen}${VT100.moveCursorToTopLeft}');
 
-  final container = ProviderContainer();
+      ref.listen(
+        _$fileChange,
+        (prev, value) {
+          ref.refresh(TestStatus.$result);
+        },
+      );
 
-  if (watch) {
-    stdout.write('${_VT100.clearScreen}${_VT100.moveCursorToTopLeft}');
+      List<_FailedTestLocation> _lastFailedTests = [];
 
-    container.listen(
-      _$fileChange,
-      (value) => container.refresh(_TestStatus.$result),
-    );
+      ref.listen<AsyncValue<List<_FailedTestLocation>>>(
+          TestStatus.$currentlyFailedTestsLocation, (prev, value) {
+        value.when(
+          data: (value) => _lastFailedTests = value,
+          loading: () => _lastFailedTests = [],
+          error: (err, stack) => print('error'),
+        );
+      });
 
-    container.listen<AsyncValue<List<Test>>>(
-      _TestStatus.$allFailedTests,
-      (value) {
-        _merge((unwrap) {
-          final failedTests = unwrap(value);
-
-          final failedTestsLocations = failedTests.map((test) {
-            final suite = unwrap(
-              container.read(_TestStatus.$suite(test.suiteID)),
-            );
-
-            return _FailedTestLocation(
-              path: suite.path!,
-              name: test.name,
-            );
-          }).toList();
-
-          container.read(_TestStatus.$failedTestsLocation).state =
-              failedTestsLocations;
-        });
-      },
-    );
-  }
-
-  // TODO dispose
-
-  String? lastOutput;
-
-  final outputStream = container.listenAsStream(_TestStatus.$output);
-
-  await outputStream.forEach((output) {
-    // console.cursorPosition = originalCursorPosition;
-
-    if (lastOutput != null) {
-      final lastOutputHeight = lastOutput!.split('\n').length;
-
-      stdout.write('${_ESC}[${lastOutputHeight}A');
+      ref.listen(_$fileChange, (prev, value) {
+        ref
+            .read(TestStatus.$failedTestsLocationFromPreviousRun.notifier)
+            .state = _lastFailedTests;
+      });
+      stdin.listen((event) {
+        if (event.first == 10) {
+          // enter
+          ref
+              .read(TestStatus.$failedTestsLocationFromPreviousRun.notifier)
+              .state = _lastFailedTests;
+        }
+      });
     }
-    stdout.write('${_ESC}[J');
 
-    print(output);
+    // TODO dispose
 
-    lastOutput = output;
-  });
+    ref.listen<AsyncValue<String>>(TestStatus.$output, (lastOutput, output) {
+      final logger = ref.read(loggerProvider);
+
+      // console.cursorPosition = originalCursorPosition;
+      if (watch) {
+        logger.stdout(
+          '${VT100.moveCursorToTopLeft}${VT100.clearScreenFromCursorDown}',
+        );
+      } else {
+        if (lastOutput?.asData != null) {
+          final lastOutputHeight = lastOutput!.asData!.value.split('\n').length;
+
+          logger.stdout(VT100.moveCursorUp(lastOutputHeight));
+        }
+        logger.stdout(VT100.clearScreenFromCursorDown);
+      }
+
+      output.when(
+        loading: () {}, // nothing to do
+        error: (err, stack) {}, // TODO print error
+        data: (output) => logger.stdout(output),
+      );
+    });
+
+    final completer = Completer<void>();
+
+    if (!watch) {
+      // if not in watch mode, finish the command when the test proccess completes.
+      final sub = ref.listen<TestResult>(
+        TestStatus.$result,
+        (previous, current) {},
+      );
+      Future(sub.read().done).then(completer.complete);
+    }
+
+    await completer.future;
+  }, overrides: [
+    if (workingDirectory != null)
+      _$workingDirectory.overrideWithValue(Directory(workingDirectory)),
+  ]);
 }

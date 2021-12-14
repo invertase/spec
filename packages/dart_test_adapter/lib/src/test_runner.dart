@@ -1,18 +1,37 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:isolate';
 
 import 'package:collection/src/iterable_extensions.dart';
 
 import 'test_protocol.dart';
 
+enum WebRenderer {
+  auto,
+  canvaskit,
+  html,
+}
+
 TestResult flutterTest({
   Map<String, String>? environment,
+  List<String>? arguments,
+  List<String>? tests,
+  String? workdingDirectory,
+  // TODO(rrousselGit) expose a typed interface for CLI parameters
 }) {
   final testProcess = Process.start(
     'flutter',
-    ['test', '--reporter=json', '--no-pub'],
+    [
+      'test',
+      ...?arguments,
+      '--reporter=json',
+      '--no-pub',
+      '--chain-stack-traces',
+      ...?tests,
+    ],
     environment: environment,
+    workingDirectory: workdingDirectory,
   );
 
   return _parseTestJsonOutput(testProcess);
@@ -20,12 +39,26 @@ TestResult flutterTest({
 
 TestResult dartTest({
   Map<String, String>? environment,
+  List<String>? arguments,
+  List<String>? tests,
+  String? workdingDirectory,
+  // TODO(rrousselGit) expose a typed interface for CLI parameters
 }) {
-  final testProcess = Process.start(
-    'dart',
-    ['test', '--reporter=json'],
-    environment: environment,
-  );
+  final testProcess = Future(() async {
+    return Process.start(
+      'dart',
+      [
+        // '--packages=${await Isolate.packageConfig}',
+        'test',
+        ...?arguments,
+        '--reporter=json',
+        '--chain-stack-traces',
+        ...?tests,
+      ],
+      environment: environment,
+      workingDirectory: workdingDirectory,
+    );
+  });
 
   return _parseTestJsonOutput(testProcess);
 }
@@ -38,9 +71,10 @@ TestResult _parseTestJsonOutput(Future<Process> processFuture) {
         .map(utf8.decode)
         // Sometimes a message contains multiple JSON map at once
         // so we split the message in multiple events
-        .asyncExpand((msg) async* {
+        .asyncExpand<String>((msg) async* {
           for (final value in msg.split('\n')) {
-            if (value.trim().isNotEmpty) yield value;
+            final trimmedValue = value.trim();
+            if (trimmedValue.isNotEmpty) yield trimmedValue;
           }
         })
         .map(json.decode)
@@ -49,19 +83,10 @@ TestResult _parseTestJsonOutput(Future<Process> processFuture) {
   }
 
   return TestResult._(
+    processFuture,
     _ReactiveWrapper(getEventStream()),
   );
 }
-
-// extension on Stream<TestEvent> {
-//   Stream<T> whereIs<T>() {
-//     return where((event) => event is T).cast<T>();
-//   }
-
-//   Future<T> firstWhereIs<T>() {
-//     return firstWhere((event) => event is T).then((v) => v as T);
-//   }
-// }
 
 /// Wraps a Stream to allow accessing elements previously emitted and
 /// yet-to-be-emitted events at the same time.
@@ -99,8 +124,9 @@ class _ReactiveWrapper<Event> {
 }
 
 class TestResult {
-  TestResult._(this._events);
+  TestResult._(this._processFuture, this._events);
 
+  final Future<Process> _processFuture;
   final _ReactiveWrapper<TestEvent> _events;
 
   Stream<TestEvent> all() => _events.whereIs<TestEvent>();
@@ -122,4 +148,9 @@ class TestResult {
 
   Stream<TestEventTestError> testError() =>
       _events.whereIs<TestEventTestError>();
+
+  Future<void> dispose() async {
+    _events.close();
+    (await _processFuture).kill();
+  }
 }
