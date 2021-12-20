@@ -7,11 +7,11 @@ import 'package:riverpod/riverpod.dart';
 import 'package:dart_test_adapter/dart_test_adapter.dart';
 import 'package:ansi_styles/ansi_styles.dart';
 import 'package:spec_cli/src/container.dart';
-import 'package:spec_cli/src/logger.dart';
+import 'package:spec_cli/src/renderer.dart';
 
 import 'vt100.dart';
 
-Future<void> festCommandRunner(List<String> args) async {
+Future<int> festCommandRunner(List<String> args) async {
   final parser = ArgParser();
   parser.addFlag(
     'watch',
@@ -335,7 +335,7 @@ abstract class TestStatus {
           return '''
   ${'✕'.red} ${test.name}
 ${error.toString().multilinePadLeft(4)}
-${stackTrace.multilinePadLeft(4)}''';
+${stackTrace.trim().multilinePadLeft(4)}''';
         },
         loading: () => '  ${ref.watch($spinner)} ${test.name}',
       );
@@ -382,17 +382,19 @@ ${stackTrace.multilinePadLeft(4)}''';
       final failingSuites = suites
           .where((suite) => ref.watch($suiteStatus(suite.id)) is AsyncError)
           .expand((suite) {
+        final testLabels = unwrap(ref.watch($suiteTestsOutputLabels(suite.id)));
         return [
           unwrap(ref.watch($suiteOutputLabel(suite.id))),
-          unwrap(ref.watch($suiteTestsOutputLabels(suite.id))),
+          if (testLabels.isNotEmpty) testLabels,
         ];
       }).join('\n');
       final loadingSuites = suites
           .where((suite) => ref.watch($suiteStatus(suite.id)) is AsyncLoading)
           .expand((suite) {
+        final testLabels = unwrap(ref.watch($suiteTestsOutputLabels(suite.id)));
         return [
           unwrap(ref.watch($suiteOutputLabel(suite.id))),
-          unwrap(ref.watch($suiteTestsOutputLabels(suite.id))),
+          if (testLabels.isNotEmpty) testLabels,
         ];
       }).join('\n');
 
@@ -455,7 +457,7 @@ class FailedTestException implements Exception {
   final TestEventTestError testError;
 }
 
-Future<void> fest({
+Future<int> fest({
   bool watch = false,
   String? workingDirectory,
 }) {
@@ -496,33 +498,18 @@ Future<void> fest({
       });
     }
 
-    // TODO dispose
+    final renderer = rendererOverride ??
+        (watch ? FullScreenRenderer() : BacktrackingRenderer());
 
     ref.listen<AsyncValue<String>>(TestStatus.$output, (lastOutput, output) {
-      final logger = ref.read(loggerProvider);
-
-      // console.cursorPosition = originalCursorPosition;
-      if (watch) {
-        logger.stdout(
-          '${VT100.moveCursorToTopLeft}${VT100.clearScreenFromCursorDown}',
-        );
-      } else {
-        if (lastOutput?.asData != null) {
-          final lastOutputHeight = lastOutput!.asData!.value.split('\n').length;
-
-          logger.stdout(VT100.moveCursorUp(lastOutputHeight));
-        }
-        logger.stdout(VT100.clearScreenFromCursorDown);
-      }
-
       output.when(
         loading: () {}, // nothing to do
         error: (err, stack) {}, // TODO print error
-        data: (output) => logger.stdout(output),
+        data: renderer.renderFrame,
       );
     });
 
-    final completer = Completer<void>();
+    final completer = Completer<int>();
 
     if (!watch) {
       // if not in watch mode, finish the command when the test proccess completes.
@@ -530,10 +517,15 @@ Future<void> fest({
         TestStatus.$result,
         (previous, current) {},
       );
-      Future(sub.read().done).then(completer.complete);
+      Future(sub.read().done).then((doneEvent) {
+        // TODO test `success = null`
+        final exitCode = doneEvent.success != false ? 0 : -1;
+
+        completer.complete(exitCode);
+      });
     }
 
-    await completer.future;
+    return completer.future;
   }, overrides: [
     if (workingDirectory != null)
       _$workingDirectory.overrideWithValue(Directory(workingDirectory)),

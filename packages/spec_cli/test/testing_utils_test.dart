@@ -1,26 +1,28 @@
 import 'package:spec_cli/src/command_runner.dart';
-import 'package:spec_cli/src/logger.dart';
+import 'package:spec_cli/src/renderer.dart';
 import 'package:test/expect.dart';
 import 'package:test/scaffolding.dart';
 
 import 'utils.dart';
 
 void main() {
-  final logger = TestLogger();
+  late TestRenderer renderer;
 
-  tearDown(logger.clear);
+  setUp(() => rendererOverride = renderer = TestRenderer());
+  tearDown(() => rendererOverride = null);
 
-  testScope('createProject works', (ref) async {
-    final dir = await createProject([
-      PackageInfo(
-        name: 'a',
-        files: {
-          'lib/foo.dart': '''
+  groupScope('Testing utilities', () {
+    testScope('createProject works', (ref) async {
+      final dir = await createProject([
+        PackageInfo(
+          name: 'a',
+          files: {
+            'lib/foo.dart': '''
 class Counter {
   int count = 0;
 }
 ''',
-          'test/my_test.dart': '''
+            'test/my_test.dart': '''
 import 'package:a/foo.dart';
 import 'package:test/test.dart';
 
@@ -31,32 +33,30 @@ void main() {
   });
 }
 ''',
-        },
-      ),
-    ]);
+          },
+        ),
+      ]);
 
-    await fest(
-      workingDirectory: dir.path + '/packages/a',
-    );
+      await fest(
+        workingDirectory: dir.path + '/packages/a',
+      );
 
-    expect(
-      logger.outputByScreenResetsWithoutAnsi.join('---\n'),
-      '''
-RUNS  test/my_test.dart
+      expect(
+        renderer.frames.join('---\n'),
+        '''
+ RUNS  test/my_test.dart
 ---
-RUNS  test/my_test.dart
+ RUNS  test/my_test.dart
   ... Counter defaults to 0
 ---
-PASS  test/my_test.dart
+ PASS  test/my_test.dart
 ''',
-    );
-  }, overrides: [
-    TestStatus.$spinner.overrideWithValue('...'),
-    loggerProvider.overrideWithValue(logger),
-  ]);
+      );
+    });
 
-  testScope('runTest works', (ref) async {
-    await runTest('''
+    testScope('runTest works', (ref) async {
+      await runTest({
+        'my_test.dart': '''
 import 'package:test/test.dart';
 
 void main() {
@@ -67,12 +67,13 @@ void main() {
     expect(0, 1);
   });
 }
-''');
+''',
+      });
 
-    expect(
-      logger.outputByScreenResetsWithoutAnsi.last,
-      '''
-FAIL  test/my_test.dart
+      expect(
+        renderer.frames.last,
+        '''
+ FAIL  test/my_test.dart
   ✓ works
   ✕ fails
     Expected: <1>
@@ -81,9 +82,9 @@ FAIL  test/my_test.dart
     package:test_api       expect
     test/my_test.dart 8:5  main.<fn>
 ''',
-    );
+      );
+    });
   }, overrides: [
     TestStatus.$spinner.overrideWithValue('...'),
-    loggerProvider.overrideWithValue(logger),
   ]);
 }

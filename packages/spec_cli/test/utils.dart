@@ -1,12 +1,12 @@
 import 'dart:async';
+import 'dart:collection';
 import 'dart:io';
 
-import 'package:cli_util/cli_logging.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:spec_cli/src/command_runner.dart';
-import 'package:test_descriptor/test_descriptor.dart' as d;
 import 'package:riverpod/riverpod.dart';
 import 'package:spec_cli/src/container.dart';
+import 'package:spec_cli/src/renderer.dart';
 import 'package:test/expect.dart';
 import 'package:test/scaffolding.dart';
 
@@ -21,90 +21,175 @@ ProviderContainer createContainer({
   return container;
 }
 
-@isTest
-void testScope(
+final _defaultOverridesKey = Object();
+
+@isTestGroup
+void groupScope(
   String description,
-  FutureOr<void> Function(DartRef ref) cb, {
-  List<Override> overrides = const [],
+  FutureOr<void> Function() cb, {
+  List<Override>? overrides,
 }) {
+  group(description, () {
+    return runZoned(
+      cb,
+      zoneValues: {
+        if (overrides != null) _defaultOverridesKey: overrides,
+      },
+    );
+  });
+}
+
+@isTest
+void testScope(String description, FutureOr<void> Function(DartRef ref) cb,
+    {List<Override> overrides = const [], Timeout? timeout}) {
+  final defaultOverrides = Zone.current[_defaultOverridesKey];
   return test(
     description,
-    () => runScoped(cb, overrides: overrides),
-    timeout: Timeout.factor(10),
+    () {
+      return runScoped(cb, overrides: [
+        ...?defaultOverrides,
+        ...overrides,
+      ]);
+    },
+    timeout: timeout,
   );
 }
 
-class TestLogger extends StandardLogger {
-  final _buffer = StringBuffer();
+class TestRenderer extends Renderer {
+  final List<String> frames = [];
 
-  /// All the logs in order that were emitted so far.
-  ///
-  /// This includes both [stdout], [stderr] and [trace].
-  /// Logs from [trace] and [stderr] are respectively prefixed by `t-` and `e-`
-  /// such that:
-  ///
-  /// ```dart
-  /// logger.stdout('Hello');
-  /// logger.stderr('Error');
-  /// logger.stdout('world');
-  /// ```
-  ///
-  /// has the following output:
-  ///
-  /// ```
-  /// Hello
-  /// e-Error
-  /// world
-  /// ```
-  ///
-  /// This both ensures that tests to not forget to check errors and
-  /// allows testing what the logs would actually look like.
-  String get output => _buffer.toString();
+  @override
+  void renderFrame(String output) {
+    final outputWithoutAnsi = output.replaceAll(ansiRegex, '');
 
-  /// All logs in order, split by ANSI screen reset codes such as "clear screen"
-  /// or "clear after cursor".
-  /// Then, ANSI codes are removed, and finally the output is trimmed.
-  List<String> get outputByScreenResetsWithoutAnsi {
-    return output
-        .split(
-          RegExp(r'(?:\x1B\[2J|\x1B\[J)'),
-        )
-        .map((e) => e.replaceAll(ansiRegex, '').trim())
-        .where((element) => element.isNotEmpty)
-        .map((e) => '$e\n')
-        .toList();
+    frames.add(outputWithoutAnsi + '\n');
+  }
+}
+
+/// Compares a list of frames against a pattern
+///
+/// The pattern is the concatenation of some individual frames, in order
+/// of expected rendering.
+///
+/// Frames can be defined in a multiline string, separated by `---\n`, such as:
+/// ```dart
+/// framesMatch('''
+/// firstFrame
+/// ---
+/// secondFrame
+/// ---
+/// thirdFrame
+/// ''');
+/// ```
+///
+/// Alternatively, [framesMatch] can be used with a list of matcher:
+///
+/// ```dart
+/// framesMatch([
+///   equals('firstFrame'),
+///   'secondFrame', // litterals works too
+///   contains('third'),
+/// ])
+/// ```
+///
+/// Frames can be skipped. But no extra frame can be added.
+/// Meaning the matcher:
+///
+/// ```dart
+/// framesMatch('''
+/// A
+/// ---
+/// B
+/// ---
+/// C
+/// ''');
+/// ```
+///
+/// will accept "A then B then C", "A then C" and "B then C". But it will reject:
+/// - "A then C then B", becauses frames are not in the correct order
+/// - "A then G", because even if B/C were skipped, G is not a known frame
+/// - "A then B then C then C", because this defines 4 frames instead of 3
+Matcher framesMatch(Object expectation) {
+  assert(expectation is String || expectation is List);
+  final expectedFrames = expectation is String
+      ? expectation.split(RegExp(r'^---\n$')).map(wrapMatcher).toList()
+      : (expectation as List<Object?>).map(wrapMatcher).toList();
+
+  return _FramesMatch(expectedFrames);
+}
+
+class _FramesMatch extends Matcher {
+  _FramesMatch(this.frameMatchers);
+
+  static final _expectedFrameMismatchKey = Object();
+  static final _expectedFrameMismatchStartAtKey = Object();
+  static final _unknownFrameKey = Object();
+  static final _unknownFrameIndexKey = Object();
+
+  final List<Matcher> frameMatchers;
+
+  @override
+  bool matches(
+    covariant List<String> frames,
+    Map<Object?, Object?> matchState,
+  ) {
+    var expectedFrameIndex = 0;
+    for (var actualFrameIndex = 0; actualFrameIndex < frames.length;) {
+      final actualFrame = frames[actualFrameIndex];
+
+      /// Ran out of matcher to test the frame against.
+      /// Either more frames were rendered than expected, or a frame
+      /// had no matching matcher.
+      if (expectedFrameIndex >= frameMatchers.length) {
+        matchState[_unknownFrameKey] = actualFrame;
+        matchState[_unknownFrameIndexKey] = actualFrameIndex;
+        matchState[_expectedFrameMismatchStartAtKey] = expectedFrameIndex;
+        return false;
+      }
+
+      final expectedFrame = frameMatchers[expectedFrameIndex];
+
+      // current frame matches current frame-matcher, testing next frame
+      if (expectedFrame.matches(actualFrame, matchState)) {
+        expectedFrameIndex++;
+        actualFrameIndex++;
+        continue;
+      }
+
+      // current frame does not match current matcher. It's possible
+      // that an expected frame was skipped, so testing same frame against
+      // the next matcher.
+      expectedFrameIndex++;
+    }
+
+    return true;
   }
 
   @override
-  void stderr(String message) {
-    _buffer.writeln(
-      message.replaceAll(RegExp('^', multiLine: true), 'e-'),
-    );
+  Description describe(Description description) {
+    return description.addAll('frames', '\n', ' in order', frameMatchers);
   }
 
   @override
-  void stdout(String message) {
-    _buffer.writeln(message);
-  }
+  Description describeMismatch(
+    Object? item,
+    Description mismatchDescription,
+    Map<Object?, Object?> matchState,
+    bool verbose,
+  ) {
+    if (matchState.containsKey(_expectedFrameMismatchKey)) {
+      final failedFrame = matchState[_expectedFrameMismatchKey];
+      final failedFrameStartAt =
+          matchState[_expectedFrameMismatchStartAtKey] ?? 0;
 
-  @override
-  void trace(String message) {
-    _buffer.writeln(
-      message.replaceAll(RegExp('^', multiLine: true), 't-'),
-    );
+      return mismatchDescription
+          .add('expected to find matching frame for\n  ')
+          .addDescriptionOf(failedFrame)
+          .add('\nat or after the frame at index $failedFrameStartAt')
+          .add('\nbut none were found.');
+    }
+    return mismatchDescription;
   }
-
-  @override
-  void write(String message) {
-    _buffer.write(message);
-  }
-
-  @override
-  void writeCharCode(int charCode) {
-    throw UnimplementedError();
-  }
-
-  void clear() => _buffer.clear();
 }
 
 // Cloned from https://github.com/chalk/ansi-regex/blob/main/index.js
@@ -166,18 +251,37 @@ class _IsEqualIgnoringAnsi extends Matcher {
 }
 
 Future<Directory> createProject(List<PackageInfo> packages) async {
-  final workingDir = Directory(d.sandbox);
+  final workingDir = Directory(
+    Directory.systemTemp
+        .createTempSync('dart_test_')
+        .resolveSymbolicLinksSync(),
+  );
+
+  addTearDown(() async {
+    for (var i = 0; i < 5; i++) {
+      try {
+        // Sometimes the deletion fails to complete (likely because .dart_tool
+        // takes too long to delete).
+        // So we use a retry mechanism.
+        await workingDir.delete(recursive: true);
+        break;
+      } on FileSystemException {}
+    }
+
+    // After all the retries, check that the folder was properly deleted.
+    if (workingDir.existsSync()) {
+      throw StateError('failed to delete $workingDir');
+    }
+  });
 
   await Future.wait<void>(
     packages.map((package) async {
-      final packagePath = '${d.sandbox}/packages/${package.name}';
+      final packagePath = '${workingDir.path}/packages/${package.name}';
 
       await Future.wait(
         package.files.entries.map((entry) async {
           final file =
               await File('${packagePath}/${entry.key}').create(recursive: true);
-
-          addTearDown(file.delete);
 
           await file.writeAsString(entry.value);
         }),
@@ -200,18 +304,27 @@ Future<Directory> createProject(List<PackageInfo> packages) async {
   return workingDir;
 }
 
+TestRenderer? testRenderer;
+
 /// Runs a single test
 ///
 /// For more advanced use-cases, use [createProject].
-Future<void> runTest(String test) async {
+Future<int> runTest(Map<String, String> tests) async {
+  if (testRenderer == null) {
+    testRenderer = rendererOverride = TestRenderer();
+    addTearDown(() => testRenderer = rendererOverride = null);
+  }
+
   final dir = await createProject([
     PackageInfo(
       name: 'a',
-      files: {'test/my_test.dart': test},
+      files: {
+        for (final entry in tests.entries) 'test/' + entry.key: entry.value,
+      },
     ),
   ]);
 
-  await fest(
+  return fest(
     workingDirectory: dir.path + '/packages/a',
   );
 }
