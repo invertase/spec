@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:collection';
 import 'dart:io';
 
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -112,7 +111,10 @@ class TestRenderer extends Renderer {
 Matcher framesMatch(Object expectation) {
   assert(expectation is String || expectation is List);
   final expectedFrames = expectation is String
-      ? expectation.split(RegExp(r'^---\n$')).map(wrapMatcher).toList()
+      ? expectation
+          .split(RegExp(r'^---\n', multiLine: true))
+          .map(wrapMatcher)
+          .toList()
       : (expectation as List<Object?>).map(wrapMatcher).toList();
 
   return _FramesMatch(expectedFrames);
@@ -121,8 +123,8 @@ Matcher framesMatch(Object expectation) {
 class _FramesMatch extends Matcher {
   _FramesMatch(this.frameMatchers);
 
-  static final _expectedFrameMismatchKey = Object();
-  static final _expectedFrameMismatchStartAtKey = Object();
+  static final _extraExpectedFrameKey = Object();
+  static final _expectedFrameStartAtKey = Object();
   static final _unknownFrameKey = Object();
   static final _unknownFrameIndexKey = Object();
 
@@ -134,6 +136,7 @@ class _FramesMatch extends Matcher {
     Map<Object?, Object?> matchState,
   ) {
     var expectedFrameIndex = 0;
+    int? lastMatchIndex;
     for (var actualFrameIndex = 0; actualFrameIndex < frames.length;) {
       final actualFrame = frames[actualFrameIndex];
 
@@ -143,7 +146,8 @@ class _FramesMatch extends Matcher {
       if (expectedFrameIndex >= frameMatchers.length) {
         matchState[_unknownFrameKey] = actualFrame;
         matchState[_unknownFrameIndexKey] = actualFrameIndex;
-        matchState[_expectedFrameMismatchStartAtKey] = expectedFrameIndex;
+        matchState[_expectedFrameStartAtKey] =
+            lastMatchIndex == null ? 0 : lastMatchIndex + 1;
         return false;
       }
 
@@ -151,6 +155,7 @@ class _FramesMatch extends Matcher {
 
       // current frame matches current frame-matcher, testing next frame
       if (expectedFrame.matches(actualFrame, matchState)) {
+        lastMatchIndex = expectedFrameIndex;
         expectedFrameIndex++;
         actualFrameIndex++;
         continue;
@@ -162,12 +167,24 @@ class _FramesMatch extends Matcher {
       expectedFrameIndex++;
     }
 
+    /// All the frames were matched, yet some frame matchers are remaining
+    if (expectedFrameIndex < frameMatchers.length) {
+      matchState[_extraExpectedFrameKey] = frameMatchers[expectedFrameIndex];
+      matchState[_expectedFrameStartAtKey] = expectedFrameIndex;
+      return false;
+    }
+
     return true;
   }
 
   @override
   Description describe(Description description) {
-    return description.addAll('frames', '\n', ' in order', frameMatchers);
+    return description.addAll(
+      'frames (${frameMatchers.length})\n  ',
+      '\n  ---\n  ',
+      '\n  in order',
+      frameMatchers,
+    );
   }
 
   @override
@@ -177,15 +194,27 @@ class _FramesMatch extends Matcher {
     Map<Object?, Object?> matchState,
     bool verbose,
   ) {
-    if (matchState.containsKey(_expectedFrameMismatchKey)) {
-      final failedFrame = matchState[_expectedFrameMismatchKey];
-      final failedFrameStartAt =
-          matchState[_expectedFrameMismatchStartAtKey] ?? 0;
+    if (matchState.containsKey(_unknownFrameKey)) {
+      final unknownFrame = matchState[_unknownFrameKey];
+      final unknownFrameIndex = matchState[_unknownFrameIndexKey] ?? 0;
+      final lastMatchIndex = matchState[_expectedFrameStartAtKey] ?? 0;
+
+      return mismatchDescription
+          .add('received frame\n  ')
+          .addDescriptionOf(unknownFrame)
+          .add('\nat index #$unknownFrameIndex')
+          .add(
+              '\nbut does not match any expected frame starting the frame #$lastMatchIndex');
+    }
+
+    if (matchState.containsKey(_extraExpectedFrameKey)) {
+      final failedFrame = matchState[_extraExpectedFrameKey];
+      final failedFrameStartAt = matchState[_expectedFrameStartAtKey] ?? 0;
 
       return mismatchDescription
           .add('expected to find matching frame for\n  ')
           .addDescriptionOf(failedFrame)
-          .add('\nat or after the frame at index $failedFrameStartAt')
+          .add('\nat or after the frame at index #$failedFrameStartAt')
           .add('\nbut none were found.');
     }
     return mismatchDescription;

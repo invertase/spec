@@ -8,7 +8,7 @@ import 'utils.dart';
 void main() {
   late TestRenderer renderer;
 
-  setUp(() => rendererOverride = renderer = TestRenderer());
+  setUp(() => testRenderer = rendererOverride = renderer = TestRenderer());
   tearDown(() => rendererOverride = null);
 
   groupScope('Testing utilities', () {
@@ -42,8 +42,9 @@ void main() {
       );
 
       expect(
-        renderer.frames.join('---\n'),
-        '''
+        renderer.frames,
+        framesMatch(
+          '''
  RUNS  test/my_test.dart
 ---
  RUNS  test/my_test.dart
@@ -51,6 +52,7 @@ void main() {
 ---
  PASS  test/my_test.dart
 ''',
+        ),
       );
     });
 
@@ -71,7 +73,7 @@ void main() {
       });
 
       expect(
-        renderer.frames.last,
+        testRenderer!.frames.last,
         '''
  FAIL  test/my_test.dart
   ✓ works

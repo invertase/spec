@@ -31,8 +31,9 @@ void main() {
       });
 
       expect(
-        testRenderer!.frames.join('---\n'),
-        '''
+        testRenderer!.frames,
+        framesMatch(
+          '''
  RUNS  test/my_test.dart
 ---
  RUNS  test/my_test.dart
@@ -56,6 +57,7 @@ void main() {
 ---
  PASS  test/my_test.dart
 ''',
+        ),
       );
       expect(exitCode, 0);
     });
@@ -87,8 +89,9 @@ void main() {
       });
 
       expect(
-        testRenderer!.frames.join('---\n'),
-        '''
+        testRenderer!.frames,
+        framesMatch(
+          '''
  RUNS  test/my_test.dart
 ---
  RUNS  test/my_test.dart
@@ -125,6 +128,7 @@ void main() {
     Bad state: first
     test/my_test.dart 9:5  main.<fn>
 ''',
+        ),
       );
 
       expect(exitCode, -1);
@@ -148,25 +152,29 @@ void main() {
 
       expect(
         testRenderer!.frames,
-        containsAllInOrder([
+        framesMatch(
           '''
+ RUNS  test/failing_test.dart
+  ... failing
+ RUNS  test/passing_test.dart
+  ... passing
+---
  RUNS  test/passing_test.dart
   ... passing
 
  FAIL  test/failing_test.dart
   ✕ failing
     Bad state: fail
-    test/my_test.dart 3:25  main.<fn>
-''',
-          '''
+    test/failing_test.dart 3:25  main.<fn>
+---
  PASS  test/passing_test.dart
 
  FAIL  test/failing_test.dart
   ✕ failing
     Bad state: fail
-    test/my_test.dart 3:25  main.<fn>
+    test/failing_test.dart 3:25  main.<fn>
 ''',
-        ]),
+        ),
       );
 
       expect(exitCode, -1);
