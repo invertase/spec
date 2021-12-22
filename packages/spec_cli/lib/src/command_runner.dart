@@ -377,10 +377,12 @@ ${stackTrace.trim().multilinePadLeft(4)}''';
 
       final passingSuites = suites
           .where((suite) => ref.watch($suiteStatus(suite.id)) is AsyncData)
+          .sorted((a, b) => a.path!.compareTo(b.path!))
           .map((suite) => unwrap(ref.watch($suiteOutputLabel(suite.id))))
           .join('\n');
       final failingSuites = suites
           .where((suite) => ref.watch($suiteStatus(suite.id)) is AsyncError)
+          .sorted((a, b) => a.path!.compareTo(b.path!))
           .expand((suite) {
         final testLabels = unwrap(ref.watch($suiteTestsOutputLabels(suite.id)));
         return [
@@ -390,6 +392,7 @@ ${stackTrace.trim().multilinePadLeft(4)}''';
       }).join('\n');
       final loadingSuites = suites
           .where((suite) => ref.watch($suiteStatus(suite.id)) is AsyncLoading)
+          .sorted((a, b) => a.path!.compareTo(b.path!))
           .expand((suite) {
         final testLabels = unwrap(ref.watch($suiteTestsOutputLabels(suite.id)));
         return [

@@ -5,6 +5,45 @@ import 'utils.dart';
 
 void main() {
   groupScope('Spec', () {
+    testScope('passing suites are showed first and collapsed', (ref) async {
+      final exitCode = await runTest({
+        'pending_test.dart': '''
+import 'package:test/test.dart';
+void main() {
+  test('pending', () => Future.delayed(Duration(milliseconds: 100)));
+}
+''',
+        'passing_test.dart': '''
+import 'package:test/test.dart';
+void main() {
+  test('passing', () {});
+}
+''',
+      });
+
+      expect(
+        testRenderer!.frames,
+        framesMatch(
+          '''
+ RUNS  test/passing_test.dart
+  ... passing
+ RUNS  test/pending_test.dart
+  ... pending
+---
+ PASS  test/passing_test.dart
+
+ RUNS  test/pending_test.dart
+  ... pending
+---
+ PASS  test/passing_test.dart
+ PASS  test/pending_test.dart
+''',
+        ),
+      );
+
+      expect(exitCode, 0);
+    });
+
     testScope('shows progress as tests complete', (ref) async {
       final exitCode = await runTest({
         'my_test.dart': '''
