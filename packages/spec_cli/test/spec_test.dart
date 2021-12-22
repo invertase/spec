@@ -5,6 +5,191 @@ import 'utils.dart';
 
 void main() {
   groupScope('Spec', () {
+    // TODO test invalid dart code
+    testScope('render error logs made during tests', (ref) async {
+      final exitCode = await runTest({
+        'my_test.dart': r'''
+import 'package:test/test.dart';
+import 'dart:io';
+
+void main() {
+  test('first', () async {
+    print('hello');
+    stderr.write('this an error');
+    await Future.delayed(Duration(milliseconds: 10));
+  });
+}
+''',
+      });
+
+      expect(
+        testRenderer!.frames,
+        framesMatch(
+          '''
+ RUNS  test/my_test.dart
+---
+ RUNS  test/my_test.dart
+  ... first
+---
+ RUNS  test/my_test.dart
+  ... first
+hello
+---
+ RUNS  test/my_test.dart
+  ... first
+hello
+this is an error
+---
+ PASS  test/my_test.dart
+''',
+        ),
+      );
+
+      expect(exitCode, 0);
+    });
+
+    testScope('render logs made during tests', (ref) async {
+      final exitCode = await runTest({
+        'my_test.dart': r'''
+import 'package:test/test.dart';
+import 'dart:async';
+
+void main() {
+  final secondCompleter = Completer<void>();
+  final thirdCompleter = Completer<void>();
+  test('first', () {
+    addTearDown(secondCompleter.complete);
+    print('hello\nfirst');
+    print('another');
+    throw StateError('first');
+  });
+  test('second', () async {
+    addTearDown(thirdCompleter.complete);
+    print('hello\nsecond');
+    await secondCompleter.future;
+    await Future.delayed(Duration(milliseconds: 10));
+  });
+  test('third', () async {
+    print('hello\nthird');
+    await thirdCompleter.future;
+    await Future.delayed(Duration(milliseconds: 10));
+  });
+}
+''',
+      });
+
+      expect(
+        testRenderer!.frames,
+        framesMatch(
+          '''
+ RUNS  test/my_test.dart
+---
+ RUNS  test/my_test.dart
+  ... first
+---
+ RUNS  test/my_test.dart
+  ... first
+hello
+first
+---
+ RUNS  test/my_test.dart
+  ... first
+hello
+first
+another
+---
+ RUNS  test/my_test.dart
+  ✕ first
+hello
+first
+another
+
+    Bad state: first
+    test/my_test.dart 11:5  main.<fn>
+---
+ RUNS  test/my_test.dart
+  ... second
+  ✕ first
+hello
+first
+another
+
+    Bad state: first
+    test/my_test.dart 11:5  main.<fn>
+---
+ RUNS  test/my_test.dart
+  ... second
+hello
+second
+  ✕ first
+hello
+first
+another
+
+    Bad state: first
+    test/my_test.dart 11:5  main.<fn>
+---
+ RUNS  test/my_test.dart
+  ✓ second
+hello
+second
+  ✕ first
+hello
+first
+another
+
+    Bad state: first
+    test/my_test.dart 11:5  main.<fn>
+---
+ RUNS  test/my_test.dart
+  ✓ second
+hello
+second
+  ... third
+  ✕ first
+hello
+first
+another
+
+    Bad state: first
+    test/my_test.dart 11:5  main.<fn>
+---
+ RUNS  test/my_test.dart
+  ✓ second
+hello
+second
+  ... third
+hello
+third
+  ✕ first
+hello
+first
+another
+
+    Bad state: first
+    test/my_test.dart 11:5  main.<fn>
+---
+ FAIL  test/my_test.dart
+  ✓ second
+hello
+second
+  ✓ third
+hello
+third
+  ✕ first
+hello
+first
+another
+
+    Bad state: first
+    test/my_test.dart 11:5  main.<fn>
+''',
+        ),
+      );
+
+      expect(exitCode, -1);
+    });
+
     testScope('passing suites are showed first and collapsed', (ref) async {
       final exitCode = await runTest({
         'pending_test.dart': '''

@@ -140,6 +140,8 @@ class TestResult {
 
   Stream<TestEventGroup> groups() => _events.whereIs<TestEventGroup>();
 
+  Stream<TestEventMessage> messages() => _events.whereIs<TestEventMessage>();
+
   Stream<TestEventTestStart> testStart() =>
       _events.whereIs<TestEventTestStart>();
 

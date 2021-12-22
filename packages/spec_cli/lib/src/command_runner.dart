@@ -316,6 +316,23 @@ abstract class TestStatus {
     return charForOffset(offset);
   });
 
+  static final $testMessages =
+      Provider.autoDispose.family<List<String>, int>((ref, testID) {
+    final result = ref.watch($result);
+
+    final messages = result
+        .messages()
+        .where((e) => e.testID == testID)
+        .map((e) => e.message);
+
+    final sub = messages.listen(
+      (message) => ref.state = [...ref.state, message],
+    );
+    ref.onDispose(sub.cancel);
+
+    return [];
+  }, dependencies: [$result]);
+
   static final $testsOutputLabel =
       Provider.autoDispose.family<AsyncValue<String>, int>((ref, testID) {
     return _merge((unwrap) {
@@ -323,8 +340,18 @@ abstract class TestStatus {
 
       final status = ref.watch($testStatus(testID));
 
-      return status.when(
+      var result = status.when(
         data: (data) => '  ${'✓'.green} ${test.name}',
+        error: (err, stack) => '  ${'✕'.red} ${test.name}',
+        loading: () => '  ${ref.watch($spinner)} ${test.name}',
+      );
+
+      final messages = ref.watch($testMessages(testID));
+      if (messages.isNotEmpty) {
+        result = result + '\n' + messages.join('\n');
+      }
+
+      return status.maybeWhen(
         error: (err, stack) {
           final error = err is FailedTestException ? err.testError.error : err;
 
@@ -333,11 +360,12 @@ abstract class TestStatus {
               : stack.toString();
 
           return '''
-  ${'✕'.red} ${test.name}
+$result
+
 ${error.toString().multilinePadLeft(4)}
 ${stackTrace.trim().multilinePadLeft(4)}''';
         },
-        loading: () => '  ${ref.watch($spinner)} ${test.name}',
+        orElse: () => result,
       );
     });
   }, dependencies: [$test, $testStatus, $spinner]);
