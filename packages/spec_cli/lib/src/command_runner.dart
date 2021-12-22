@@ -1,11 +1,11 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:ansi_styles/ansi_styles.dart';
 import 'package:args/args.dart';
+import 'package:dart_test_adapter/dart_test_adapter.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:riverpod/riverpod.dart';
-import 'package:dart_test_adapter/dart_test_adapter.dart';
-import 'package:ansi_styles/ansi_styles.dart';
 import 'package:spec_cli/src/container.dart';
 import 'package:spec_cli/src/renderer.dart';
 
@@ -140,31 +140,38 @@ abstract class TestStatus {
 
   static final $suiteStatus =
       Provider.family<AsyncValue<void>, int>((ref, suiteID) {
-    final testIds = ref.watch($testIdsForSuite(suiteID));
+    return _merge((unwrap) {
+      final testIds = unwrap(ref.watch($testIdsForSuite(suiteID)));
 
-    return testIds.when(
-      error: (err, stack) => AsyncError(err, stackTrace: stack),
-      loading: () => AsyncLoading(),
-      data: (testIds) {
-        // any loading leads to RUNNING, even if there's an error/success
-        final hasLoading =
-            testIds.any((id) => ref.watch($testStatus(id)) is AsyncLoading);
-        if (hasLoading) return AsyncLoading();
+      /// We verify that "testIds" contains all ids that this suite is supposed
+      /// to have. In case we have yet to receive some test events.
+      final hasAllIds = ref.watch(
+        $rootGroup(suiteID).select(
+          (rootGroup) => testIds.length == rootGroup.asData?.value.testCount,
+        ),
+      );
+      if (!hasAllIds) unwrap(const AsyncLoading());
 
-        late final error = testIds
-            .map((id) => ref.watch($testStatus(id)))
-            .firstWhereOrNull((status) => status is AsyncError) as AsyncError?;
+      // any loading leads to RUNNING, even if there's an error/success
+      final hasLoading =
+          testIds.any((id) => ref.watch($testStatus(id)) is AsyncLoading);
+      if (hasLoading) unwrap(const AsyncLoading());
 
-        if (error != null) {
-          return AsyncError(
+      late final error = testIds
+          .map((id) => ref.watch($testStatus(id)))
+          .firstWhereOrNull((status) => status is AsyncError) as AsyncError?;
+
+      if (error != null) {
+        unwrap(
+          AsyncError(
             error.error,
             stackTrace: error.stackTrace,
-          );
-        }
+          ),
+        );
+      }
 
-        return AsyncData(null);
-      },
-    );
+      return;
+    });
   }, dependencies: [$testIdsForSuite]);
 
   static final $group = FutureProvider.family<Group, int>((ref, groupID) async {
@@ -360,8 +367,7 @@ abstract class TestStatus {
               : stack.toString();
 
           return '''
-$result
-
+$result${messages.isNotEmpty ? '\n' : ''}
 ${error.toString().multilinePadLeft(4)}
 ${stackTrace.trim().multilinePadLeft(4)}''';
         },
