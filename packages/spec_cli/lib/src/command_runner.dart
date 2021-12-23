@@ -201,10 +201,8 @@ abstract class TestStatus {
   }, dependencies: [$result]);
 
   static final $test = StreamProvider.family<Test, int>((ref, testID) async* {
-    await for (final events in ref.watch($result).testStart().combined()) {
-      final event = events.lastWhereOrNull((e) => e.test.id == testID);
-
-      if (event != null) yield event.test;
+    await for (final testStart in ref.watch($result).testStart()) {
+      if (testStart.test.id == testID) yield testStart.test;
     }
   }, dependencies: [$result]);
 
