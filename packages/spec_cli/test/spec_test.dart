@@ -5,7 +5,40 @@ import 'utils.dart';
 
 void main() {
   groupScope('Spec', () {
-    // TODO test invalid dart code
+    testScope('handle empty suites', (ref) async {}, skip: true);
+    testScope('handle errors inside setup', (ref) async {}, skip: true);
+    testScope('handle errors inside tearDown', (ref) async {}, skip: true);
+    testScope('handle empty groups', (ref) async {}, skip: true);
+    testScope('handle test failure after test done', (ref) async {},
+        skip: true);
+    testScope('handle nested groups', (ref) async {}, skip: true);
+
+    testScope('handle suites that failes to compile', (ref) async {
+      final exitCode = await runTest({'my_test.dart': 'invalid'});
+
+      expect(
+          testRenderer!.frames,
+          framesMatch(
+            [
+              ' RUNS  test/my_test.dart\n',
+              contains('''
+ FAIL  test/my_test.dart
+
+    Failed to load "test/my_test.dart":
+    test/my_test.dart:1:1: Error: Variables must be declared using the keywords \'const\', \'final\', \'var\' or a type name.
+    Try adding the name of the type of the variable or the keyword \'var\'.
+    invalid
+    ^^^^^^^
+    test/my_test.dart:1:1: Error: Expected \';\' after this.
+    invalid
+    ^^^^^^^
+'''),
+            ],
+          ));
+
+      expect(exitCode, -1);
+    }, skip: true);
+
     testScope('render error logs made during tests', (ref) async {
       final exitCode = await runTest({
         'my_test.dart': r'''
@@ -376,8 +409,16 @@ void main() {
 
       expect(
         testRenderer!.frames,
-        framesMatch(
-          '''
+        framesMatch('''
+ RUNS  test/failing_test.dart
+---
+ RUNS  test/failing_test.dart
+ RUNS  test/passing_test.dart
+---
+ RUNS  test/failing_test.dart
+  ... failing
+ RUNS  test/passing_test.dart
+---
  RUNS  test/failing_test.dart
   ... failing
  RUNS  test/passing_test.dart
@@ -397,8 +438,7 @@ void main() {
   ✕ failing
     Bad state: fail
     test/failing_test.dart 3:25  main.<fn>
-''',
-        ),
+'''),
       );
 
       expect(exitCode, -1);
