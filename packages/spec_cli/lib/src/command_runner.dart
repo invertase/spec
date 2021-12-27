@@ -124,9 +124,20 @@ abstract class TestStatus {
     ],
   );
 
+  /** Suites */
+
   static final $suiteCount = FutureProvider<int>((ref) async {
     final allSuites = await ref.watch($result).allSuites();
     return allSuites.count;
+  }, dependencies: [$result]);
+
+  static final $suites = StreamProvider<List<Suite>>((ref) {
+    final result = ref.watch($result);
+
+    return result
+        .suites()
+        .combined()
+        .map((event) => event.map((e) => e.suite).toList());
   }, dependencies: [$result]);
 
   static final $suite = FutureProvider.family<Suite, int>((ref, suiteID) async {
@@ -174,6 +185,8 @@ abstract class TestStatus {
     });
   }, dependencies: [$testIdsForSuite]);
 
+  /** Groups */
+
   static final $group = FutureProvider.family<Group, int>((ref, groupID) async {
     final groupEvent = await ref
         .watch($result)
@@ -191,13 +204,25 @@ abstract class TestStatus {
         .then((e) => e.group);
   }, dependencies: [$result]);
 
+  /** Tests */
+
   static final $testIdsForSuite =
-      StreamProvider.family<List<int>, int>((ref, suiteID) async* {
-    yield* ref.watch($result).testStart().where((event) {
-      return event.test.url != null && event.test.suiteID == suiteID;
-    }).map((event) {
-      return event.test.id;
-    }).combined();
+      StreamProvider.family<List<int>, int>((ref, suiteID) {
+    final controller = StreamController<List<int>>();
+    controller.onListen = () => controller.add([]);
+    ref.onDispose(controller.close);
+
+    final ids = <int>{};
+
+    ref
+        .watch($result)
+        .testStart()
+        .where((event) => event.test.suiteID == suiteID)
+        .listen((event) {
+      if (ids.add(event.test.id)) controller.add(ids.toList());
+    });
+
+    return controller.stream;
   }, dependencies: [$result]);
 
   static final $test = StreamProvider.family<Test, int>((ref, testID) async* {
@@ -217,24 +242,6 @@ abstract class TestStatus {
           .toList();
     });
   }, dependencies: [$allTests, $testStatus]);
-
-  static final $currentlyFailedTestsLocation =
-      Provider<AsyncValue<List<_FailedTestLocation>>>((ref) {
-    return _merge((unwrap) {
-      final failedTests = unwrap(ref.watch($allFailedTests));
-
-      return failedTests.map((test) {
-        final suite = unwrap(
-          ref.watch($suite(test.suiteID)),
-        );
-
-        return _FailedTestLocation(
-          path: suite.path!,
-          name: test.name,
-        );
-      }).toList();
-    });
-  }, dependencies: [$allFailedTests, $suite]);
 
   static final $testStatus =
       FutureProvider.family<void, int>((ref, testID) async {
@@ -257,20 +264,30 @@ abstract class TestStatus {
     ]);
   }, dependencies: [$result]);
 
-  static final $suites = StreamProvider<List<Suite>>((ref) {
-    final result = ref.watch($result);
+  static final $currentlyFailedTestsLocation =
+      Provider<AsyncValue<List<_FailedTestLocation>>>((ref) {
+    return _merge((unwrap) {
+      final failedTests = unwrap(ref.watch($allFailedTests));
 
-    return result
-        .suites()
-        .combined()
-        .map((event) => event.map((e) => e.suite).toList());
-  }, dependencies: [$result]);
+      return failedTests.map((test) {
+        final suite = unwrap(
+          ref.watch($suite(test.suiteID)),
+        );
+
+        return _FailedTestLocation(
+          path: suite.path!,
+          name: test.name,
+        );
+      }).toList();
+    });
+  }, dependencies: [$allFailedTests, $suite]);
+
+  /** Output */
 
   static final $suiteOutputLabel =
       Provider.family<AsyncValue<String>, int>((ref, suiteID) {
     return _merge((unwrap) {
       final suite = unwrap(ref.watch($suite(suiteID)));
-      final rootGroup = unwrap(ref.watch($rootGroup(suiteID)));
       final suiteStatus = ref.watch($suiteStatus(suiteID));
 
       return [
@@ -280,7 +297,6 @@ abstract class TestStatus {
           loading: (_) => ' RUNS '.black.bgYellow,
         ),
         if (suite.path != null) suite.path!,
-        if (rootGroup.name.isNotEmpty) rootGroup.name,
       ].join(' ');
     });
   }, dependencies: [$suite, $rootGroup, $suiteStatus]);
@@ -345,11 +361,17 @@ abstract class TestStatus {
 
       final status = ref.watch($testStatus(testID));
 
-      var result = status.when(
-        data: (data) => '  ${'✓'.green} ${test.name}',
-        error: (err, stack) => '  ${'✕'.red} ${test.name}',
-        loading: () => '  ${ref.watch($spinner)} ${test.name}',
-      );
+      var result = '';
+
+      if (test.url != null) {
+        // Tests with a null URL are non-user-defined tests (such as setup/teardown).
+        // They can fail, but we don't want to show their name.
+        result = status.when(
+          data: (data) => '  ${'✓'.green} ${test.name}',
+          error: (err, stack) => '  ${'✕'.red} ${test.name}',
+          loading: () => '  ${ref.watch($spinner)} ${test.name}',
+        );
+      }
 
       final messages = ref.watch($testMessages(testID));
       if (messages.isNotEmpty) {
@@ -543,18 +565,27 @@ Future<int> fest({
     final renderer = rendererOverride ??
         (watch ? FullScreenRenderer() : BacktrackingRenderer());
 
-    ref.listen<AsyncValue<String>>(TestStatus.$output, (lastOutput, output) {
-      output.when(
-        loading: () {}, // nothing to do
-        error: (err, stack) {}, // TODO print error
-        data: renderer.renderFrame,
-      );
-    });
+    ref.listen<AsyncValue<String>>(
+      TestStatus.$output,
+      (lastOutput, output) {
+        output.when(
+          loading: () {}, // nothing to do
+          error: (err, stack) {
+            print('Error: failed to render\n$err\n$stack');
+          }, // TODO print error
+          data: renderer.renderFrame,
+        );
+      },
+      fireImmediately: true,
+    );
 
     final completer = Completer<int>();
 
     if (!watch) {
       // if not in watch mode, finish the command when the test proccess completes.
+
+      // use "listen" to prevent the provider from getting disposed while
+      // awaiting the done operation
       final sub = ref.listen<TestResult>(
         TestStatus.$result,
         (previous, current) {},
