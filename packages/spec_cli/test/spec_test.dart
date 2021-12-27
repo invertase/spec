@@ -37,8 +37,8 @@ void main() {}
 
         expect(exitCode, 0);
       },
-      skip:
-          'blocked by https://github.com/dart-lang/test/issues/1652 because we cannot determine if a suite is completed without tests',
+      skip: 'blocked by https://github.com/dart-lang/test/issues/1652 because '
+          'we cannot determine if a suite is completed without tests',
     );
 
     testScope(
@@ -67,8 +67,8 @@ void main() {
 
         expect(exitCode, 0);
       },
-      skip:
-          'blocked by https://github.com/dart-lang/test/issues/1652 because we cannot determine if a suite is completed without tests',
+      skip: 'blocked by https://github.com/dart-lang/test/issues/1652 because '
+          'we cannot determine if a group is completed without tests',
     );
 
     testScope('handle suites that fail to compile', (ref) async {
