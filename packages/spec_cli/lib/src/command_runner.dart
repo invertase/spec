@@ -441,39 +441,44 @@ ${stackTrace.trim().multilinePadLeft(4)}''';
     });
   }, dependencies: [$testsForSuite, $testStatus, $testsOutputLabel]);
 
+  static final $suiteOutput =
+      Provider.autoDispose.family<AsyncValue<String>, int>((ref, suiteID) {
+    return _merge((unwrap) {
+      final suiteStatus = ref.watch($suiteStatus(suiteID));
+      final showTests = suiteStatus.map(
+        data: (_) => false,
+        error: (_) => true,
+        loading: (_) => true,
+      );
+
+      final testLabels = showTests
+          ? unwrap(ref.watch($suiteTestsOutputLabels(suiteID)))
+          : null;
+
+      return [
+        unwrap(ref.watch($suiteOutputLabel(suiteID))),
+        if (testLabels != null && testLabels.isNotEmpty) testLabels,
+      ].join('\n');
+    });
+  }, dependencies: [$suiteStatus, $suiteOutputLabel, $suiteTestsOutputLabels]);
+
   static final $output = Provider.autoDispose<AsyncValue<String>>((ref) {
     return _merge((unwrap) {
-      final suites = unwrap(ref.watch($suites));
+      final suites = unwrap(ref.watch($suites))
+          .sorted((a, b) => a.path!.compareTo(b.path!));
 
-      String labelForSuites(Iterable<Suite> suites, {required bool showTests}) {
-        return suites
-            .sorted((a, b) => a.path!.compareTo(b.path!))
-            .expand((suite) {
-          final testLabels = showTests
-              ? unwrap(ref.watch($suiteTestsOutputLabels(suite.id)))
-              : null;
-
-          return [
-            unwrap(ref.watch($suiteOutputLabel(suite.id))),
-            if (testLabels != null && testLabels.isNotEmpty) testLabels,
-          ];
-        }).join('\n');
-      }
-
-      final passingSuites = labelForSuites(
-        suites.where((suite) => ref.watch($suiteStatus(suite.id)) is AsyncData),
-        showTests: false,
-      );
-      final failingSuites = labelForSuites(
-        suites
-            .where((suite) => ref.watch($suiteStatus(suite.id)) is AsyncError),
-        showTests: true,
-      );
-      final loadingSuites = labelForSuites(
-        suites.where(
-            (suite) => ref.watch($suiteStatus(suite.id)) is AsyncLoading),
-        showTests: true,
-      );
+      final passingSuites = suites
+          .where((suite) => ref.watch($suiteStatus(suite.id)) is AsyncData)
+          .map((suite) => unwrap(ref.watch($suiteOutput(suite.id))))
+          .join('\n');
+      final failingSuites = suites
+          .where((suite) => ref.watch($suiteStatus(suite.id)) is AsyncError)
+          .map((suite) => unwrap(ref.watch($suiteOutput(suite.id))))
+          .join('\n');
+      final loadingSuites = suites
+          .where((suite) => ref.watch($suiteStatus(suite.id)) is AsyncLoading)
+          .map((suite) => unwrap(ref.watch($suiteOutput(suite.id))))
+          .join('\n');
 
       return [
         if (passingSuites.isNotEmpty) passingSuites,
@@ -483,9 +488,8 @@ ${stackTrace.trim().multilinePadLeft(4)}''';
     });
   }, dependencies: [
     $suites,
+    $suiteOutput,
     $suiteStatus,
-    $suiteOutputLabel,
-    $suiteTestsOutputLabels
   ]);
 }
 
