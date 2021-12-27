@@ -159,7 +159,7 @@ abstract class TestStatus {
       /// We verify that "testIds" contains all ids that this suite is supposed
       /// to have. In case we have yet to receive some test events.
       final hasAllVisibleIds = ref.watch(
-        $rootGroup(suiteID).select(
+        $scaffoldGroup(suiteID).select(
           (rootGroup) =>
               rootGroup.asData != null &&
               visibleTests.length == rootGroup.asData!.value.testCount,
@@ -192,7 +192,7 @@ abstract class TestStatus {
     });
   }, dependencies: [
     $testsForSuite,
-    $rootGroup,
+    $scaffoldGroup,
     $testStatus,
   ]);
 
@@ -207,7 +207,9 @@ abstract class TestStatus {
     return groupEvent.group;
   }, dependencies: [$result]);
 
-  static final $rootGroup = FutureProvider.family<Group, int>((ref, suiteID) {
+  /// The virtual top-most group added by the test package.
+  static final $scaffoldGroup =
+      FutureProvider.family<Group, int>((ref, suiteID) {
     return ref
         .watch($result)
         .groups()
@@ -215,7 +217,55 @@ abstract class TestStatus {
         .then((e) => e.group);
   }, dependencies: [$result]);
 
+  /// User-defined groups at the root of a suite (excluding [$scaffoldGroup])
+  static final $rootGroupsForSuite = StreamProvider.autoDispose
+      .family<List<Group>, int>((ref, suiteID) async* {
+    final scaffoldGroup = await ref.watch($scaffoldGroup(suiteID).future);
+
+    yield* ref
+        .watch($result)
+        .groups()
+        .where((e) => e.group.parentID == scaffoldGroup)
+        .map((e) => e.group)
+        .combined();
+  }, dependencies: [$scaffoldGroup, $result]);
+
+  static final $childrenGroupsForGroup =
+      StreamProvider.autoDispose.family<List<Group>, int>((ref, groupID) {
+    return ref
+        .watch($result)
+        .groups()
+        .where((e) => e.group.parentID == groupID)
+        .map((e) => e.group)
+        .combined();
+  }, dependencies: [$result]);
+
   /** Tests */
+
+  static final $rootTestsForSuite =
+      Provider.autoDispose.family<AsyncValue<List<Test>>, int>((ref, suiteID) {
+    return _merge((unwrap) {
+      final testsForSuite = unwrap(ref.watch($testsForSuite(suiteID)));
+
+      return testsForSuite.values
+          // Tests with no groups are errored tests such as when there is a compilation error.
+          // Tests with a single group are user-defined tests, since that group is added implicitly
+          .where((test) => test.groupIDs.length < 2)
+          .toList();
+    });
+  }, dependencies: [$testsForSuite]);
+
+  static final $testsForGroup =
+      Provider.autoDispose.family<AsyncValue<List<Test>>, _GroupID>((ref, id) {
+    return _merge((unwrap) {
+      final testsForSuite = unwrap(ref.watch($testsForSuite(id.suiteID)));
+
+      return testsForSuite.values
+          .where((test) =>
+              test.groupIDs.isNotEmpty && test.groupIDs.last == id.groupID)
+          .toList();
+    });
+  }, dependencies: [$testsForSuite]);
 
   static final $testsForSuite =
       StreamProvider.family<Map<int, Test>, int>((ref, suiteID) {
@@ -314,7 +364,7 @@ abstract class TestStatus {
         if (suite.path != null) suite.path!,
       ].join(' ');
     });
-  }, dependencies: [$suite, $rootGroup, $suiteStatus]);
+  }, dependencies: [$suite, $scaffoldGroup, $suiteStatus]);
 
   static final $spinner = Provider.autoDispose<String>((ref) {
     String charForOffset(int offset) {
@@ -493,6 +543,27 @@ ${stackTrace.trim().multilinePadLeft(4)}''';
   ]);
 }
 
+@immutable
+class _GroupID {
+  const _GroupID({
+    required this.groupID,
+    required this.suiteID,
+  });
+
+  final int groupID;
+  final int suiteID;
+
+  @override
+  bool operator ==(Object other) =>
+      other is _GroupID &&
+      other.runtimeType == runtimeType &&
+      other.groupID == groupID &&
+      other.suiteID == suiteID;
+
+  @override
+  int get hashCode => Object.hash(runtimeType, groupID, suiteID);
+}
+
 extension on String {
   String multilinePadLeft(int tab) {
     return this.split('\n').map((e) {
@@ -524,6 +595,12 @@ AsyncValue<T> _merge<T>(T Function(R Function<R>(AsyncValue<R>) unwrap) cb) {
 }
 
 extension<T> on Stream<T> {
+  /// Emits the combination of all the previously emitted events and the new event.
+  ///
+  /// Meaning that by pushing `A` then `B` then `C`, this will emit in order:
+  /// - `[A]`
+  /// - `[A, B]`
+  /// - `[A, B, C]`
   Stream<List<T>> combined() async* {
     final events = <T>[];
     await for (final event in this) {

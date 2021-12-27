@@ -42,28 +42,28 @@ void main() {
       });
 
       expect(
-        testRenderer!.frames.last,
-        '''
+        testRenderer!.frames,
+        framesMatch(
+          '''
  FAILS  test/my_test.dart
   root
-    mid
-      ✓ test
-    mid
+   ✓ mid
+   ✕ mid
       ✕ test2
         Bad state: fail
         test/my_test.dart 9:28  main.<fn>
   root2
-    mid2
-      ✓ test3
-    mid2-2
+   ✓ mid2
+   ✕ mid2-2
       ✕ test2-2
         Bad state: fail
         test/my_test.dart 19:29  main.<fn>
 ''',
+        ),
       );
 
-      expect(exitCode, 0);
-    }, skip: "Let's decide on how to render groups first");
+      expect(exitCode, -1);
+    });
 
     testScope(
       'handles empty suites',
