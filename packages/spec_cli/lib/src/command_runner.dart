@@ -393,7 +393,7 @@ abstract class TestStatus {
               : stack.toString();
 
           return '''
-$result
+$result${messages.isNotEmpty ? '\n' : ''}
 ${error.toString().multilinePadLeft(4)}
 ${stackTrace.trim().multilinePadLeft(4)}''';
         },
