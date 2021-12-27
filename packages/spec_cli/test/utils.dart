@@ -39,8 +39,18 @@ void groupScope(
 }
 
 @isTest
-void testScope(String description, FutureOr<void> Function(DartRef ref) cb,
-    {List<Override> overrides = const [], Timeout? timeout}) {
+void testScope(
+  String description,
+  FutureOr<void> Function(DartRef ref) cb, {
+  List<Override> overrides = const [],
+  Timeout? timeout,
+  Object? skip,
+  int? retry,
+  Map<String, Object?>? onPlatform,
+  @Deprecated('solo should only be used during developemnt') bool solo = false,
+  Object? tags,
+  String? testOn,
+}) {
   final defaultOverrides = Zone.current[_defaultOverridesKey];
   return test(
     description,
@@ -51,6 +61,13 @@ void testScope(String description, FutureOr<void> Function(DartRef ref) cb,
       ]);
     },
     timeout: timeout,
+    skip: skip,
+    retry: retry,
+    onPlatform: onPlatform,
+    // ignore: deprecated_member_use
+    solo: solo,
+    tags: tags,
+    testOn: testOn,
   );
 }
 
