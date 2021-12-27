@@ -152,25 +152,30 @@ abstract class TestStatus {
   static final $suiteStatus =
       Provider.family<AsyncValue<void>, int>((ref, suiteID) {
     return _merge((unwrap) {
-      final testIds = unwrap(ref.watch($testIdsForSuite(suiteID)));
+      final tests = unwrap(ref.watch($testsForSuite(suiteID)));
+      final visibleTests =
+          tests.values.where((test) => !test.isHidden).toList();
 
       /// We verify that "testIds" contains all ids that this suite is supposed
       /// to have. In case we have yet to receive some test events.
-      final hasAllIds = ref.watch(
+      final hasAllVisibleIds = ref.watch(
         $rootGroup(suiteID).select(
           (rootGroup) =>
               rootGroup.asData != null &&
-              testIds.length == rootGroup.asData!.value.testCount,
+              visibleTests.length == rootGroup.asData!.value.testCount,
         ),
       );
-      if (!hasAllIds) unwrap(const AsyncLoading());
+      if (!hasAllVisibleIds) {
+        // TODO update after https://github.com/dart-lang/test/issues/1652 is resolved
+        unwrap(const AsyncLoading());
+      }
 
       // any loading leads to RUNNING, even if there's an error/success
       final hasLoading =
-          testIds.any((id) => ref.watch($testStatus(id)) is AsyncLoading);
+          tests.keys.any((id) => ref.watch($testStatus(id)) is AsyncLoading);
       if (hasLoading) unwrap(const AsyncLoading());
 
-      final error = testIds
+      final error = tests.keys
           .map((id) => ref.watch($testStatus(id)))
           .firstWhereOrNull((status) => status is AsyncError) as AsyncError?;
 
@@ -185,7 +190,11 @@ abstract class TestStatus {
 
       return;
     });
-  }, dependencies: [$testIdsForSuite, $rootGroup, $testStatus]);
+  }, dependencies: [
+    $testsForSuite,
+    $rootGroup,
+    $testStatus,
+  ]);
 
   /** Groups */
 
@@ -208,23 +217,24 @@ abstract class TestStatus {
 
   /** Tests */
 
-  static final $testIdsForSuite =
-      StreamProvider.family<List<int>, int>((ref, suiteID) {
-    final controller = StreamController<List<int>>();
-    controller.onListen = () => controller.add([]);
+  static final $testsForSuite =
+      StreamProvider.family<Map<int, Test>, int>((ref, suiteID) {
+    final controller = StreamController<Map<int, Test>>();
+    controller.onListen = () => controller.add({});
     ref.onDispose(controller.close);
 
-    final ids = <int>{};
+    final tests = <int, Test>{};
 
     ref
         .watch($result)
         .testStart()
         .where((event) => event.test.suiteID == suiteID)
-        // when "url" is null, it means that this is not a user-defined test
-        // and is instead a setup/tearOff/.., so it doesn't count
-        .where((event) => event.test.url != null)
+        .where((event) => !event.test.isHidden)
         .listen((event) {
-      if (ids.add(event.test.id)) controller.add(ids.toList());
+      if (!tests.containsKey(event.test.id)) {
+        tests[event.test.id] = event.test;
+        controller.add({...tests});
+      }
     });
 
     return controller.stream;
@@ -405,19 +415,19 @@ ${stackTrace.trim().multilinePadLeft(4)}''';
   static final $suiteTestsOutputLabels =
       Provider.autoDispose.family<AsyncValue<String>, int>((ref, suiteID) {
     return _merge((unwrap) {
-      final testIds = unwrap(ref.watch($testIdsForSuite(suiteID)));
+      final tests = unwrap(ref.watch($testsForSuite(suiteID)));
 
-      final loadingTestLabels = testIds
+      final loadingTestLabels = tests.keys
           .where((id) => ref.watch($testStatus(id)) is AsyncLoading)
           .map((id) => ref.watch($testsOutputLabel(id)).asData?.value)
           .where((label) => label != null)
           .join('\n');
-      final failingTestLabels = testIds
+      final failingTestLabels = tests.keys
           .where((id) => ref.watch($testStatus(id)) is AsyncError)
           .map((id) => ref.watch($testsOutputLabel(id)).asData?.value)
           .where((label) => label != null)
           .join('\n');
-      final successTestLabels = testIds
+      final successTestLabels = tests.keys
           .where((id) => ref.watch($testStatus(id)) is AsyncData)
           .map((id) => ref.watch($testsOutputLabel(id)).asData?.value)
           .where((label) => label != null)
@@ -429,16 +439,13 @@ ${stackTrace.trim().multilinePadLeft(4)}''';
         if (failingTestLabels.isNotEmpty) failingTestLabels,
       ].join('\n');
     });
-  }, dependencies: [$testIdsForSuite, $testStatus, $testsOutputLabel]);
+  }, dependencies: [$testsForSuite, $testStatus, $testsOutputLabel]);
 
   static final $output = Provider.autoDispose<AsyncValue<String>>((ref) {
     return _merge((unwrap) {
       final suites = unwrap(ref.watch($suites));
 
-      String labelForSuites(
-        Iterable<Suite> suites, {
-        required bool showTests,
-      }) {
+      String labelForSuites(Iterable<Suite> suites, {required bool showTests}) {
         return suites
             .sorted((a, b) => a.path!.compareTo(b.path!))
             .expand((suite) {
@@ -604,9 +611,16 @@ Future<int> fest({
       });
     }
 
-    return completer.future;
+    final exitCode = await completer.future;
+    return exitCode;
   }, overrides: [
     if (workingDirectory != null)
       _$workingDirectory.overrideWithValue(Directory(workingDirectory)),
   ]);
+}
+
+extension on Test {
+  // when "url" is null, it means that this is not a user-defined test
+  // and is instead a setup/tearOff/.., so it doesn't count
+  bool get isHidden => url == null;
 }
