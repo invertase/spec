@@ -158,7 +158,9 @@ abstract class TestStatus {
       /// to have. In case we have yet to receive some test events.
       final hasAllIds = ref.watch(
         $rootGroup(suiteID).select(
-          (rootGroup) => testIds.length == rootGroup.asData?.value.testCount,
+          (rootGroup) =>
+              rootGroup.asData != null &&
+              testIds.length == rootGroup.asData!.value.testCount,
         ),
       );
       if (!hasAllIds) unwrap(const AsyncLoading());
@@ -168,7 +170,7 @@ abstract class TestStatus {
           testIds.any((id) => ref.watch($testStatus(id)) is AsyncLoading);
       if (hasLoading) unwrap(const AsyncLoading());
 
-      late final error = testIds
+      final error = testIds
           .map((id) => ref.watch($testStatus(id)))
           .firstWhereOrNull((status) => status is AsyncError) as AsyncError?;
 
@@ -183,7 +185,7 @@ abstract class TestStatus {
 
       return;
     });
-  }, dependencies: [$testIdsForSuite]);
+  }, dependencies: [$testIdsForSuite, $rootGroup, $testStatus]);
 
   /** Groups */
 
@@ -218,6 +220,9 @@ abstract class TestStatus {
         .watch($result)
         .testStart()
         .where((event) => event.test.suiteID == suiteID)
+        // when "url" is null, it means that this is not a user-defined test
+        // and is instead a setup/tearOff/.., so it doesn't count
+        .where((event) => event.test.url != null)
         .listen((event) {
       if (ids.add(event.test.id)) controller.add(ids.toList());
     });
@@ -375,7 +380,8 @@ abstract class TestStatus {
 
       final messages = ref.watch($testMessages(testID));
       if (messages.isNotEmpty) {
-        result = result + '\n' + messages.join('\n');
+        if (result.isNotEmpty) result += '\n';
+        result += messages.join('\n');
       }
 
       return status.maybeWhen(
@@ -387,7 +393,7 @@ abstract class TestStatus {
               : stack.toString();
 
           return '''
-$result${messages.isNotEmpty ? '\n' : ''}
+$result
 ${error.toString().multilinePadLeft(4)}
 ${stackTrace.trim().multilinePadLeft(4)}''';
         },
@@ -572,7 +578,7 @@ Future<int> fest({
           loading: () {}, // nothing to do
           error: (err, stack) {
             print('Error: failed to render\n$err\n$stack');
-          }, // TODO print error
+          },
           data: renderer.renderFrame,
         );
       },
