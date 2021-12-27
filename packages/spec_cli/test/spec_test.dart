@@ -13,7 +13,7 @@ void main() {
         skip: true);
     testScope('handle nested groups', (ref) async {}, skip: true);
 
-    testScope('handle suites that failes to compile', (ref) async {
+    testScope('handle suites that fail to compile', (ref) async {
       final exitCode = await runTest({'my_test.dart': 'invalid'});
 
       expect(
@@ -37,7 +37,7 @@ void main() {
           ));
 
       expect(exitCode, -1);
-    }, skip: true);
+    }, skip: 'blocked by https://github.com/dart-lang/test/issues/1652');
 
     testScope('render error logs made during tests', (ref) async {
       final exitCode = await runTest({
