@@ -5,13 +5,71 @@ import 'utils.dart';
 
 void main() {
   groupScope('Spec', () {
-    testScope('handle empty suites', (ref) async {}, skip: true);
     testScope('handle errors inside setup', (ref) async {}, skip: true);
+
     testScope('handle errors inside tearDown', (ref) async {}, skip: true);
-    testScope('handle empty groups', (ref) async {}, skip: true);
+
     testScope('handle test failure after test done', (ref) async {},
         skip: true);
     testScope('handle nested groups', (ref) async {}, skip: true);
+
+    testScope(
+      'handles empty suites',
+      (ref) async {
+        final exitCode = await runTest({
+          'my_test.dart': r'''
+import 'package:test/test.dart';
+
+void main() {}
+''',
+        });
+
+        expect(
+          testRenderer!.frames,
+          framesMatch(
+            '''
+ RUNS  test/my_test.dart
+---
+ PASS  test/my_test.dart
+''',
+          ),
+        );
+
+        expect(exitCode, 0);
+      },
+      skip:
+          'blocked by https://github.com/dart-lang/test/issues/1652 because we cannot determine if a suite is completed without tests',
+    );
+
+    testScope(
+      'handle empty groups',
+      (ref) async {
+        final exitCode = await runTest({
+          'my_test.dart': r'''
+import 'package:test/test.dart';
+
+void main() {
+  group('empty', () {});
+}
+''',
+        });
+
+        expect(
+          testRenderer!.frames,
+          framesMatch(
+            '''
+ RUNS  test/my_test.dart
+---
+ PASS  test/my_test.dart
+''',
+          ),
+        );
+
+        expect(exitCode, 0);
+      },
+      skip:
+          'blocked by https://github.com/dart-lang/test/issues/1652 because we cannot determine if a suite is completed without tests',
+    );
 
     testScope('handle suites that fail to compile', (ref) async {
       final exitCode = await runTest({'my_test.dart': 'invalid'});
