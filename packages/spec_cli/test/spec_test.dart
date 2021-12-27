@@ -11,7 +11,59 @@ void main() {
 
     testScope('handle test failure after test done', (ref) async {},
         skip: true);
-    testScope('handle nested groups', (ref) async {}, skip: true);
+
+    testScope('handles nested groups', (ref) async {
+      final exitCode = await runTest({
+        'my_test.dart': r'''
+import 'package:test/test.dart';
+
+void main() {
+  group('root', () {
+    group('mid', () {
+      test('test', () {});
+    });
+    group('mid-2', () {
+      test('test-2', () => throw StateError('fail'));
+    });
+    test('root-test', () {});
+  });
+
+  group('root2', () {
+    group('mid2', () {
+      test('test2', () {});
+    });
+    group('mid2-2', () {
+      test('test2-2', () => throw StateError('fail'));
+    });
+    test('root-test2', () {});
+  });
+}
+''',
+      });
+
+      expect(
+        testRenderer!.frames.last,
+        '''
+ FAILS  test/my_test.dart
+  root
+    mid
+      ✓ test
+    mid
+      ✕ test2
+        Bad state: fail
+        test/my_test.dart 9:28  main.<fn>
+  root2
+    mid2
+      ✓ test3
+    mid2-2
+      ✕ test2-2
+        Bad state: fail
+        test/my_test.dart 19:29  main.<fn>
+''',
+      );
+
+      expect(exitCode, 0);
+    }, skip: "Let's decide on how to render groups first");
 
     testScope(
       'handles empty suites',
