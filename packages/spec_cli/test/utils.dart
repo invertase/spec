@@ -102,9 +102,12 @@ class TestRenderer extends Renderer {
 ///
 /// ```dart
 /// framesMatch([
-///   equals('firstFrame'),
-///   'secondFrame', // litterals works too
-///   contains('third'),
+///   anyOf('firstFrame', 'first-name'),
+///   '''
+/// second frame
+/// ---
+/// third frame
+/// ''', // litterals works too
 /// ])
 /// ```
 ///
@@ -127,12 +130,21 @@ class TestRenderer extends Renderer {
 /// - "A then B then C then C", because this defines 4 frames instead of 3
 Matcher framesMatch(Object expectation) {
   assert(expectation is String || expectation is List);
+
+  List<Matcher> splitStringFrame(String frame) {
+    return frame
+        .split(RegExp(r'^---\n', multiLine: true))
+        .map(wrapMatcher)
+        .toList();
+  }
+
   final expectedFrames = expectation is String
-      ? expectation
-          .split(RegExp(r'^---\n', multiLine: true))
-          .map(wrapMatcher)
-          .toList()
-      : (expectation as List<Object?>).map(wrapMatcher).toList();
+      ? splitStringFrame(expectation)
+      : (expectation as List<Object?>).expand((matcher) {
+          return matcher is String
+              ? splitStringFrame(matcher)
+              : [matcher as Matcher];
+        }).toList();
 
   return _FramesMatch(expectedFrames);
 }
@@ -173,6 +185,7 @@ class _FramesMatch extends Matcher {
       // current frame matches current frame-matcher, testing next frame
       if (expectedFrame.matches(actualFrame, matchState)) {
         lastMatchIndex = expectedFrameIndex;
+        // TODO allow an expectation to match multiple frames
         expectedFrameIndex++;
         actualFrameIndex++;
         continue;

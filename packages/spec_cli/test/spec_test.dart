@@ -241,7 +241,27 @@ void main() {
 
       expect(
         testRenderer!.frames,
-        framesMatch(
+        framesMatch([
+          anyOf(
+            ' RUNS  test/pending_test.dart\n',
+            ' RUNS  test/pending_test.dart\n',
+          ),
+          '''
+ RUNS  test/passing_test.dart
+ RUNS  test/pending_test.dart
+''',
+          anyOf(
+            '''
+ RUNS  test/passing_test.dart
+ RUNS  test/pending_test.dart
+  ... pending
+''',
+            '''
+ RUNS  test/passing_test.dart
+  ... passing
+ RUNS  test/pending_test.dart
+''',
+          ),
           '''
  RUNS  test/passing_test.dart
   ... passing
@@ -256,7 +276,7 @@ void main() {
  PASS  test/passing_test.dart
  PASS  test/pending_test.dart
 ''',
-        ),
+        ]),
       );
 
       expect(exitCode, 0);
