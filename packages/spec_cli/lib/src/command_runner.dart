@@ -483,7 +483,7 @@ abstract class TestStatus {
     return [];
   }, dependencies: [$result]);
 
-  static final $testsOutputLabel =
+  static final $testOutputLabel =
       Provider.autoDispose.family<AsyncValue<String>, _TestKey>((ref, testKey) {
     return _merge((unwrap) {
       final test = unwrap(ref.watch($test(testKey)));
@@ -536,7 +536,7 @@ ${stackTrace.trim().multilinePadLeft(4)}''';
 
       final testContent = tests
           .sortedByStatus(ref)
-          .map((test) => ref.watch($testsOutputLabel(test.key)).asData?.value)
+          .map((test) => ref.watch($testOutputLabel(test.key)).asData?.value)
           .whereNotNull()
           .join('\n');
 
@@ -567,8 +567,8 @@ ${stackTrace.trim().multilinePadLeft(4)}''';
           ? ref
               .watch($rootTestsForSuite(suiteKey))
               .sortedByStatus(ref)
-              .map((test) =>
-                  ref.watch($testsOutputLabel(test.key)).asData?.value)
+              .map(
+                  (test) => ref.watch($testOutputLabel(test.key)).asData?.value)
               .whereNotNull()
               .join('\n')
           : null;
@@ -595,7 +595,7 @@ ${stackTrace.trim().multilinePadLeft(4)}''';
     $testStatus,
     $rootGroupsForSuite,
     $groupOutput,
-    $testsOutputLabel,
+    $testOutputLabel,
     $suiteOutputLabel,
     $rootTestsForSuite,
   ]);
