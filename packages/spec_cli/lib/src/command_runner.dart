@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:args/args.dart';
 import 'package:dart_test_adapter/dart_test_adapter.dart';
 import 'package:riverpod/riverpod.dart';
+import 'package:spec_cli/src/collection.dart';
 import 'package:spec_cli/src/container.dart';
 import 'package:spec_cli/src/renderer.dart';
 
@@ -42,7 +43,7 @@ Future<int> fest({
       ref.listen(
         $fileChange,
         (prev, value) {
-          ref.refresh($result);
+          ref.refresh($events);
         },
       );
 
@@ -79,7 +80,9 @@ Future<int> fest({
         output.when(
           loading: () {}, // nothing to do
           error: (err, stack) => print('Error: failed to render\n$err\n$stack'),
-          data: renderer.renderFrame,
+          data: (output) {
+            if (output.trim().isNotEmpty) renderer.renderFrame(output);
+          },
         );
       },
       fireImmediately: true,
@@ -92,16 +95,19 @@ Future<int> fest({
 
       // use "listen" to prevent the provider from getting disposed while
       // awaiting the done operation
-      final sub = ref.listen<TestResult>(
-        $result,
-        (previous, current) {},
-      );
-      Future(sub.read().done).then((doneEvent) {
-        // TODO test `success = null`
-        final exitCode = doneEvent.success != false ? 0 : -1;
+      ref.listen<List<TestEvent>>(
+        $events,
+        (_, events) {
+          final doneEvent = events.firstWhereTypeOrNull<TestEventDone>();
+          if (doneEvent == null) return;
 
-        exitCodeCompleter.complete(exitCode);
-      });
+          // TODO test `success = null`
+          final exitCode = doneEvent.success != false ? 0 : -1;
+
+          exitCodeCompleter.complete(exitCode);
+        },
+        fireImmediately: true,
+      );
     }
 
     return exitCodeCompleter.future;

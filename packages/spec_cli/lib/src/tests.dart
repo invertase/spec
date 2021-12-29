@@ -1,23 +1,16 @@
-import 'dart:async';
-
 import 'package:dart_test_adapter/dart_test_adapter.dart';
 import 'package:riverpod/riverpod.dart';
+import 'package:spec_cli/src/collection.dart';
 
 import 'dart_test.dart';
 import 'dart_test_utils.dart';
 import 'groups.dart';
 import 'provider_utils.dart';
-import 'rendering.dart';
 import 'suites.dart';
 
 final $rootTestsForSuite =
     Provider.autoDispose.family<List<Test>, SuiteKey>((ref, suiteKey) {
-  final testsForSuite =
-      ref.watch($testsForSuite(suiteKey)).when<Map<TestKey, Test>>(
-            data: (res) => res,
-            error: (err, stack) => {},
-            loading: () => {},
-          );
+  final testsForSuite = ref.watch($testsForSuite(suiteKey));
 
   return testsForSuite.values
       // Tests with no groups are errored tests such as when there is a compilation error.
@@ -50,7 +43,7 @@ final $testsForGroup = Provider.autoDispose
     .family<AsyncValue<List<Test>>, GroupKey>((ref, groupKey) {
   return merge((unwrap) {
     final group = unwrap(ref.watch($group(groupKey)));
-    final testsForSuite = unwrap(ref.watch($testsForSuite(group.suiteKey)));
+    final testsForSuite = ref.watch($testsForSuite(group.suiteKey));
 
     return testsForSuite.values
         .where((test) => test.groupKey == groupKey)
@@ -59,75 +52,70 @@ final $testsForGroup = Provider.autoDispose
 }, dependencies: [$testsForSuite]);
 
 final $testsForSuite =
-    StreamProvider.family<Map<TestKey, Test>, SuiteKey>((ref, suiteKey) {
-  final controller = StreamController<Map<TestKey, Test>>();
-  controller.onListen = () => controller.add({});
-  ref.onDispose(controller.close);
+    Provider.family<Map<TestKey, Test>, SuiteKey>((ref, suiteKey) {
+  return Map.fromEntries(
+    ref
+        .watch($events)
+        .whereType<TestEventTestStart>()
+        .where((event) => event.test.suiteKey == suiteKey)
+        .where((event) => !event.test.isHidden)
+        .map((e) => MapEntry(e.test.key, e.test)),
+  );
+}, dependencies: [$events]);
 
-  final tests = <TestKey, Test>{};
+final $test = Provider.family<AsyncValue<Test>, TestKey>((ref, testKey) {
+  return ref
+      .watch($events)
+      .whereType<TestEventTestStart>()
+      .where((event) => event.test.key == testKey)
+      .map((e) => e.test)
+      .firstDataOrLoading;
+}, dependencies: [$events]);
 
-  ref
-      .watch($result)
-      .testStart()
-      .where((event) => event.test.suiteKey == suiteKey)
-      .where((event) => !event.test.isHidden)
-      .listen((event) {
-    if (!tests.containsKey(event.test.key)) {
-      tests[event.test.key] = event.test;
-      controller.add({...tests});
-    }
-  });
+final $allTests = Provider<List<Test>>((ref) {
+  return ref
+      .watch($events)
+      .whereType<TestEventTestStart>()
+      .map((e) => e.test)
+      .toList();
+}, dependencies: [$events]);
 
-  return controller.stream;
-}, dependencies: [$result]);
-
-final $test = StreamProvider.family<Test, TestKey>((ref, testKey) async* {
-  await for (final testStart in ref.watch($result).testStart()) {
-    if (testStart.test.key == testKey) {
-      yield testStart.test;
-    }
-  }
-}, dependencies: [$result]);
-
-final $allTests = StreamProvider<List<Test>>((ref) {
-  return ref.watch($result).testStart().map((event) => event.test).combined();
-}, dependencies: [$result]);
-
-final $allFailedTests = Provider<AsyncValue<List<Test>>>((ref) {
-  return merge((unwrap) {
-    return unwrap(ref.watch($allTests))
-        .where((test) => ref.watch($testStatus(test.key)) is AsyncError)
-        .toList();
-  });
+final $allFailedTests = Provider<List<Test>>((ref) {
+  return ref
+      .watch($allTests)
+      .where((test) => ref.watch($testStatus(test.key)) is AsyncError)
+      .toList();
 }, dependencies: [$allTests, $testStatus]);
 
-final $testStatus = FutureProvider.family<void, TestKey>((ref, testKey) async {
-  // No need to wait for test start event
+final $testStatus = Provider.family<AsyncValue<void>, TestKey>((ref, testKey) {
+  final events = ref.watch($events);
 
-  // will either throw or complete, allowing test status handling through "when(loading, error, data)   "
+  final error = events
+      .whereType<TestEventTestError>()
+      // TODO can we have the groupID/suiteID too?
+      .where((e) => e.testID == testKey.testID)
+      .firstOrNull;
+  if (error != null) {
+    return AsyncError(
+      error.error,
+      stackTrace: StackTrace.fromString(error.stackTrace),
+    );
+  }
 
-  await Future.any([
-    ref //
-        .watch($result)
-        .testDone()
-        .firstWhere(
-          // TODO can we have the groupID/suiteID too?
-          (e) =>
-              e.testID == testKey.testID && e.result == TestDoneStatus.success,
-        ),
-    ref
-        .watch($result)
-        .testError()
-        // TODO can we have the groupID/suiteID too?
-        .firstWhere((e) => e.testID == testKey.testID)
-        .then((e) => throw FailedTestException(e)),
-  ]);
-}, dependencies: [$result]);
+  final done = events
+      .whereType<TestEventTestDone>()
+      // TODO can we have the groupID/suiteID too?
+      .where((e) => e.testID == testKey.testID)
+      .firstOrNull;
+  if (done != null) return const AsyncData(null);
+
+  return const AsyncLoading();
+}, dependencies: [$events]);
 
 final $currentlyFailedTestsLocation =
     Provider<AsyncValue<List<FailedTestLocation>>>((ref) {
   return merge((unwrap) {
-    final failedTests = unwrap(ref.watch($allFailedTests));
+    final failedTests = ref.watch($allFailedTests);
 
     return failedTests.map((test) {
       final suite = unwrap(

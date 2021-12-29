@@ -6,7 +6,7 @@ import 'io.dart';
 final $failedTestsLocationFromPreviousRun =
     StateProvider<List<FailedTestLocation>?>((ref) => null);
 
-final $result = Provider<TestResult>(
+final $events = Provider<List<TestEvent>>(
   (ref) {
     final locations =
         ref.watch($failedTestsLocationFromPreviousRun.notifier).state;
@@ -18,12 +18,17 @@ final $result = Provider<TestResult>(
         )
         .toList();
 
-    final result = dartTest(
+    final eventsStream = dartTest(
       tests: tests,
       workdingDirectory: ref.watch($workingDirectory).path,
     );
-    ref.onDispose(result.dispose);
-    return result;
+
+    final sub = eventsStream.listen((events) {
+      ref.state = events;
+    });
+    ref.onDispose(sub.cancel);
+
+    return [];
   },
   dependencies: [
     $workingDirectory,

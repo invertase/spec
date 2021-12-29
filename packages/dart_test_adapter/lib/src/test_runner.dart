@@ -2,8 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:collection/src/iterable_extensions.dart';
-
 import 'test_protocol.dart';
 
 enum WebRenderer {
@@ -12,39 +10,39 @@ enum WebRenderer {
   html,
 }
 
-TestResult flutterTest({
+Stream<List<TestEvent>> flutterTest({
   Map<String, String>? environment,
   List<String>? arguments,
   List<String>? tests,
   String? workdingDirectory,
   // TODO(rrousselGit) expose a typed interface for CLI parameters
 }) {
-  final testProcess = Process.start(
-    'flutter',
-    [
-      'test',
-      ...?arguments,
-      '--reporter=json',
-      '--no-pub',
-      '--chain-stack-traces',
-      ...?tests,
-    ],
-    environment: environment,
-    workingDirectory: workdingDirectory,
+  return _parseTestJsonOutput(
+    () => Process.start(
+      'flutter',
+      [
+        'test',
+        ...?arguments,
+        '--reporter=json',
+        '--no-pub',
+        '--chain-stack-traces',
+        ...?tests,
+      ],
+      environment: environment,
+      workingDirectory: workdingDirectory,
+    ),
   );
-
-  return _parseTestJsonOutput(testProcess);
 }
 
-TestResult dartTest({
+Stream<List<TestEvent>> dartTest({
   Map<String, String>? environment,
   List<String>? arguments,
   List<String>? tests,
   String? workdingDirectory,
   // TODO(rrousselGit) expose a typed interface for CLI parameters
 }) {
-  final testProcess = Future(() async {
-    return Process.start(
+  return _parseTestJsonOutput(
+    () => Process.start(
       'dart',
       [
         // '--packages=${await Isolate.packageConfig}',
@@ -56,102 +54,112 @@ TestResult dartTest({
       ],
       environment: environment,
       workingDirectory: workdingDirectory,
-    );
-  });
-
-  return _parseTestJsonOutput(testProcess);
-}
-
-TestResult _parseTestJsonOutput(Future<Process> processFuture) {
-  Stream<TestEvent> getEventStream() async* {
-    final process = await processFuture;
-
-    yield* process.stdout
-        .map(utf8.decode)
-        // Sometimes a message contains multiple JSON map at once
-        // so we split the message in multiple events
-        .asyncExpand<String>((msg) async* {
-          for (final value in msg.split('\n')) {
-            final trimmedValue = value.trim();
-            if (trimmedValue.isNotEmpty) yield trimmedValue;
-          }
-        })
-        .map(json.decode)
-        .cast<Map<Object?, Object?>>()
-        .map((json) => TestEvent.fromJson(Map.from(json)));
-  }
-
-  return TestResult._(
-    processFuture,
-    _ReactiveWrapper(getEventStream()),
+    ),
   );
 }
 
-/// Wraps a Stream to allow accessing elements previously emitted and
-/// yet-to-be-emitted events at the same time.
-///
-/// This is useful for things such as finding a specific event, which could
-/// already be emitted, but may not be yet.
-class _ReactiveWrapper<Event> {
-  _ReactiveWrapper(Stream<Event> stream)
-      : _stream = stream.asBroadcastStream() {
-    _subscription = _stream.listen(_events.add);
-  }
+Stream<List<TestEvent>> _parseTestJsonOutput(
+  Future<Process> Function() process,
+) {
+  final events = process()
+      .asStream()
+      .asyncExpand((process) => process.stdout)
+      .map(utf8.decode)
+      // Sometimes a message contains multiple JSON map at once
+      // so we split the message in multiple events
+      .expand<String>((msg) sync* {
+        for (final value in msg.split('\n')) {
+          final trimmedValue = value.trim();
+          if (trimmedValue.isNotEmpty) yield trimmedValue;
+        }
+      })
+      .map(json.decode)
+      .cast<Map<Object?, Object?>>()
+      .map((json) => TestEvent.fromJson(Map.from(json)));
 
-  final _events = <Event>[];
-  final Stream<Event> _stream;
-  late final StreamSubscription<Event> _subscription;
+  final allEvents = <TestEvent>[];
+  final controller = StreamController<List<TestEvent>>();
 
-  FutureOr<T> firstWhereIs<T>() {
-    final value = _events.firstWhereOrNull((e) => e is T) as T?;
+  late StreamSubscription sub;
+  controller.onListen = () {
+    sub = events.listen((event) {
+      allEvents.add(event);
+      controller.add(allEvents.toList());
+    });
+  };
+  controller.onCancel = () {
+    sub.cancel();
+    controller.close();
+  };
 
-    if (value != null) return value;
-
-    return _stream.firstWhere((e) => e is T).then((e) => e as T);
-  }
-
-  Stream<T> whereIs<T>() async* {
-    final events = _events.whereType<T>().toList();
-    for (final event in events) yield event;
-
-    yield* _stream.where((e) => e is T).cast<T>();
-  }
-
-  Future<void> close() {
-    return _subscription.cancel();
-  }
+  return controller.stream;
 }
 
-class TestResult {
-  TestResult._(this._processFuture, this._events);
+// /// Wraps a Stream to allow accessing elements previously emitted and
+// /// yet-to-be-emitted events at the same time.
+// ///
+// /// This is useful for things such as finding a specific event, which could
+// /// already be emitted, but may not be yet.
+// class _ReactiveWrapper<Event> {
+//   _ReactiveWrapper(Stream<Event> stream)
+//       : _stream = stream.asBroadcastStream() {
+//     _subscription = _stream.listen(_events.add);
+//   }
 
-  final Future<Process> _processFuture;
-  final _ReactiveWrapper<TestEvent> _events;
+//   final _events = <Event>[];
+//   final Stream<Event> _stream;
+//   late final StreamSubscription<Event> _subscription;
 
-  Stream<TestEvent> all() => _events.whereIs<TestEvent>();
+//   FutureOr<T> firstWhereIs<T>() {
+//     final value = _events.firstWhereOrNull((e) => e is T) as T?;
 
-  FutureOr<TestEventStart> start() => _events.firstWhereIs<TestEventStart>();
-  FutureOr<TestEventDone> done() => _events.firstWhereIs<TestEventDone>();
+//     if (value != null) return value;
 
-  Future<TestEventAllSuites> allSuites() =>
-      _events.whereIs<TestEventAllSuites>().first;
+//     return _stream.firstWhere((e) => e is T).then((e) => e as T);
+//   }
 
-  Stream<TestEventSuite> suites() => _events.whereIs<TestEventSuite>();
+//   Stream<T> whereIs<T>() async* {
+//     final events = _events.whereType<T>().toList();
+//     for (final event in events) yield event;
 
-  Stream<TestEventGroup> groups() => _events.whereIs<TestEventGroup>();
+//     yield* _stream.where((e) => e is T).cast<T>();
+//   }
 
-  Stream<TestEventMessage> messages() => _events.whereIs<TestEventMessage>();
+//   Future<void> close() {
+//     return _subscription.cancel();
+//   }
+// }
 
-  Stream<TestEventTestStart> testStart() =>
-      _events.whereIs<TestEventTestStart>();
+// class TestResult {
+//   TestResult._(this._processFuture, this._events);
 
-  Stream<TestEventTestDone> testDone() => _events.whereIs<TestEventTestDone>();
+//   final Future<Process> _processFuture;
+//   final _ReactiveWrapper<TestEvent> _events;
 
-  Stream<TestEventTestError> testError() =>
-      _events.whereIs<TestEventTestError>();
+//   Stream<TestEvent> all() => _events.whereIs<TestEvent>();
 
-  Future<void> dispose() async {
-    _events.close();
-    (await _processFuture).kill();
-  }
-}
+//   FutureOr<TestEventStart> start() => _events.firstWhereIs<TestEventStart>();
+//   FutureOr<TestEventDone> done() => _events.firstWhereIs<TestEventDone>();
+
+//   Future<TestEventAllSuites> allSuites() =>
+//       _events.whereIs<TestEventAllSuites>().first;
+
+//   Stream<TestEventSuite> suites() => _events.whereIs<TestEventSuite>();
+
+//   Stream<TestEventGroup> groups() => _events.whereIs<TestEventGroup>();
+
+//   Stream<TestEventMessage> messages() => _events.whereIs<TestEventMessage>();
+
+//   Stream<TestEventTestStart> testStart() =>
+//       _events.whereIs<TestEventTestStart>();
+
+//   Stream<TestEventTestDone> testDone() => _events.whereIs<TestEventTestDone>();
+
+//   Stream<TestEventTestError> testError() =>
+//       _events.whereIs<TestEventTestError>();
+
+//   Future<void> dispose() async {
+//     _events.close();
+//     (await _processFuture).kill();
+//   }
+// }

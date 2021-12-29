@@ -1,41 +1,44 @@
 import 'package:dart_test_adapter/dart_test_adapter.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:collection/collection.dart';
-import 'package:spec_cli/src/rendering.dart';
 
+import 'collection.dart';
 import 'dart_test.dart';
 import 'dart_test_utils.dart';
 import 'groups.dart';
 import 'provider_utils.dart';
 import 'tests.dart';
 
-final $suiteCount = FutureProvider<int>((ref) async {
-  final allSuites = await ref.watch($result).allSuites();
-  return allSuites.count;
-}, dependencies: [$result]);
+final $suiteCount = Provider<AsyncValue<int>>((ref) {
+  return ref
+      .watch($events)
+      .whereType<TestEventAllSuites>()
+      .map((e) => e.count)
+      .firstDataOrLoading;
+}, dependencies: [$events]);
 
-final $suites = StreamProvider<List<Suite>>((ref) {
-  final result = ref.watch($result);
+final $suites = Provider<List<Suite>>((ref) {
+  final events = ref.watch($events);
 
-  return result
-      .suites()
-      .combined()
-      .map((event) => event.map((e) => e.suite).toList());
-}, dependencies: [$result]);
+  return events
+      .whereType<TestEventSuite>()
+      .map((event) => event.suite)
+      .toList();
+}, dependencies: [$events]);
 
-final $suite = FutureProvider.family<Suite, SuiteKey>((ref, suiteKey) async {
-  final suiteEvent = await ref
-      .watch($result)
-      .suites()
-      .firstWhere((e) => e.suite.key == suiteKey);
-
-  return suiteEvent.suite;
-}, dependencies: [$result]);
+final $suite = Provider.family<AsyncValue<Suite>, SuiteKey>((ref, suiteKey) {
+  return ref
+      .watch($events)
+      .whereType<TestEventSuite>()
+      .where((e) => e.suite.key == suiteKey)
+      .map((event) => event.suite)
+      .firstDataOrLoading;
+}, dependencies: [$events]);
 
 final $suiteStatus =
     Provider.family<AsyncValue<void>, SuiteKey>((ref, suiteKey) {
   return merge((unwrap) {
-    final tests = unwrap(ref.watch($testsForSuite(suiteKey)));
+    final tests = ref.watch($testsForSuite(suiteKey));
     final visibleTests = tests.values.where((test) => !test.isHidden).toList();
 
     /// We verify that "testIds" contains all ids that this suite is supposed

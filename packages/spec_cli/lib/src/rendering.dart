@@ -67,21 +67,15 @@ final $spinner = Provider.autoDispose<String>((ref) {
 
 final $testMessages =
     Provider.autoDispose.family<List<String>, TestKey>((ref, testKey) {
-  final result = ref.watch($result);
+  final events = ref.watch($events);
 
-  final messages = result
-      .messages()
+  return events
+      .whereType<TestEventMessage>()
       // TODO can we have the groupID/suiteID too?
       .where((e) => e.testID == testKey.testID)
-      .map((e) => e.message);
-
-  final sub = messages.listen(
-    (message) => ref.state = [...ref.state, message],
-  );
-  ref.onDispose(sub.cancel);
-
-  return [];
-}, dependencies: [$result]);
+      .map((e) => e.message)
+      .toList();
+}, dependencies: [$events]);
 
 final $testLabel =
     Provider.autoDispose.family<String?, TestKey>((ref, testKey) {
@@ -239,7 +233,7 @@ final $suiteOutput =
 final $output = Provider.autoDispose<AsyncValue<String>>((ref) {
   return merge((unwrap) {
     final suites =
-        unwrap(ref.watch($suites)).sorted((a, b) => a.path!.compareTo(b.path!));
+        ref.watch($suites).sorted((a, b) => a.path!.compareTo(b.path!));
 
     final passingSuites = suites
         .where((suite) => ref.watch($suiteStatus(suite.key)) is AsyncData)
