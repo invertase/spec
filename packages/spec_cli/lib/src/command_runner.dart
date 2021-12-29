@@ -78,16 +78,14 @@ Future<int> fest({
       (lastOutput, output) {
         output.when(
           loading: () {}, // nothing to do
-          error: (err, stack) {
-            print('Error: failed to render\n$err\n$stack');
-          },
+          error: (err, stack) => print('Error: failed to render\n$err\n$stack'),
           data: renderer.renderFrame,
         );
       },
       fireImmediately: true,
     );
 
-    final completer = Completer<int>();
+    final exitCodeCompleter = Completer<int>();
 
     if (!watch) {
       // if not in watch mode, finish the command when the test proccess completes.
@@ -102,15 +100,11 @@ Future<int> fest({
         // TODO test `success = null`
         final exitCode = doneEvent.success != false ? 0 : -1;
 
-        completer.complete(exitCode);
+        exitCodeCompleter.complete(exitCode);
       });
     }
 
-    final exitCode = await completer.future;
-    print('got exit code $exitCode');
-    await Future.delayed(Duration(seconds: 2));
-    print('done');
-    return exitCode;
+    return exitCodeCompleter.future;
   }, overrides: [
     if (workingDirectory != null)
       $workingDirectory.overrideWithValue(Directory(workingDirectory)),
