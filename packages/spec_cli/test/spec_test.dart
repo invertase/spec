@@ -1,4 +1,4 @@
-import 'package:spec_cli/src/command_runner.dart';
+import 'package:spec_cli/src/rendering.dart';
 import 'package:test/test.dart';
 
 import 'utils.dart';
@@ -593,6 +593,6 @@ void main() {
       expect(exitCode, -1);
     });
   }, overrides: [
-    TestStatus.$spinner.overrideWithValue('...'),
+    $spinner.overrideWithValue('...'),
   ]);
 }

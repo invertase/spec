@@ -1,5 +1,6 @@
 import 'package:spec_cli/src/command_runner.dart';
 import 'package:spec_cli/src/renderer.dart';
+import 'package:spec_cli/src/rendering.dart';
 import 'package:test/expect.dart';
 import 'package:test/scaffolding.dart';
 
@@ -85,6 +86,6 @@ void main() {
       );
     });
   }, overrides: [
-    TestStatus.$spinner.overrideWithValue('...'),
+    $spinner.overrideWithValue('...'),
   ]);
 }
