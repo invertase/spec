@@ -5,6 +5,20 @@ import 'utils.dart';
 
 void main() {
   groupScope('Spec', () {
+    // TODO on sigint/sigterm, report suites/tests that were not executed. Blocked by https://github.com/dart-lang/test/issues/1654
+
+    testScope(
+        'on sigint/sigterm, abort and show failures details', (ref) async {},
+        skip: true);
+
+    testScope('does not collapse passing suites if there is only one suite',
+        (ref) async {},
+        skip: true);
+
+    testScope('handles skipped tests', (ref) async {}, skip: true);
+    testScope('handles skipped tests with a reason', (ref) async {},
+        skip: true);
+
     testScope('handle errors inside setup', (ref) async {}, skip: true);
 
     testScope('handle errors inside tearDown', (ref) async {}, skip: true);
@@ -18,9 +32,11 @@ void main() {
 import 'package:test/test.dart';
 
 void main() {
+  test('root-test', () {});
+
   group('root', () {
     group('mid', () {
-      test('test', () {});
+      test('test', () => print('hello world'));
     });
     group('mid-2', () {
       test('test-2', () => throw StateError('fail'));
@@ -37,6 +53,8 @@ void main() {
     });
     test('root-test2', () {});
   });
+
+  test('root failing test', () => throw StateError('fail'));
 }
 ''',
       });
@@ -48,6 +66,7 @@ void main() {
  FAILS  test/my_test.dart
   root
    ✓ mid
+hello world
    ✕ mid
       ✕ test2
         Bad state: fail

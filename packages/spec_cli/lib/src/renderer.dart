@@ -10,6 +10,13 @@ abstract class Renderer {
   void renderFrame(String output);
 }
 
+class DebugRenderer implements Renderer {
+  @override
+  void renderFrame(String output) {
+    stdout.writeln('log:\n`\n$output\n`');
+  }
+}
+
 class FullScreenRenderer implements Renderer {
   FullScreenRenderer()
       : assert(
@@ -20,9 +27,7 @@ class FullScreenRenderer implements Renderer {
   @override
   void renderFrame(String output) {
     stdout
-      ..write(
-        '${VT100.moveCursorToTopLeft}${VT100.clearScreenFromCursorDown}',
-      )
+      ..write('${VT100.moveCursorToTopLeft}${VT100.clearScreenFromCursorDown}')
       ..writeln(output);
   }
 }
@@ -42,9 +47,12 @@ class BacktrackingRenderer implements Renderer {
   void renderFrame(String output) {
     if (_lastFrame != null) {
       final lastOutputHeight = _lastFrame!.split('\n').length;
-      stdout.write(VT100.moveCursorUp(lastOutputHeight));
+      stdout.write(
+        VT100.moveCursorUp(lastOutputHeight - 1) + VT100.moveCursorToColumn(0),
+      );
     }
-    stdout.writeln(VT100.clearScreenFromCursorDown);
+    stdout.write(VT100.clearScreenFromCursorDown);
+    stdout.write(output);
 
     _lastFrame = output;
   }

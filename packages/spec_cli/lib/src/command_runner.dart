@@ -140,26 +140,27 @@ abstract class TestStatus {
         .map((event) => event.map((e) => e.suite).toList());
   }, dependencies: [$result]);
 
-  static final $suite = FutureProvider.family<Suite, int>((ref, suiteID) async {
+  static final $suite =
+      FutureProvider.family<Suite, _SuiteKey>((ref, suiteKey) async {
     final suiteEvent = await ref
         .watch($result)
         .suites()
-        .firstWhere((e) => e.suite.id == suiteID);
+        .firstWhere((e) => e.suite.key == suiteKey);
 
     return suiteEvent.suite;
   }, dependencies: [$result]);
 
   static final $suiteStatus =
-      Provider.family<AsyncValue<void>, int>((ref, suiteID) {
+      Provider.family<AsyncValue<void>, _SuiteKey>((ref, suiteKey) {
     return _merge((unwrap) {
-      final tests = unwrap(ref.watch($testsForSuite(suiteID)));
+      final tests = unwrap(ref.watch($testsForSuite(suiteKey)));
       final visibleTests =
           tests.values.where((test) => !test.isHidden).toList();
 
       /// We verify that "testIds" contains all ids that this suite is supposed
       /// to have. In case we have yet to receive some test events.
       final hasAllVisibleIds = ref.watch(
-        $scaffoldGroup(suiteID).select(
+        $scaffoldGroup(suiteKey).select(
           (rootGroup) =>
               rootGroup.asData != null &&
               visibleTests.length == rootGroup.asData!.value.testCount,
@@ -171,8 +172,8 @@ abstract class TestStatus {
       }
 
       // any loading leads to RUNNING, even if there's an error/success
-      final hasLoading =
-          tests.keys.any((id) => ref.watch($testStatus(id)) is AsyncLoading);
+      final hasLoading = tests.keys
+          .any((testKey) => ref.watch($testStatus(testKey)) is AsyncLoading);
       if (hasLoading) unwrap(const AsyncLoading());
 
       final error = tests.keys
@@ -198,91 +199,144 @@ abstract class TestStatus {
 
   /** Groups */
 
-  static final $group = FutureProvider.family<Group, int>((ref, groupID) async {
+  static final $group =
+      FutureProvider.family<Group, _GroupKey>((ref, groupKey) async {
     final groupEvent = await ref
-        .watch($result)
+        .watch($result) //
         .groups()
-        .firstWhere((e) => e.group.id == groupID);
+        .firstWhere((e) => e.group.key == groupKey);
 
     return groupEvent.group;
   }, dependencies: [$result]);
 
+  static final $groupName = Provider.autoDispose
+      .family<AsyncValue<String>, _GroupKey>((ref, groupKey) {
+    return _merge((unwrap) {
+      final group = unwrap(ref.watch($group(groupKey)));
+      final parentGroup = group.parentKey == null
+          ? null
+          : unwrap(ref.watch($group(group.parentKey!)));
+
+      if (parentGroup == null || parentGroup.parentID == null) {
+        return group.name;
+      }
+
+      // group names are the concatenation of their name plus their parent's name
+      // and a whitespace. So to determine the true group name, we're removing those
+      return group.name.substring(parentGroup.name.length + 1);
+    });
+  }, dependencies: [$group]);
+
   /// The virtual top-most group added by the test package.
   static final $scaffoldGroup =
-      FutureProvider.family<Group, int>((ref, suiteID) {
+      FutureProvider.family<Group, _SuiteKey>((ref, suiteKey) {
     return ref
         .watch($result)
         .groups()
-        .firstWhere((e) => e.group.parentID == null)
+        .firstWhere(
+            (e) => e.group.parentID == null && e.group.suiteKey == suiteKey)
         .then((e) => e.group);
   }, dependencies: [$result]);
 
   /// User-defined groups at the root of a suite (excluding [$scaffoldGroup])
-  static final $rootGroupsForSuite = StreamProvider.autoDispose
-      .family<List<Group>, int>((ref, suiteID) async* {
-    final scaffoldGroup = await ref.watch($scaffoldGroup(suiteID).future);
+  static final $rootGroupsForSuite =
+      Provider.family<List<Group>, _SuiteKey>((ref, suiteKey) {
+    ref.watch($scaffoldGroup(suiteKey).future).then((scaffoldGroup) {
+      final rootGroups = ref
+          .watch($result)
+          .groups()
+          .where((e) => e.group.parentKey == scaffoldGroup.key)
+          .map((e) => e.group)
+          .combined();
 
-    yield* ref
-        .watch($result)
-        .groups()
-        .where((e) => e.group.parentID == scaffoldGroup)
-        .map((e) => e.group)
-        .combined();
+      final sub = rootGroups.listen((rootGroups) => ref.state = rootGroups);
+      ref.onDispose(sub.cancel);
+    });
+
+    return [];
   }, dependencies: [$scaffoldGroup, $result]);
 
   static final $childrenGroupsForGroup =
-      StreamProvider.autoDispose.family<List<Group>, int>((ref, groupID) {
-    return ref
+      Provider.family<List<Group>, _GroupKey>((ref, groupKey) {
+    final children = ref
         .watch($result)
         .groups()
-        .where((e) => e.group.parentID == groupID)
+        .where((e) => e.group.parentKey == groupKey)
         .map((e) => e.group)
         .combined();
+
+    final sub = children.listen((children) => ref.state = children);
+    ref.onDispose(sub.cancel);
+
+    return [];
   }, dependencies: [$result]);
 
   /** Tests */
 
   static final $rootTestsForSuite =
-      Provider.autoDispose.family<AsyncValue<List<Test>>, int>((ref, suiteID) {
-    return _merge((unwrap) {
-      final testsForSuite = unwrap(ref.watch($testsForSuite(suiteID)));
+      Provider.autoDispose.family<List<Test>, _SuiteKey>((ref, suiteKey) {
+    final testsForSuite =
+        ref.watch($testsForSuite(suiteKey)).when<Map<_TestKey, Test>>(
+              data: (res) => res,
+              error: (err, stack) => {},
+              loading: () => {},
+            );
 
-      return testsForSuite.values
-          // Tests with no groups are errored tests such as when there is a compilation error.
-          // Tests with a single group are user-defined tests, since that group is added implicitly
-          .where((test) => test.groupIDs.length < 2)
-          .toList();
-    });
+    return testsForSuite.values
+        // Tests with no groups are errored tests such as when there is a compilation error.
+        // Tests with a single group are user-defined tests, since that group is added implicitly
+        .where((test) => test.groupIDs.length < 2)
+        .toList();
   }, dependencies: [$testsForSuite]);
 
-  static final $testsForGroup =
-      Provider.autoDispose.family<AsyncValue<List<Test>>, _GroupID>((ref, id) {
+  static final $testName =
+      Provider.autoDispose.family<AsyncValue<String>, _TestKey>((ref, testKey) {
     return _merge((unwrap) {
-      final testsForSuite = unwrap(ref.watch($testsForSuite(id.suiteID)));
+      final test = unwrap(ref.watch($test(testKey)));
+      final parentGroup = test.groupKey != null
+          ? unwrap(ref.watch($group(test.groupKey!)))
+          : null;
+
+      // Tests without groups or tests where their group is the [$scaffoldGroup]
+      // have their correct name
+      if (parentGroup == null || parentGroup.parentID == null) {
+        return test.name;
+      }
+
+      // test names are the concatenation of their name plus their parent's name
+      // and a whitespace. So to determine the true group name, we're removing those
+      return test.name.substring(parentGroup.name.length + 1);
+    });
+  }, dependencies: [$test]);
+
+  static final $testsForGroup = Provider.autoDispose
+      .family<AsyncValue<List<Test>>, _GroupKey>((ref, groupKey) {
+    return _merge((unwrap) {
+      final group = unwrap(ref.watch($group(groupKey)));
+      final testsForSuite = unwrap(ref.watch($testsForSuite(group.suiteKey)));
 
       return testsForSuite.values
-          .where((test) =>
-              test.groupIDs.isNotEmpty && test.groupIDs.last == id.groupID)
+          .where((test) => test.groupKey == groupKey)
           .toList();
     });
   }, dependencies: [$testsForSuite]);
 
   static final $testsForSuite =
-      StreamProvider.family<Map<int, Test>, int>((ref, suiteID) {
-    final controller = StreamController<Map<int, Test>>();
+      StreamProvider.family<Map<_TestKey, Test>, _SuiteKey>((ref, suiteKey) {
+    final controller = StreamController<Map<_TestKey, Test>>();
     controller.onListen = () => controller.add({});
     ref.onDispose(controller.close);
 
-    final tests = <int, Test>{};
+    final tests = <_TestKey, Test>{};
 
     ref
         .watch($result)
         .testStart()
-        .where((event) => event.test.suiteID == suiteID)
+        .where((event) => event.test.suiteKey == suiteKey)
         .where((event) => !event.test.isHidden)
         .listen((event) {
-      if (!tests.containsKey(event.test.id)) {
-        tests[event.test.id] = event.test;
+      if (!tests.containsKey(event.test.key)) {
+        tests[event.test.key] = event.test;
         controller.add({...tests});
       }
     });
@@ -290,9 +344,12 @@ abstract class TestStatus {
     return controller.stream;
   }, dependencies: [$result]);
 
-  static final $test = StreamProvider.family<Test, int>((ref, testID) async* {
+  static final $test =
+      StreamProvider.family<Test, _TestKey>((ref, testKey) async* {
     await for (final testStart in ref.watch($result).testStart()) {
-      if (testStart.test.id == testID) yield testStart.test;
+      if (testStart.test.key == testKey) {
+        yield testStart.test;
+      }
     }
   }, dependencies: [$result]);
 
@@ -303,13 +360,13 @@ abstract class TestStatus {
   static final $allFailedTests = Provider<AsyncValue<List<Test>>>((ref) {
     return _merge((unwrap) {
       return unwrap(ref.watch($allTests))
-          .where((test) => ref.watch($testStatus(test.id)) is AsyncError)
+          .where((test) => ref.watch($testStatus(test.key)) is AsyncError)
           .toList();
     });
   }, dependencies: [$allTests, $testStatus]);
 
   static final $testStatus =
-      FutureProvider.family<void, int>((ref, testID) async {
+      FutureProvider.family<void, _TestKey>((ref, testKey) async {
     // No need to wait for test start event
 
     // will either throw or complete, allowing test status handling through "when(loading, error, data)   "
@@ -319,12 +376,16 @@ abstract class TestStatus {
           .watch($result)
           .testDone()
           .firstWhere(
-            (e) => e.testID == testID && e.result == TestDoneStatus.success,
+            // TODO can we have the groupID/suiteID too?
+            (e) =>
+                e.testID == testKey.testID &&
+                e.result == TestDoneStatus.success,
           ),
       ref
           .watch($result)
           .testError()
-          .firstWhere((e) => e.testID == testID)
+          // TODO can we have the groupID/suiteID too?
+          .firstWhere((e) => e.testID == testKey.testID)
           .then((e) => throw FailedTestException(e)),
     ]);
   }, dependencies: [$result]);
@@ -336,7 +397,7 @@ abstract class TestStatus {
 
       return failedTests.map((test) {
         final suite = unwrap(
-          ref.watch($suite(test.suiteID)),
+          ref.watch($suite(test.suiteKey)),
         );
 
         return _FailedTestLocation(
@@ -350,10 +411,10 @@ abstract class TestStatus {
   /** Output */
 
   static final $suiteOutputLabel =
-      Provider.family<AsyncValue<String>, int>((ref, suiteID) {
+      Provider.family<AsyncValue<String>, _SuiteKey>((ref, suiteKey) {
     return _merge((unwrap) {
-      final suite = unwrap(ref.watch($suite(suiteID)));
-      final suiteStatus = ref.watch($suiteStatus(suiteID));
+      final suite = unwrap(ref.watch($suite(suiteKey)));
+      final suiteStatus = ref.watch($suiteStatus(suiteKey));
 
       return [
         suiteStatus.map(
@@ -400,15 +461,18 @@ abstract class TestStatus {
     ref.onDispose(inverval.listen((_) {}).cancel);
 
     return charForOffset(offset);
+
+    return '○';
   });
 
   static final $testMessages =
-      Provider.autoDispose.family<List<String>, int>((ref, testID) {
+      Provider.autoDispose.family<List<String>, _TestKey>((ref, testKey) {
     final result = ref.watch($result);
 
     final messages = result
         .messages()
-        .where((e) => e.testID == testID)
+        // TODO can we have the groupID/suiteID too?
+        .where((e) => e.testID == testKey.testID)
         .map((e) => e.message);
 
     final sub = messages.listen(
@@ -420,11 +484,11 @@ abstract class TestStatus {
   }, dependencies: [$result]);
 
   static final $testsOutputLabel =
-      Provider.autoDispose.family<AsyncValue<String>, int>((ref, testID) {
+      Provider.autoDispose.family<AsyncValue<String>, _TestKey>((ref, testKey) {
     return _merge((unwrap) {
-      final test = unwrap(ref.watch($test(testID)));
-
-      final status = ref.watch($testStatus(testID));
+      final test = unwrap(ref.watch($test(testKey)));
+      final name = unwrap(ref.watch($testName(testKey)));
+      final status = ref.watch($testStatus(testKey));
 
       var result = '';
 
@@ -432,13 +496,13 @@ abstract class TestStatus {
         // Tests with a null URL are non-user-defined tests (such as setup/teardown).
         // They can fail, but we don't want to show their name.
         result = status.when(
-          data: (data) => '  ${'✓'.green} ${test.name}',
-          error: (err, stack) => '  ${'✕'.red} ${test.name}',
-          loading: () => '  ${ref.watch($spinner)} ${test.name}',
+          data: (data) => '  ${'✓'.green} ${name}',
+          error: (err, stack) => '  ${'✕'.red} ${name}',
+          loading: () => '  ${ref.watch($spinner)} ${name}',
         );
       }
 
-      final messages = ref.watch($testMessages(testID));
+      final messages = ref.watch($testMessages(testKey));
       if (messages.isNotEmpty) {
         if (result.isNotEmpty) result += '\n';
         result += messages.join('\n');
@@ -460,57 +524,81 @@ ${stackTrace.trim().multilinePadLeft(4)}''';
         orElse: () => result,
       );
     });
-  }, dependencies: [$test, $testStatus, $spinner]);
+  }, dependencies: [$test, $testStatus, $spinner, $testName]);
 
-  static final $suiteTestsOutputLabels =
-      Provider.autoDispose.family<AsyncValue<String>, int>((ref, suiteID) {
+  static final AutoDisposeProviderFamily<AsyncValue<String>, _GroupKey>
+      $groupOutput = Provider.autoDispose.family<AsyncValue<String>, _GroupKey>(
+          (ref, groupKey) {
     return _merge((unwrap) {
-      final tests = unwrap(ref.watch($testsForSuite(suiteID)));
+      final label = unwrap(ref.watch($groupName(groupKey)));
+      final tests = unwrap(ref.watch($testsForGroup(groupKey)));
+      final childrenGroups = ref.watch($childrenGroupsForGroup(groupKey));
 
-      final loadingTestLabels = tests.keys
-          .where((id) => ref.watch($testStatus(id)) is AsyncLoading)
-          .map((id) => ref.watch($testsOutputLabel(id)).asData?.value)
-          .where((label) => label != null)
+      final testContent = tests
+          .sortedByStatus(ref)
+          .map((test) => ref.watch($testsOutputLabel(test.key)).asData?.value)
+          .whereNotNull()
           .join('\n');
-      final failingTestLabels = tests.keys
-          .where((id) => ref.watch($testStatus(id)) is AsyncError)
-          .map((id) => ref.watch($testsOutputLabel(id)).asData?.value)
-          .where((label) => label != null)
-          .join('\n');
-      final successTestLabels = tests.keys
-          .where((id) => ref.watch($testStatus(id)) is AsyncData)
-          .map((id) => ref.watch($testsOutputLabel(id)).asData?.value)
-          .where((label) => label != null)
+
+      final childrenGroupsContent = childrenGroups
+          .map((group) => ref.watch($groupOutput(group.key)).asData?.value)
+          .whereNotNull()
           .join('\n');
 
       return [
-        if (successTestLabels.isNotEmpty) successTestLabels,
-        if (loadingTestLabels.isNotEmpty) loadingTestLabels,
-        if (failingTestLabels.isNotEmpty) failingTestLabels,
+        label,
+        if (testContent.isNotEmpty) testContent,
+        if (childrenGroupsContent.isNotEmpty) childrenGroupsContent,
       ].join('\n');
     });
-  }, dependencies: [$testsForSuite, $testStatus, $testsOutputLabel]);
+  }, dependencies: [$groupName]);
 
-  static final $suiteOutput =
-      Provider.autoDispose.family<AsyncValue<String>, int>((ref, suiteID) {
+  static final $suiteOutput = Provider.autoDispose
+      .family<AsyncValue<String>, _SuiteKey>((ref, suiteKey) {
     return _merge((unwrap) {
-      final suiteStatus = ref.watch($suiteStatus(suiteID));
-      final showTests = suiteStatus.map(
+      final suiteStatus = ref.watch($suiteStatus(suiteKey));
+      final showContent = suiteStatus.map(
         data: (_) => false,
         error: (_) => true,
         loading: (_) => true,
       );
 
-      final testLabels = showTests
-          ? unwrap(ref.watch($suiteTestsOutputLabels(suiteID)))
+      final rootTestsOutput = showContent
+          ? ref
+              .watch($rootTestsForSuite(suiteKey))
+              .sortedByStatus(ref)
+              .map((test) =>
+                  ref.watch($testsOutputLabel(test.key)).asData?.value)
+              .whereNotNull()
+              .join('\n')
           : null;
 
-      return [
-        unwrap(ref.watch($suiteOutputLabel(suiteID))),
-        if (testLabels != null && testLabels.isNotEmpty) testLabels,
+      final rootGroupsOutput = showContent
+          ? ref
+              .watch($rootGroupsForSuite(suiteKey))
+              .map((group) => ref.watch($groupOutput(group.key)).asData?.value)
+              .whereNotNull()
+              .join('\n')
+          : null;
+
+      final res = [
+        unwrap(ref.watch($suiteOutputLabel(suiteKey))),
+        if (rootTestsOutput != null && rootTestsOutput.isNotEmpty)
+          rootTestsOutput,
+        if (rootGroupsOutput != null && rootGroupsOutput.isNotEmpty)
+          rootGroupsOutput,
       ].join('\n');
+      return res;
     });
-  }, dependencies: [$suiteStatus, $suiteOutputLabel, $suiteTestsOutputLabels]);
+  }, dependencies: [
+    $suiteStatus,
+    $testStatus,
+    $rootGroupsForSuite,
+    $groupOutput,
+    $testsOutputLabel,
+    $suiteOutputLabel,
+    $rootTestsForSuite,
+  ]);
 
   static final $output = Provider.autoDispose<AsyncValue<String>>((ref) {
     return _merge((unwrap) {
@@ -518,16 +606,16 @@ ${stackTrace.trim().multilinePadLeft(4)}''';
           .sorted((a, b) => a.path!.compareTo(b.path!));
 
       final passingSuites = suites
-          .where((suite) => ref.watch($suiteStatus(suite.id)) is AsyncData)
-          .map((suite) => unwrap(ref.watch($suiteOutput(suite.id))))
+          .where((suite) => ref.watch($suiteStatus(suite.key)) is AsyncData)
+          .map((suite) => unwrap(ref.watch($suiteOutput(suite.key))))
           .join('\n');
       final failingSuites = suites
-          .where((suite) => ref.watch($suiteStatus(suite.id)) is AsyncError)
-          .map((suite) => unwrap(ref.watch($suiteOutput(suite.id))))
+          .where((suite) => ref.watch($suiteStatus(suite.key)) is AsyncError)
+          .map((suite) => unwrap(ref.watch($suiteOutput(suite.key))))
           .join('\n');
       final loadingSuites = suites
-          .where((suite) => ref.watch($suiteStatus(suite.id)) is AsyncLoading)
-          .map((suite) => unwrap(ref.watch($suiteOutput(suite.id))))
+          .where((suite) => ref.watch($suiteStatus(suite.key)) is AsyncLoading)
+          .map((suite) => unwrap(ref.watch($suiteOutput(suite.key))))
           .join('\n');
 
       return [
@@ -541,27 +629,6 @@ ${stackTrace.trim().multilinePadLeft(4)}''';
     $suiteOutput,
     $suiteStatus,
   ]);
-}
-
-@immutable
-class _GroupID {
-  const _GroupID({
-    required this.groupID,
-    required this.suiteID,
-  });
-
-  final int groupID;
-  final int suiteID;
-
-  @override
-  bool operator ==(Object other) =>
-      other is _GroupID &&
-      other.runtimeType == runtimeType &&
-      other.groupID == groupID &&
-      other.suiteID == suiteID;
-
-  @override
-  int get hashCode => Object.hash(runtimeType, groupID, suiteID);
 }
 
 extension on String {
@@ -693,6 +760,9 @@ Future<int> fest({
     }
 
     final exitCode = await completer.future;
+    print('got exit code $exitCode');
+    await Future.delayed(Duration(seconds: 2));
+    print('done');
     return exitCode;
   }, overrides: [
     if (workingDirectory != null)
@@ -700,8 +770,111 @@ Future<int> fest({
   ]);
 }
 
+@immutable
+class _TestKey {
+  _TestKey({
+    required this.testID,
+    required this.groupID,
+    required this.suiteID,
+  });
+
+  final int testID;
+  final int? groupID;
+  final int suiteID;
+
+  @override
+  bool operator ==(Object other) =>
+      other is _TestKey &&
+      other.runtimeType == runtimeType &&
+      other.testID == testID &&
+      other.groupID == groupID &&
+      other.suiteID == suiteID;
+
+  @override
+  int get hashCode => Object.hash(runtimeType, testID, suiteID, groupID);
+}
+
+@immutable
+class _GroupKey {
+  _GroupKey({
+    required this.groupID,
+    required this.suiteID,
+  });
+
+  final int groupID;
+  final int suiteID;
+
+  @override
+  bool operator ==(Object other) =>
+      other is _GroupKey &&
+      other.runtimeType == runtimeType &&
+      other.groupID == groupID &&
+      other.suiteID == suiteID;
+
+  @override
+  int get hashCode => Object.hash(runtimeType, suiteID, groupID);
+}
+
+@immutable
+class _SuiteKey {
+  _SuiteKey({required this.suiteID});
+
+  final int suiteID;
+
+  @override
+  bool operator ==(Object other) =>
+      other is _SuiteKey &&
+      other.runtimeType == runtimeType &&
+      other.suiteID == suiteID;
+
+  @override
+  int get hashCode => Object.hash(runtimeType, suiteID);
+}
+
 extension on Test {
   // when "url" is null, it means that this is not a user-defined test
   // and is instead a setup/tearOff/.., so it doesn't count
   bool get isHidden => url == null;
+
+  _TestKey get key => _TestKey(
+        testID: id,
+        groupID: groupIDs.isEmpty ? null : groupIDs.last,
+        suiteID: suiteID,
+      );
+
+  _GroupKey? get groupKey => groupIDs.isEmpty
+      ? null
+      : _GroupKey(suiteID: suiteID, groupID: groupIDs.last);
+
+  _SuiteKey get suiteKey => _SuiteKey(suiteID: suiteID);
+}
+
+extension on Group {
+  _GroupKey get key => _GroupKey(
+        groupID: id,
+        suiteID: suiteID,
+      );
+
+  _GroupKey? get parentKey =>
+      parentID == null ? null : _GroupKey(groupID: parentID!, suiteID: suiteID);
+
+  _SuiteKey get suiteKey => _SuiteKey(suiteID: suiteID);
+}
+
+extension on Suite {
+  _SuiteKey get key => _SuiteKey(
+        suiteID: id,
+      );
+}
+
+extension on List<Test> {
+  List<Test> sortedByStatus(Ref ref) {
+    return sortedBy<num>((test) {
+      return ref.watch(TestStatus.$testStatus(test.key)).map(
+            data: (_) => 0,
+            loading: (_) => 1,
+            error: (_) => 2,
+          );
+    });
+  }
 }

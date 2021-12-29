@@ -6,13 +6,11 @@ import 'package:test/scaffolding.dart';
 import 'utils.dart';
 
 void main() {
-  late TestRenderer renderer;
-
-  setUp(() => testRenderer = rendererOverride = renderer = TestRenderer());
-  tearDown(() => rendererOverride = null);
-
   groupScope('Testing utilities', () {
     testScope('createProject works', (ref) async {
+      final renderer = rendererOverride = TestRenderer();
+      addTearDown(() => rendererOverride = null);
+
       final dir = await createProject([
         PackageInfo(
           name: 'a',

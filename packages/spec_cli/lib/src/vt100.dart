@@ -8,4 +8,8 @@ abstract class VT100 {
   static String moveCursorUp(int lines) {
     return '${VT100.ESC}[${lines}A';
   }
+
+  static String moveCursorToColumn(int column) {
+    return '${VT100.ESC}[${column}G';
+  }
 }
