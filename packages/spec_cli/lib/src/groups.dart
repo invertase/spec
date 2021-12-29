@@ -23,11 +23,13 @@ final AutoDisposeProviderFamily<AsyncValue<int>, GroupKey> $groupDepth =
         ? unwrap(ref.watch($group(group.parentKey!)))
         : null;
 
-    if (parent == null || parent.parentID == null) return 0;
+    if (parent == null || parent.parentID == null) {
+      return 0;
+    }
 
     return unwrap(ref.watch($groupDepth(group.parentKey!))) + 1;
   });
-});
+}, dependencies: [$group]);
 
 final $groupName =
     Provider.autoDispose.family<AsyncValue<String>, GroupKey>((ref, groupKey) {

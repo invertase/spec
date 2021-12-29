@@ -127,7 +127,6 @@ final AutoDisposeProviderFamily<AsyncValue<String>, GroupKey> $groupOutput =
     Provider.autoDispose.family<AsyncValue<String>, GroupKey>((ref, groupKey) {
   return merge((unwrap) {
     final groupDepth = unwrap(ref.watch($groupDepth(groupKey)));
-
     final label = unwrap(ref.watch($groupName(groupKey)));
     final tests = unwrap(ref.watch($testsForGroup(groupKey)));
     final childrenGroups = ref.watch($childrenGroupsForGroup(groupKey));
@@ -151,12 +150,20 @@ final AutoDisposeProviderFamily<AsyncValue<String>, GroupKey> $groupOutput =
         .join('\n');
 
     return [
-      label.multilinePadLeft(groupDepth * 2),
+      label.multilinePadLeft(groupDepth * 2 + 2),
       if (testContent.isNotEmpty) testContent,
       if (childrenGroupsContent.isNotEmpty) childrenGroupsContent,
     ].join('\n');
   });
-}, dependencies: [$groupName, $groupDepth]);
+}, dependencies: [
+  $groupName,
+  $groupDepth,
+  $testsForGroup,
+  $testError,
+  $testLabel,
+  $testMessages,
+  $childrenGroupsForGroup,
+]);
 
 String? _renderTest({
   required List<String> messages,
@@ -169,7 +176,7 @@ String? _renderTest({
   error = error?.multilinePadLeft(depth * 2 + 4);
 
   return [
-    label?.multilinePadLeft(depth * 2 + 2),
+    if (label != null) label.multilinePadLeft(depth * 2 + 2),
     ...messages, // messages are voluntarily not indented
     if (error != null)
       if (messages.isNotEmpty) '\n$error' else error,

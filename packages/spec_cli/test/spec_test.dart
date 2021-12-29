@@ -60,25 +60,31 @@ void main() {
       });
 
       expect(
-        testRenderer!.frames,
-        framesMatch(
-          '''
- FAILS  test/my_test.dart
+        testRenderer!.frames.last,
+        '''
+ FAIL  test/my_test.dart
+  ✓ root-test
+  ✕ root failing test
+    Bad state: fail
+    test/my_test.dart 26:35  main.<fn>
   root
-   ✓ mid
+    ✓ root-test
+    mid
+      ✓ test
 hello world
-   ✕ mid
-      ✕ test2
+    mid-2
+      ✕ test-2
         Bad state: fail
-        test/my_test.dart 9:28  main.<fn>
+        test/my_test.dart 11:28  main.<fn>.<fn>.<fn>
   root2
-   ✓ mid2
-   ✕ mid2-2
+    ✓ root-test2
+    mid2
+      ✓ test2
+    mid2-2
       ✕ test2-2
         Bad state: fail
-        test/my_test.dart 19:29  main.<fn>
+        test/my_test.dart 21:29  main.<fn>.<fn>.<fn>
 ''',
-        ),
       );
 
       expect(exitCode, -1);
