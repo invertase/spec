@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 
 import 'package:cli_util/cli_logging.dart';
 
@@ -32,6 +33,12 @@ class FullScreenRenderer implements Renderer {
   }
 }
 
+int computeOutputHeight(String output, {required int terminalWidth}) {
+  return output.split('\n').fold(0, (acc, line) {
+    return acc + max(1, (line.length / terminalWidth).ceil());
+  });
+}
+
 /// A [Renderer] that, when a new frame is drawn, will clear previously rendered
 /// content – without touching to the output of previously executed commands.
 class BacktrackingRenderer implements Renderer {
@@ -46,7 +53,10 @@ class BacktrackingRenderer implements Renderer {
   @override
   void renderFrame(String output) {
     if (_lastFrame != null) {
-      final lastOutputHeight = _lastFrame!.split('\n').length;
+      final lastOutputHeight = computeOutputHeight(
+        _lastFrame!,
+        terminalWidth: stdout.terminalColumns,
+      );
       stdout.write(
         VT100.moveCursorUp(lastOutputHeight - 1) + VT100.moveCursorToColumn(0),
       );
