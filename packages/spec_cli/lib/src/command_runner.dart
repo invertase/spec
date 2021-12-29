@@ -494,9 +494,9 @@ abstract class TestStatus {
         // Tests with a null URL are non-user-defined tests (such as setup/teardown).
         // They can fail, but we don't want to show their name.
         return status.when(
-          data: (data) => '  ${'✓'.green} ${name}',
-          error: (err, stack) => '  ${'✕'.red} ${name}',
-          loading: () => '  ${ref.watch($spinner)} ${name}',
+          data: (data) => '${'✓'.green} ${name}',
+          error: (err, stack) => '${'✕'.red} ${name}',
+          loading: () => '${ref.watch($spinner)} ${name}',
         );
       }
 
@@ -517,8 +517,8 @@ abstract class TestStatus {
             : stack.toString();
 
         return '''
-${error.toString().multilinePadLeft(4)}
-${stackTrace.trim().multilinePadLeft(4)}''';
+${error.toString()}
+${stackTrace.trim()}''';
       },
     );
   }, dependencies: [$test, $testStatus, $spinner, $testName]);
@@ -533,7 +533,14 @@ ${stackTrace.trim().multilinePadLeft(4)}''';
 
       final testContent = tests
           .sortedByStatus(ref)
-          .map((test) => ref.watch($testLabel(test.key)))
+          .map((test) {
+            return _renderTest(
+              messages: ref.watch($testMessages(test.key)),
+              error: ref.watch($testError(test.key)),
+              label: ref.watch($testLabel(test.key)),
+              depth: 0,
+            );
+          })
           .whereNotNull()
           .join('\n');
 
@@ -550,6 +557,24 @@ ${stackTrace.trim().multilinePadLeft(4)}''';
     });
   }, dependencies: [$groupName]);
 
+  static String? _renderTest({
+    required List<String> messages,
+    required String? error,
+    required String? label,
+    required int depth,
+  }) {
+    if (messages.isEmpty && error == null && label == null) return null;
+
+    error = error?.multilinePadLeft(depth * 2 + 4);
+
+    return [
+      label?.multilinePadLeft(depth * 2 + 2),
+      ...messages, // messages are voluntarily not indented
+      if (error != null)
+        if (messages.isNotEmpty) '\n$error' else error,
+    ].join('\n');
+  }
+
   static final $suiteOutput = Provider.autoDispose
       .family<AsyncValue<String>, _SuiteKey>((ref, suiteKey) {
     return _merge((unwrap) {
@@ -564,17 +589,13 @@ ${stackTrace.trim().multilinePadLeft(4)}''';
           ? ref
               .watch($rootTestsForSuite(suiteKey))
               .sortedByStatus(ref)
-              .expand((test) {
-                final messages = ref.watch($testMessages(test.key));
-                final error = ref.watch($testError(test.key));
-                return [
-                  ref.watch($testLabel(test.key)),
-                  ...messages,
-                  if (messages.isNotEmpty && error != null)
-                    '\n$error'
-                  else
-                    error,
-                ];
+              .map((test) {
+                return _renderTest(
+                  messages: ref.watch($testMessages(test.key)),
+                  error: ref.watch($testError(test.key)),
+                  label: ref.watch($testLabel(test.key)),
+                  depth: 0,
+                );
               })
               .whereNotNull()
               .join('\n')
