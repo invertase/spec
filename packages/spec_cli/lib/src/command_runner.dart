@@ -483,47 +483,44 @@ abstract class TestStatus {
     return [];
   }, dependencies: [$result]);
 
-  static final $testOutputLabel =
-      Provider.autoDispose.family<AsyncValue<String>, _TestKey>((ref, testKey) {
-    return _merge((unwrap) {
+  static final $testLabel =
+      Provider.autoDispose.family<String?, _TestKey>((ref, testKey) {
+    return _merge<String?>((unwrap) {
       final test = unwrap(ref.watch($test(testKey)));
       final name = unwrap(ref.watch($testName(testKey)));
       final status = ref.watch($testStatus(testKey));
 
-      var result = '';
-
       if (test.url != null) {
         // Tests with a null URL are non-user-defined tests (such as setup/teardown).
         // They can fail, but we don't want to show their name.
-        result = status.when(
+        return status.when(
           data: (data) => '  ${'✓'.green} ${name}',
           error: (err, stack) => '  ${'✕'.red} ${name}',
           loading: () => '  ${ref.watch($spinner)} ${name}',
         );
       }
 
-      final messages = ref.watch($testMessages(testKey));
-      if (messages.isNotEmpty) {
-        if (result.isNotEmpty) result += '\n';
-        result += messages.join('\n');
-      }
+      return null;
+    }).whenOrNull<String?>(data: (data) => data);
+  }, dependencies: [$test, $testStatus, $spinner, $testName]);
 
-      return status.maybeWhen(
-        error: (err, stack) {
-          final error = err is FailedTestException ? err.testError.error : err;
+  static final $testError =
+      Provider.autoDispose.family<String?, _TestKey>((ref, testKey) {
+    final status = ref.watch($testStatus(testKey));
 
-          final stackTrace = err is FailedTestException
-              ? err.testError.stackTrace
-              : stack.toString();
+    return status.whenOrNull<String?>(
+      error: (err, stack) {
+        final error = err is FailedTestException ? err.testError.error : err;
 
-          return '''
-$result${messages.isNotEmpty ? '\n' : ''}
+        final stackTrace = err is FailedTestException
+            ? err.testError.stackTrace
+            : stack.toString();
+
+        return '''
 ${error.toString().multilinePadLeft(4)}
 ${stackTrace.trim().multilinePadLeft(4)}''';
-        },
-        orElse: () => result,
-      );
-    });
+      },
+    );
   }, dependencies: [$test, $testStatus, $spinner, $testName]);
 
   static final AutoDisposeProviderFamily<AsyncValue<String>, _GroupKey>
@@ -536,7 +533,7 @@ ${stackTrace.trim().multilinePadLeft(4)}''';
 
       final testContent = tests
           .sortedByStatus(ref)
-          .map((test) => ref.watch($testOutputLabel(test.key)).asData?.value)
+          .map((test) => ref.watch($testLabel(test.key)))
           .whereNotNull()
           .join('\n');
 
@@ -567,8 +564,18 @@ ${stackTrace.trim().multilinePadLeft(4)}''';
           ? ref
               .watch($rootTestsForSuite(suiteKey))
               .sortedByStatus(ref)
-              .map(
-                  (test) => ref.watch($testOutputLabel(test.key)).asData?.value)
+              .expand((test) {
+                final messages = ref.watch($testMessages(test.key));
+                final error = ref.watch($testError(test.key));
+                return [
+                  ref.watch($testLabel(test.key)),
+                  ...messages,
+                  if (messages.isNotEmpty && error != null)
+                    '\n$error'
+                  else
+                    error,
+                ];
+              })
               .whereNotNull()
               .join('\n')
           : null;
@@ -595,7 +602,7 @@ ${stackTrace.trim().multilinePadLeft(4)}''';
     $testStatus,
     $rootGroupsForSuite,
     $groupOutput,
-    $testOutputLabel,
+    $testLabel,
     $suiteOutputLabel,
     $rootTestsForSuite,
   ]);
