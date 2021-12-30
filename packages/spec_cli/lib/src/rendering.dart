@@ -110,6 +110,8 @@ final $testLabel =
 
 final $testError =
     Provider.autoDispose.family<String?, TestKey>((ref, testKey) {
+  if (!ref.watch($hasExitCode)) return null;
+
   final status = ref.watch($testStatus(testKey));
 
   return status.whenOrNull<String?>(
@@ -119,7 +121,7 @@ $err
 ${stack.trim()}''';
     },
   );
-}, dependencies: [$test, $testStatus, $spinner, $testName]);
+}, dependencies: [$test, $testStatus, $spinner, $testName, $hasExitCode]);
 
 final AutoDisposeProviderFamily<AsyncValue<String?>, GroupKey> $groupOutput =
     Provider.autoDispose.family<AsyncValue<String?>, GroupKey>((ref, groupKey) {
@@ -133,7 +135,8 @@ final AutoDisposeProviderFamily<AsyncValue<String?>, GroupKey> $groupOutput =
         .sortedByStatus(ref)
         .map((test) {
           return _renderTest(
-            onlyShowErrors: ref.watch($hasExitCode),
+            status: ref.watch($testStatus(test.key)),
+            hasExitCode: ref.watch($hasExitCode),
             messages: ref.watch($testMessages(test.key)),
             error: ref.watch($testError(test.key)),
             label: ref.watch($testLabel(test.key)),
@@ -162,27 +165,30 @@ final AutoDisposeProviderFamily<AsyncValue<String?>, GroupKey> $groupOutput =
   $groupDepth,
   $testsForGroup,
   $testError,
+  $testStatus,
   $testLabel,
   $testMessages,
   $childrenGroupsForGroup,
 ]);
 
 String? _renderTest({
-  required bool onlyShowErrors,
+  required bool hasExitCode,
+  required TestStatus status,
   required List<String> messages,
   required String? error,
   required String? label,
   required int depth,
 }) {
-  if (onlyShowErrors && error == null) return null;
+  if (hasExitCode && !status.failing) return null;
   if (messages.isEmpty && error == null && label == null) return null;
 
   error = error?.multilinePadLeft(depth * 2 + 4);
 
   return [
     if (label != null) label.multilinePadLeft(depth * 2 + 2),
-    ...messages, // messages are voluntarily not indented
-    if (error != null)
+    if (status.pending || (status.failing && hasExitCode))
+      ...messages, // messages are voluntarily not indented
+    if (error != null && hasExitCode)
       if (messages.isNotEmpty) '\n$error' else error,
   ].join('\n');
 }
@@ -203,7 +209,8 @@ final $suiteOutput =
             .sortedByStatus(ref)
             .map((test) {
               return _renderTest(
-                onlyShowErrors: ref.watch($hasExitCode),
+                status: ref.watch($testStatus(test.key)),
+                hasExitCode: ref.watch($hasExitCode),
                 messages: ref.watch($testMessages(test.key)),
                 error: ref.watch($testError(test.key)),
                 label: ref.watch($testLabel(test.key)),

@@ -390,46 +390,20 @@ another
 ---
  RUNS  test/my_test.dart
   ✕ first
-hello
-first
-another
-
-    Bad state: first
-    test/my_test.dart 11:5  main.<fn>
 ---
  RUNS  test/my_test.dart
   ... second
   ✕ first
-hello
-first
-another
-
-    Bad state: first
-    test/my_test.dart 11:5  main.<fn>
 ---
  RUNS  test/my_test.dart
   ... second
 hello
 second
   ✕ first
-hello
-first
-another
-
-    Bad state: first
-    test/my_test.dart 11:5  main.<fn>
 ---
  RUNS  test/my_test.dart
   ✓ second
-hello
-second
   ✕ first
-hello
-first
-another
-
-    Bad state: first
-    test/my_test.dart 11:5  main.<fn>
 ---
  RUNS  test/my_test.dart
   ✓ second
@@ -437,42 +411,18 @@ hello
 second
   ... third
   ✕ first
-hello
-first
-another
-
-    Bad state: first
-    test/my_test.dart 11:5  main.<fn>
 ---
  RUNS  test/my_test.dart
   ✓ second
-hello
-second
   ... third
 hello
 third
   ✕ first
-hello
-first
-another
-
-    Bad state: first
-    test/my_test.dart 11:5  main.<fn>
 ---
  FAIL  test/my_test.dart
   ✓ second
-hello
-second
   ✓ third
-hello
-third
   ✕ first
-hello
-first
-another
-
-    Bad state: first
-    test/my_test.dart 11:5  main.<fn>
 ---
  FAIL  test/my_test.dart
   ✕ first
@@ -659,34 +609,24 @@ void main() {
 ---
  RUNS  test/my_test.dart
   ✕ first
-    Bad state: first
-    test/my_test.dart 9:5  main.<fn>
 ---
  RUNS  test/my_test.dart
   ... second
   ✕ first
-    Bad state: first
-    test/my_test.dart 9:5  main.<fn>
 ---
  RUNS  test/my_test.dart
   ✓ second
   ✕ first
-    Bad state: first
-    test/my_test.dart 9:5  main.<fn>
 ---
  RUNS  test/my_test.dart
   ✓ second
   ... third
   ✕ first
-    Bad state: first
-    test/my_test.dart 9:5  main.<fn>
 ---
  FAIL  test/my_test.dart
   ✓ second
   ✓ third
   ✕ first
-    Bad state: first
-    test/my_test.dart 9:5  main.<fn>
 ---
  FAIL  test/my_test.dart
   ✕ first
@@ -741,15 +681,11 @@ void main() {
 
  FAIL  test/failing_test.dart
   ✕ failing
-    Bad state: fail
-    test/failing_test.dart 3:25  main.<fn>
 ---
  PASS  test/passing_test.dart
 
  FAIL  test/failing_test.dart
   ✕ failing
-    Bad state: fail
-    test/failing_test.dart 3:25  main.<fn>
 ---
  FAIL  test/failing_test.dart
   ✕ failing
