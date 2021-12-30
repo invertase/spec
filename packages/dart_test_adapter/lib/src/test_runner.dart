@@ -62,7 +62,6 @@ Stream<List<TestEvent>> _parseTestJsonOutput(
       // Sometimes a message contains multiple JSON map at once
       // so we split the message in multiple events
       .expand<String>((msg) sync* {
-        print(msg);
         for (final value in msg.split('\n')) {
           final trimmedValue = value.trim();
           if (trimmedValue.isNotEmpty) yield trimmedValue;
