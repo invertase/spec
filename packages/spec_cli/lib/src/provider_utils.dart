@@ -5,7 +5,10 @@ AsyncValue<T> merge<T>(T Function(R Function<R>(AsyncValue<R>) unwrap) cb) {
     R unwrap<R>(AsyncValue<R> asyncValue) {
       return asyncValue.map(
         data: (d) => d.value,
-        error: (e) => throw e,
+        error: (e) => throw Error.throwWithStackTrace(
+          e.error,
+          e.stackTrace ?? StackTrace.current,
+        ),
         loading: (l) => throw l,
       );
     }

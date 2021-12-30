@@ -1,6 +1,7 @@
 import 'package:dart_test_adapter/dart_test_adapter.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:collection/collection.dart';
+import 'package:spec_cli/src/io.dart';
 
 import 'collection.dart';
 import 'dart_test.dart';
@@ -25,6 +26,17 @@ final $suites = Provider<List<Suite>>((ref) {
       .map((event) => event.suite)
       .toList();
 }, dependencies: [$events]);
+
+final $hasAllSuites = Provider<bool>((ref) {
+  return ref.watch($suiteCount).when(
+        error: (err, stack) => false,
+        loading: () => false,
+        data: (suiteCount) {
+          final suites = ref.watch($suites);
+          return suites.length == suiteCount;
+        },
+      );
+}, dependencies: [$suites, $suiteCount]);
 
 final $suite = Provider.family<AsyncValue<Suite>, SuiteKey>((ref, suiteKey) {
   return ref
@@ -80,3 +92,34 @@ final $suiteStatus =
   $scaffoldGroup,
   $testStatus,
 ]);
+
+final $exitCode = Provider<AsyncValue<int>>((ref) {
+  // The exit code will be preemptively obtained when a signal is sent.
+  // No matter whether all tests executed are passing or not, since the command
+  // didn't have the time to complete, we consider the command as failing
+  if (ref.watch($isEarlyAbort)) return AsyncData(-1);
+
+  if (!ref.watch($hasAllSuites)) return const AsyncLoading();
+
+  final suites = ref.watch($suites);
+
+  final hasPendingSuite =
+      suites.any((suite) => ref.watch($suiteStatus(suite.key)) is AsyncLoading);
+  if (hasPendingSuite) return const AsyncLoading();
+
+  final hasErroredSuite = suites.any(
+    (suite) => ref.watch($suiteStatus(suite.key)) is AsyncError,
+  );
+  if (hasErroredSuite) return const AsyncData(-1);
+
+  // All suites are completed and passing
+  return AsyncData(0);
+}, dependencies: [$suites, $suiteStatus, $isEarlyAbort, $hasAllSuites]);
+
+final $hasExitCode = Provider<bool>((ref) {
+  return ref.watch($exitCode).when(
+        data: (_) => true,
+        error: (_, __) => false,
+        loading: () => false,
+      );
+}, dependencies: [$exitCode]);

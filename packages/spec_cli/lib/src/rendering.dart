@@ -1,8 +1,8 @@
 import 'package:dart_test_adapter/dart_test_adapter.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:collection/collection.dart';
-import 'package:spec_cli/src/command_runner.dart';
 import 'package:duration/duration.dart';
+import 'package:spec_cli/src/io.dart';
 
 import 'dart_test.dart';
 import 'dart_test_utils.dart';
@@ -22,12 +22,15 @@ final $suiteOutputLabel =
       suiteStatus.map(
         data: (_) => ' PASS '.black.bgGreen.bold,
         error: (_) => ' FAIL '.white.bgRed.bold,
-        loading: (_) => ' RUNS '.black.bgYellow.bold,
+        loading: (_) {
+          if (ref.watch($isEarlyAbort)) return ' STOP '.white.bgGrey.bold;
+          return ' RUNS '.black.bgYellow.bold;
+        },
       ),
       if (suite.path != null) suite.path!,
     ].join(' ');
   });
-}, dependencies: [$suite, $scaffoldGroup, $suiteStatus]);
+}, dependencies: [$suite, $scaffoldGroup, $suiteStatus, $isEarlyAbort]);
 
 final $spinner = Provider.autoDispose<String>((ref) {
   String charForOffset(int offset) {
@@ -90,7 +93,12 @@ final $testLabel =
       return status.when(
         pass: () => '${'✓'.green} $name',
         fail: (err, stack) => '${'✕'.red} $name',
-        pending: () => '${ref.watch($spinner)} $name',
+        pending: () {
+          final pendingLogo =
+              ref.watch($isEarlyAbort) ? '○'.yellow : ref.watch($spinner);
+
+          return '$pendingLogo $name';
+        },
         // TODO show skipReason
         skip: (skipReason) => '${'○'.yellow} $name',
       );
@@ -98,7 +106,7 @@ final $testLabel =
 
     return null;
   }).whenOrNull<String?>(data: (data) => data);
-}, dependencies: [$test, $testStatus, $spinner, $testName]);
+}, dependencies: [$test, $testStatus, $spinner, $testName, $isEarlyAbort]);
 
 final $testError =
     Provider.autoDispose.family<String?, TestKey>((ref, testKey) {
@@ -125,7 +133,7 @@ final AutoDisposeProviderFamily<AsyncValue<String?>, GroupKey> $groupOutput =
         .sortedByStatus(ref)
         .map((test) {
           return _renderTest(
-            onlyShowErrors: ref.watch($done) != null,
+            onlyShowErrors: ref.watch($hasExitCode),
             messages: ref.watch($testMessages(test.key)),
             error: ref.watch($testError(test.key)),
             label: ref.watch($testLabel(test.key)),
@@ -150,7 +158,7 @@ final AutoDisposeProviderFamily<AsyncValue<String?>, GroupKey> $groupOutput =
   });
 }, dependencies: [
   $groupName,
-  $done,
+  $hasExitCode,
   $groupDepth,
   $testsForGroup,
   $testError,
@@ -195,7 +203,7 @@ final $suiteOutput =
             .sortedByStatus(ref)
             .map((test) {
               return _renderTest(
-                onlyShowErrors: ref.watch($done) != null,
+                onlyShowErrors: ref.watch($hasExitCode),
                 messages: ref.watch($testMessages(test.key)),
                 error: ref.watch($testError(test.key)),
                 label: ref.watch($testLabel(test.key)),
@@ -229,14 +237,15 @@ final $suiteOutput =
   $rootGroupsForSuite,
   $groupOutput,
   $testLabel,
-  $done,
+  $hasExitCode,
   $suiteOutputLabel,
   $rootTestsForSuite,
 ]);
 
 final $summary = Provider.autoDispose<String?>((ref) {
-  final done = ref.watch($done);
-  if (done == null) return null;
+  // Don't show the summary until the very last render
+  final exitCode = ref.watch($exitCode);
+  if (exitCode is! AsyncData) return null;
 
   final suites = ref.watch($suites);
   final failingSuitesCount =
@@ -265,17 +274,27 @@ final $summary = Provider.autoDispose<String?>((ref) {
     '${tests.length} total',
   ].join(', ');
 
-  final timeDescription = prettyDuration(Duration(milliseconds: done.time));
+  final startTime = ref.watch($startTime);
+  final elapsedTime = DateTime.now().difference(startTime);
+
+  final timeDescription = prettyDuration(elapsedTime);
 
   return '''
 ${'Test Suites:'.bold} $suitesDescription
 ${'Tests:'.bold}       $testsDescription
 ${'Time:'.bold}        $timeDescription''';
-}, dependencies: [$done, $suites, $allTests, $testStatus, $suiteStatus]);
+}, dependencies: [
+  $exitCode,
+  $suites,
+  $allTests,
+  $testStatus,
+  $suiteStatus,
+  $startTime,
+]);
 
 final $output = Provider.autoDispose<AsyncValue<String>>((ref) {
   return merge((unwrap) {
-    final isDone = ref.watch($done) != null;
+    final isDone = ref.watch($hasExitCode);
     final suites =
         ref.watch($suites).sorted((a, b) => a.path!.compareTo(b.path!));
 
@@ -306,7 +325,7 @@ final $output = Provider.autoDispose<AsyncValue<String>>((ref) {
   });
 }, dependencies: [
   $suites,
-  $done,
+  $hasExitCode,
   $suiteOutput,
   $suiteStatus,
   $summary,

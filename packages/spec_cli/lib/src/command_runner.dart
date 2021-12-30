@@ -2,12 +2,10 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:args/args.dart';
-import 'package:dart_test_adapter/dart_test_adapter.dart';
-import 'package:collection/collection.dart';
 import 'package:riverpod/riverpod.dart';
-import 'package:spec_cli/src/collection.dart';
 import 'package:spec_cli/src/container.dart';
 import 'package:spec_cli/src/renderer.dart';
+import 'package:spec_cli/src/suites.dart';
 
 import 'dart_test.dart';
 import 'io.dart';
@@ -89,42 +87,10 @@ Future<int> fest({
       fireImmediately: true,
     );
 
-    final exitCodeCompleter = Completer<int>();
-
-    if (!watch) {
-      // if not in watch mode, finish the command when the test proccess completes.
-
-      // use "listen" to prevent the provider from getting disposed while
-      // awaiting the done operation
-      ref.listen<List<TestEvent>>(
-        $events,
-        (_, events) {
-          final doneEvent = events.firstWhereTypeOrNull<TestEventDone>();
-          if (doneEvent == null) return;
-
-          // TODO test `success = null`
-          final exitCode = doneEvent.success != false ? 0 : -1;
-
-          exitCodeCompleter.complete(exitCode);
-        },
-        fireImmediately: true,
-      );
-    }
-
-    await exitCodeCompleter.future;
-    // Wait for the summary to be printed, since it is renderer right after the
-    // exit code is obtained to obtain the time spent
-    await ref.pump();
-
-    return exitCodeCompleter.future;
+    return ref.read($exitCode.future);
   }, overrides: [
+    $startTime.overrideWithValue(DateTime.now()),
     if (workingDirectory != null)
       $workingDirectory.overrideWithValue(Directory(workingDirectory)),
   ]);
 }
-
-final $done = Provider.autoDispose<TestEventDone?>((ref) {
-  final events = ref.watch($events);
-
-  return events.whereType<TestEventDone>().firstOrNull;
-}, dependencies: [$events]);

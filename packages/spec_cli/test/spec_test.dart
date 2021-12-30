@@ -11,6 +11,12 @@ void main() {
         'on sigint/sigterm, abort and show failures details', (ref) async {},
         skip: true);
 
+    testScope(
+      'on sigint/sigterm, pending tests/suites are shown as skipped/stopped',
+      (ref) async {},
+      skip: true,
+    );
+
     testScope('does not collapse passing suites if there is only one suite',
         (ref) async {},
         skip: true);

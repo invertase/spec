@@ -68,7 +68,8 @@ final $rootGroupsForSuite =
   final scaffoldGroup = ref.watch($scaffoldGroup(suiteKey));
   return scaffoldGroup.when(
     error: (err, stack) {
-      throw Error.throwWithStackTrace(err, stack ?? StackTrace.current);
+      throw StateError('??');
+      // throw Error.throwWithStackTrace(err, stack ?? StackTrace.current);
     },
     loading: () => [],
     data: (scaffoldGroup) {
