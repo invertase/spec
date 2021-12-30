@@ -1,5 +1,6 @@
 // coverage:ignore-file
 // GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target
 
 part of 'test_protocol.dart';
@@ -14,7 +15,7 @@ final _privateConstructorUsedError = UnsupportedError(
     'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more informations: https://github.com/rrousselGit/freezed#custom-getters-and-methods');
 
 TestEvent _$TestEventFromJson(Map<String, dynamic> json) {
-  switch (json['type'] as String?) {
+  switch (json['type']) {
     case 'start':
       return TestEventStart.fromJson(json);
     case 'done':
@@ -155,7 +156,7 @@ class _$TestEventTearOff {
     );
   }
 
-  TestEvent fromJson(Map<String, Object> json) {
+  TestEvent fromJson(Map<String, Object?> json) {
     return TestEvent.fromJson(json);
   }
 }
@@ -376,7 +377,9 @@ class _$TestEventStart implements TestEventStart {
       {required this.protocolVersion,
       required this.pid,
       required this.time,
-      this.runnerVersion});
+      this.runnerVersion,
+      String? $type})
+      : $type = $type ?? 'start';
 
   factory _$TestEventStart.fromJson(Map<String, dynamic> json) =>
       _$$TestEventStartFromJson(json);
@@ -390,6 +393,9 @@ class _$TestEventStart implements TestEventStart {
   @override
   final String? runnerVersion;
 
+  @JsonKey(name: 'type')
+  final String $type;
+
   @override
   String toString() {
     return 'TestEvent.start(protocolVersion: $protocolVersion, pid: $pid, time: $time, runnerVersion: $runnerVersion)';
@@ -398,26 +404,23 @@ class _$TestEventStart implements TestEventStart {
   @override
   bool operator ==(dynamic other) {
     return identical(this, other) ||
-        (other is TestEventStart &&
-            (identical(other.protocolVersion, protocolVersion) ||
-                const DeepCollectionEquality()
-                    .equals(other.protocolVersion, protocolVersion)) &&
-            (identical(other.pid, pid) ||
-                const DeepCollectionEquality().equals(other.pid, pid)) &&
-            (identical(other.time, time) ||
-                const DeepCollectionEquality().equals(other.time, time)) &&
-            (identical(other.runnerVersion, runnerVersion) ||
-                const DeepCollectionEquality()
-                    .equals(other.runnerVersion, runnerVersion)));
+        (other.runtimeType == runtimeType &&
+            other is TestEventStart &&
+            const DeepCollectionEquality()
+                .equals(other.protocolVersion, protocolVersion) &&
+            const DeepCollectionEquality().equals(other.pid, pid) &&
+            const DeepCollectionEquality().equals(other.time, time) &&
+            const DeepCollectionEquality()
+                .equals(other.runnerVersion, runnerVersion));
   }
 
   @override
-  int get hashCode =>
-      runtimeType.hashCode ^
-      const DeepCollectionEquality().hash(protocolVersion) ^
-      const DeepCollectionEquality().hash(pid) ^
-      const DeepCollectionEquality().hash(time) ^
-      const DeepCollectionEquality().hash(runnerVersion);
+  int get hashCode => Object.hash(
+      runtimeType,
+      const DeepCollectionEquality().hash(protocolVersion),
+      const DeepCollectionEquality().hash(pid),
+      const DeepCollectionEquality().hash(time),
+      const DeepCollectionEquality().hash(runnerVersion));
 
   @JsonKey(ignore: true)
   @override
@@ -570,7 +573,7 @@ class _$TestEventStart implements TestEventStart {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$TestEventStartToJson(this)..['type'] = 'start';
+    return _$$TestEventStartToJson(this);
   }
 }
 
@@ -584,11 +587,11 @@ abstract class TestEventStart implements TestEvent {
   factory TestEventStart.fromJson(Map<String, dynamic> json) =
       _$TestEventStart.fromJson;
 
-  String get protocolVersion => throw _privateConstructorUsedError;
-  int get pid => throw _privateConstructorUsedError;
+  String get protocolVersion;
+  int get pid;
   @override
-  int get time => throw _privateConstructorUsedError;
-  String? get runnerVersion => throw _privateConstructorUsedError;
+  int get time;
+  String? get runnerVersion;
   @override
   @JsonKey(ignore: true)
   $TestEventStartCopyWith<TestEventStart> get copyWith =>
@@ -636,7 +639,8 @@ class _$TestEventDoneCopyWithImpl<$Res> extends _$TestEventCopyWithImpl<$Res>
 /// @nodoc
 @JsonSerializable()
 class _$TestEventDone implements TestEventDone {
-  _$TestEventDone({required this.success, required this.time});
+  _$TestEventDone({required this.success, required this.time, String? $type})
+      : $type = $type ?? 'done';
 
   factory _$TestEventDone.fromJson(Map<String, dynamic> json) =>
       _$$TestEventDoneFromJson(json);
@@ -651,6 +655,9 @@ class _$TestEventDone implements TestEventDone {
   @override
   final int time;
 
+  @JsonKey(name: 'type')
+  final String $type;
+
   @override
   String toString() {
     return 'TestEvent.done(success: $success, time: $time)';
@@ -659,19 +666,17 @@ class _$TestEventDone implements TestEventDone {
   @override
   bool operator ==(dynamic other) {
     return identical(this, other) ||
-        (other is TestEventDone &&
-            (identical(other.success, success) ||
-                const DeepCollectionEquality()
-                    .equals(other.success, success)) &&
-            (identical(other.time, time) ||
-                const DeepCollectionEquality().equals(other.time, time)));
+        (other.runtimeType == runtimeType &&
+            other is TestEventDone &&
+            const DeepCollectionEquality().equals(other.success, success) &&
+            const DeepCollectionEquality().equals(other.time, time));
   }
 
   @override
-  int get hashCode =>
-      runtimeType.hashCode ^
-      const DeepCollectionEquality().hash(success) ^
-      const DeepCollectionEquality().hash(time);
+  int get hashCode => Object.hash(
+      runtimeType,
+      const DeepCollectionEquality().hash(success),
+      const DeepCollectionEquality().hash(time));
 
   @JsonKey(ignore: true)
   @override
@@ -824,7 +829,7 @@ class _$TestEventDone implements TestEventDone {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$TestEventDoneToJson(this)..['type'] = 'done';
+    return _$$TestEventDoneToJson(this);
   }
 }
 
@@ -839,9 +844,9 @@ abstract class TestEventDone implements TestEvent {
   ///
   /// Will be `null` if the test runner was close before all tests completed
   /// running.
-  bool? get success => throw _privateConstructorUsedError;
+  bool? get success;
   @override
-  int get time => throw _privateConstructorUsedError;
+  int get time;
   @override
   @JsonKey(ignore: true)
   $TestEventDoneCopyWith<TestEventDone> get copyWith =>
@@ -890,7 +895,8 @@ class _$TestEventAllSuitesCopyWithImpl<$Res>
 /// @nodoc
 @JsonSerializable()
 class _$TestEventAllSuites implements TestEventAllSuites {
-  _$TestEventAllSuites({required this.count, required this.time});
+  _$TestEventAllSuites({required this.count, required this.time, String? $type})
+      : $type = $type ?? 'allSuites';
 
   factory _$TestEventAllSuites.fromJson(Map<String, dynamic> json) =>
       _$$TestEventAllSuitesFromJson(json);
@@ -900,6 +906,9 @@ class _$TestEventAllSuites implements TestEventAllSuites {
   @override
   final int time;
 
+  @JsonKey(name: 'type')
+  final String $type;
+
   @override
   String toString() {
     return 'TestEvent.allSuites(count: $count, time: $time)';
@@ -908,18 +917,17 @@ class _$TestEventAllSuites implements TestEventAllSuites {
   @override
   bool operator ==(dynamic other) {
     return identical(this, other) ||
-        (other is TestEventAllSuites &&
-            (identical(other.count, count) ||
-                const DeepCollectionEquality().equals(other.count, count)) &&
-            (identical(other.time, time) ||
-                const DeepCollectionEquality().equals(other.time, time)));
+        (other.runtimeType == runtimeType &&
+            other is TestEventAllSuites &&
+            const DeepCollectionEquality().equals(other.count, count) &&
+            const DeepCollectionEquality().equals(other.time, time));
   }
 
   @override
-  int get hashCode =>
-      runtimeType.hashCode ^
-      const DeepCollectionEquality().hash(count) ^
-      const DeepCollectionEquality().hash(time);
+  int get hashCode => Object.hash(
+      runtimeType,
+      const DeepCollectionEquality().hash(count),
+      const DeepCollectionEquality().hash(time));
 
   @JsonKey(ignore: true)
   @override
@@ -1072,7 +1080,7 @@ class _$TestEventAllSuites implements TestEventAllSuites {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$TestEventAllSuitesToJson(this)..['type'] = 'allSuites';
+    return _$$TestEventAllSuitesToJson(this);
   }
 }
 
@@ -1083,9 +1091,9 @@ abstract class TestEventAllSuites implements TestEvent {
   factory TestEventAllSuites.fromJson(Map<String, dynamic> json) =
       _$TestEventAllSuites.fromJson;
 
-  int get count => throw _privateConstructorUsedError;
+  int get count;
   @override
-  int get time => throw _privateConstructorUsedError;
+  int get time;
   @override
   @JsonKey(ignore: true)
   $TestEventAllSuitesCopyWith<TestEventAllSuites> get copyWith =>
@@ -1142,7 +1150,8 @@ class _$TestEventSuiteCopyWithImpl<$Res> extends _$TestEventCopyWithImpl<$Res>
 /// @nodoc
 @JsonSerializable()
 class _$TestEventSuite implements TestEventSuite {
-  _$TestEventSuite(this.suite, {required this.time});
+  _$TestEventSuite(this.suite, {required this.time, String? $type})
+      : $type = $type ?? 'suite';
 
   factory _$TestEventSuite.fromJson(Map<String, dynamic> json) =>
       _$$TestEventSuiteFromJson(json);
@@ -1152,6 +1161,9 @@ class _$TestEventSuite implements TestEventSuite {
   @override
   final int time;
 
+  @JsonKey(name: 'type')
+  final String $type;
+
   @override
   String toString() {
     return 'TestEvent.suite(suite: $suite, time: $time)';
@@ -1160,18 +1172,17 @@ class _$TestEventSuite implements TestEventSuite {
   @override
   bool operator ==(dynamic other) {
     return identical(this, other) ||
-        (other is TestEventSuite &&
-            (identical(other.suite, suite) ||
-                const DeepCollectionEquality().equals(other.suite, suite)) &&
-            (identical(other.time, time) ||
-                const DeepCollectionEquality().equals(other.time, time)));
+        (other.runtimeType == runtimeType &&
+            other is TestEventSuite &&
+            const DeepCollectionEquality().equals(other.suite, suite) &&
+            const DeepCollectionEquality().equals(other.time, time));
   }
 
   @override
-  int get hashCode =>
-      runtimeType.hashCode ^
-      const DeepCollectionEquality().hash(suite) ^
-      const DeepCollectionEquality().hash(time);
+  int get hashCode => Object.hash(
+      runtimeType,
+      const DeepCollectionEquality().hash(suite),
+      const DeepCollectionEquality().hash(time));
 
   @JsonKey(ignore: true)
   @override
@@ -1324,7 +1335,7 @@ class _$TestEventSuite implements TestEventSuite {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$TestEventSuiteToJson(this)..['type'] = 'suite';
+    return _$$TestEventSuiteToJson(this);
   }
 }
 
@@ -1334,9 +1345,9 @@ abstract class TestEventSuite implements TestEvent {
   factory TestEventSuite.fromJson(Map<String, dynamic> json) =
       _$TestEventSuite.fromJson;
 
-  Suite get suite => throw _privateConstructorUsedError;
+  Suite get suite;
   @override
-  int get time => throw _privateConstructorUsedError;
+  int get time;
   @override
   @JsonKey(ignore: true)
   $TestEventSuiteCopyWith<TestEventSuite> get copyWith =>
@@ -1393,7 +1404,8 @@ class _$TestEventGroupCopyWithImpl<$Res> extends _$TestEventCopyWithImpl<$Res>
 /// @nodoc
 @JsonSerializable()
 class _$TestEventGroup implements TestEventGroup {
-  _$TestEventGroup(this.group, {required this.time});
+  _$TestEventGroup(this.group, {required this.time, String? $type})
+      : $type = $type ?? 'group';
 
   factory _$TestEventGroup.fromJson(Map<String, dynamic> json) =>
       _$$TestEventGroupFromJson(json);
@@ -1403,6 +1415,9 @@ class _$TestEventGroup implements TestEventGroup {
   @override
   final int time;
 
+  @JsonKey(name: 'type')
+  final String $type;
+
   @override
   String toString() {
     return 'TestEvent.group(group: $group, time: $time)';
@@ -1411,18 +1426,17 @@ class _$TestEventGroup implements TestEventGroup {
   @override
   bool operator ==(dynamic other) {
     return identical(this, other) ||
-        (other is TestEventGroup &&
-            (identical(other.group, group) ||
-                const DeepCollectionEquality().equals(other.group, group)) &&
-            (identical(other.time, time) ||
-                const DeepCollectionEquality().equals(other.time, time)));
+        (other.runtimeType == runtimeType &&
+            other is TestEventGroup &&
+            const DeepCollectionEquality().equals(other.group, group) &&
+            const DeepCollectionEquality().equals(other.time, time));
   }
 
   @override
-  int get hashCode =>
-      runtimeType.hashCode ^
-      const DeepCollectionEquality().hash(group) ^
-      const DeepCollectionEquality().hash(time);
+  int get hashCode => Object.hash(
+      runtimeType,
+      const DeepCollectionEquality().hash(group),
+      const DeepCollectionEquality().hash(time));
 
   @JsonKey(ignore: true)
   @override
@@ -1575,7 +1589,7 @@ class _$TestEventGroup implements TestEventGroup {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$TestEventGroupToJson(this)..['type'] = 'group';
+    return _$$TestEventGroupToJson(this);
   }
 }
 
@@ -1585,9 +1599,9 @@ abstract class TestEventGroup implements TestEvent {
   factory TestEventGroup.fromJson(Map<String, dynamic> json) =
       _$TestEventGroup.fromJson;
 
-  Group get group => throw _privateConstructorUsedError;
+  Group get group;
   @override
-  int get time => throw _privateConstructorUsedError;
+  int get time;
   @override
   @JsonKey(ignore: true)
   $TestEventGroupCopyWith<TestEventGroup> get copyWith =>
@@ -1645,7 +1659,8 @@ class _$TestEventTestStartCopyWithImpl<$Res>
 /// @nodoc
 @JsonSerializable()
 class _$TestEventTestStart implements TestEventTestStart {
-  _$TestEventTestStart(this.test, {required this.time});
+  _$TestEventTestStart(this.test, {required this.time, String? $type})
+      : $type = $type ?? 'testStart';
 
   factory _$TestEventTestStart.fromJson(Map<String, dynamic> json) =>
       _$$TestEventTestStartFromJson(json);
@@ -1655,6 +1670,9 @@ class _$TestEventTestStart implements TestEventTestStart {
   @override
   final int time;
 
+  @JsonKey(name: 'type')
+  final String $type;
+
   @override
   String toString() {
     return 'TestEvent.testStart(test: $test, time: $time)';
@@ -1663,18 +1681,17 @@ class _$TestEventTestStart implements TestEventTestStart {
   @override
   bool operator ==(dynamic other) {
     return identical(this, other) ||
-        (other is TestEventTestStart &&
-            (identical(other.test, test) ||
-                const DeepCollectionEquality().equals(other.test, test)) &&
-            (identical(other.time, time) ||
-                const DeepCollectionEquality().equals(other.time, time)));
+        (other.runtimeType == runtimeType &&
+            other is TestEventTestStart &&
+            const DeepCollectionEquality().equals(other.test, test) &&
+            const DeepCollectionEquality().equals(other.time, time));
   }
 
   @override
-  int get hashCode =>
-      runtimeType.hashCode ^
-      const DeepCollectionEquality().hash(test) ^
-      const DeepCollectionEquality().hash(time);
+  int get hashCode => Object.hash(
+      runtimeType,
+      const DeepCollectionEquality().hash(test),
+      const DeepCollectionEquality().hash(time));
 
   @JsonKey(ignore: true)
   @override
@@ -1827,7 +1844,7 @@ class _$TestEventTestStart implements TestEventTestStart {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$TestEventTestStartToJson(this)..['type'] = 'testStart';
+    return _$$TestEventTestStartToJson(this);
   }
 }
 
@@ -1838,9 +1855,9 @@ abstract class TestEventTestStart implements TestEvent {
   factory TestEventTestStart.fromJson(Map<String, dynamic> json) =
       _$TestEventTestStart.fromJson;
 
-  Test get test => throw _privateConstructorUsedError;
+  Test get test;
   @override
-  int get time => throw _privateConstructorUsedError;
+  int get time;
   @override
   @JsonKey(ignore: true)
   $TestEventTestStartCopyWith<TestEventTestStart> get copyWith =>
@@ -1910,7 +1927,9 @@ class _$TestEventTestDone implements TestEventTestDone {
       required this.testID,
       required this.hidden,
       required this.skipped,
-      required this.result});
+      required this.result,
+      String? $type})
+      : $type = $type ?? 'testDone';
 
   factory _$TestEventTestDone.fromJson(Map<String, dynamic> json) =>
       _$$TestEventTestDoneFromJson(json);
@@ -1926,6 +1945,9 @@ class _$TestEventTestDone implements TestEventTestDone {
   @override
   final TestDoneStatus result;
 
+  @JsonKey(name: 'type')
+  final String $type;
+
   @override
   String toString() {
     return 'TestEvent.testDone(time: $time, testID: $testID, hidden: $hidden, skipped: $skipped, result: $result)';
@@ -1934,28 +1956,23 @@ class _$TestEventTestDone implements TestEventTestDone {
   @override
   bool operator ==(dynamic other) {
     return identical(this, other) ||
-        (other is TestEventTestDone &&
-            (identical(other.time, time) ||
-                const DeepCollectionEquality().equals(other.time, time)) &&
-            (identical(other.testID, testID) ||
-                const DeepCollectionEquality().equals(other.testID, testID)) &&
-            (identical(other.hidden, hidden) ||
-                const DeepCollectionEquality().equals(other.hidden, hidden)) &&
-            (identical(other.skipped, skipped) ||
-                const DeepCollectionEquality()
-                    .equals(other.skipped, skipped)) &&
-            (identical(other.result, result) ||
-                const DeepCollectionEquality().equals(other.result, result)));
+        (other.runtimeType == runtimeType &&
+            other is TestEventTestDone &&
+            const DeepCollectionEquality().equals(other.time, time) &&
+            const DeepCollectionEquality().equals(other.testID, testID) &&
+            const DeepCollectionEquality().equals(other.hidden, hidden) &&
+            const DeepCollectionEquality().equals(other.skipped, skipped) &&
+            const DeepCollectionEquality().equals(other.result, result));
   }
 
   @override
-  int get hashCode =>
-      runtimeType.hashCode ^
-      const DeepCollectionEquality().hash(time) ^
-      const DeepCollectionEquality().hash(testID) ^
-      const DeepCollectionEquality().hash(hidden) ^
-      const DeepCollectionEquality().hash(skipped) ^
-      const DeepCollectionEquality().hash(result);
+  int get hashCode => Object.hash(
+      runtimeType,
+      const DeepCollectionEquality().hash(time),
+      const DeepCollectionEquality().hash(testID),
+      const DeepCollectionEquality().hash(hidden),
+      const DeepCollectionEquality().hash(skipped),
+      const DeepCollectionEquality().hash(result));
 
   @JsonKey(ignore: true)
   @override
@@ -2108,7 +2125,7 @@ class _$TestEventTestDone implements TestEventTestDone {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$TestEventTestDoneToJson(this)..['type'] = 'testDone';
+    return _$$TestEventTestDoneToJson(this);
   }
 }
 
@@ -2124,11 +2141,11 @@ abstract class TestEventTestDone implements TestEvent {
       _$TestEventTestDone.fromJson;
 
   @override
-  int get time => throw _privateConstructorUsedError;
-  int get testID => throw _privateConstructorUsedError;
-  bool get hidden => throw _privateConstructorUsedError;
-  bool get skipped => throw _privateConstructorUsedError;
-  TestDoneStatus get result => throw _privateConstructorUsedError;
+  int get time;
+  int get testID;
+  bool get hidden;
+  bool get skipped;
+  TestDoneStatus get result;
   @override
   @JsonKey(ignore: true)
   $TestEventTestDoneCopyWith<TestEventTestDone> get copyWith =>
@@ -2190,7 +2207,9 @@ class _$TestEventMessage implements TestEventMessage {
       {required this.time,
       required this.testID,
       required this.messageType,
-      required this.message});
+      required this.message,
+      String? $type})
+      : $type = $type ?? 'print';
 
   factory _$TestEventMessage.fromJson(Map<String, dynamic> json) =>
       _$$TestEventMessageFromJson(json);
@@ -2204,6 +2223,9 @@ class _$TestEventMessage implements TestEventMessage {
   @override
   final String message;
 
+  @JsonKey(name: 'type')
+  final String $type;
+
   @override
   String toString() {
     return 'TestEvent.print(time: $time, testID: $testID, messageType: $messageType, message: $message)';
@@ -2212,25 +2234,22 @@ class _$TestEventMessage implements TestEventMessage {
   @override
   bool operator ==(dynamic other) {
     return identical(this, other) ||
-        (other is TestEventMessage &&
-            (identical(other.time, time) ||
-                const DeepCollectionEquality().equals(other.time, time)) &&
-            (identical(other.testID, testID) ||
-                const DeepCollectionEquality().equals(other.testID, testID)) &&
-            (identical(other.messageType, messageType) ||
-                const DeepCollectionEquality()
-                    .equals(other.messageType, messageType)) &&
-            (identical(other.message, message) ||
-                const DeepCollectionEquality().equals(other.message, message)));
+        (other.runtimeType == runtimeType &&
+            other is TestEventMessage &&
+            const DeepCollectionEquality().equals(other.time, time) &&
+            const DeepCollectionEquality().equals(other.testID, testID) &&
+            const DeepCollectionEquality()
+                .equals(other.messageType, messageType) &&
+            const DeepCollectionEquality().equals(other.message, message));
   }
 
   @override
-  int get hashCode =>
-      runtimeType.hashCode ^
-      const DeepCollectionEquality().hash(time) ^
-      const DeepCollectionEquality().hash(testID) ^
-      const DeepCollectionEquality().hash(messageType) ^
-      const DeepCollectionEquality().hash(message);
+  int get hashCode => Object.hash(
+      runtimeType,
+      const DeepCollectionEquality().hash(time),
+      const DeepCollectionEquality().hash(testID),
+      const DeepCollectionEquality().hash(messageType),
+      const DeepCollectionEquality().hash(message));
 
   @JsonKey(ignore: true)
   @override
@@ -2383,7 +2402,7 @@ class _$TestEventMessage implements TestEventMessage {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$TestEventMessageToJson(this)..['type'] = 'print';
+    return _$$TestEventMessageToJson(this);
   }
 }
 
@@ -2398,10 +2417,10 @@ abstract class TestEventMessage implements TestEvent {
       _$TestEventMessage.fromJson;
 
   @override
-  int get time => throw _privateConstructorUsedError;
-  int get testID => throw _privateConstructorUsedError;
-  String get messageType => throw _privateConstructorUsedError;
-  String get message => throw _privateConstructorUsedError;
+  int get time;
+  int get testID;
+  String get messageType;
+  String get message;
   @override
   @JsonKey(ignore: true)
   $TestEventMessageCopyWith<TestEventMessage> get copyWith =>
@@ -2471,7 +2490,9 @@ class _$TestEventTestError implements TestEventTestError {
       required this.testID,
       required this.error,
       required this.stackTrace,
-      required this.isFailure});
+      required this.isFailure,
+      String? $type})
+      : $type = $type ?? 'error';
 
   factory _$TestEventTestError.fromJson(Map<String, dynamic> json) =>
       _$$TestEventTestErrorFromJson(json);
@@ -2487,6 +2508,9 @@ class _$TestEventTestError implements TestEventTestError {
   @override
   final bool isFailure;
 
+  @JsonKey(name: 'type')
+  final String $type;
+
   @override
   String toString() {
     return 'TestEvent.error(time: $time, testID: $testID, error: $error, stackTrace: $stackTrace, isFailure: $isFailure)';
@@ -2495,29 +2519,24 @@ class _$TestEventTestError implements TestEventTestError {
   @override
   bool operator ==(dynamic other) {
     return identical(this, other) ||
-        (other is TestEventTestError &&
-            (identical(other.time, time) ||
-                const DeepCollectionEquality().equals(other.time, time)) &&
-            (identical(other.testID, testID) ||
-                const DeepCollectionEquality().equals(other.testID, testID)) &&
-            (identical(other.error, error) ||
-                const DeepCollectionEquality().equals(other.error, error)) &&
-            (identical(other.stackTrace, stackTrace) ||
-                const DeepCollectionEquality()
-                    .equals(other.stackTrace, stackTrace)) &&
-            (identical(other.isFailure, isFailure) ||
-                const DeepCollectionEquality()
-                    .equals(other.isFailure, isFailure)));
+        (other.runtimeType == runtimeType &&
+            other is TestEventTestError &&
+            const DeepCollectionEquality().equals(other.time, time) &&
+            const DeepCollectionEquality().equals(other.testID, testID) &&
+            const DeepCollectionEquality().equals(other.error, error) &&
+            const DeepCollectionEquality()
+                .equals(other.stackTrace, stackTrace) &&
+            const DeepCollectionEquality().equals(other.isFailure, isFailure));
   }
 
   @override
-  int get hashCode =>
-      runtimeType.hashCode ^
-      const DeepCollectionEquality().hash(time) ^
-      const DeepCollectionEquality().hash(testID) ^
-      const DeepCollectionEquality().hash(error) ^
-      const DeepCollectionEquality().hash(stackTrace) ^
-      const DeepCollectionEquality().hash(isFailure);
+  int get hashCode => Object.hash(
+      runtimeType,
+      const DeepCollectionEquality().hash(time),
+      const DeepCollectionEquality().hash(testID),
+      const DeepCollectionEquality().hash(error),
+      const DeepCollectionEquality().hash(stackTrace),
+      const DeepCollectionEquality().hash(isFailure));
 
   @JsonKey(ignore: true)
   @override
@@ -2670,7 +2689,7 @@ class _$TestEventTestError implements TestEventTestError {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$TestEventTestErrorToJson(this)..['type'] = 'error';
+    return _$$TestEventTestErrorToJson(this);
   }
 }
 
@@ -2686,11 +2705,11 @@ abstract class TestEventTestError implements TestEvent {
       _$TestEventTestError.fromJson;
 
   @override
-  int get time => throw _privateConstructorUsedError;
-  int get testID => throw _privateConstructorUsedError;
-  String get error => throw _privateConstructorUsedError;
-  String get stackTrace => throw _privateConstructorUsedError;
-  bool get isFailure => throw _privateConstructorUsedError;
+  int get time;
+  int get testID;
+  String get error;
+  String get stackTrace;
+  bool get isFailure;
   @override
   @JsonKey(ignore: true)
   $TestEventTestErrorCopyWith<TestEventTestError> get copyWith =>
@@ -2753,7 +2772,9 @@ class _$TestEventDebug implements TestEventDebug {
       {required this.time,
       required this.suiteID,
       this.observatory,
-      this.remoteDebugger});
+      this.remoteDebugger,
+      String? $type})
+      : $type = $type ?? 'debug';
 
   factory _$TestEventDebug.fromJson(Map<String, dynamic> json) =>
       _$$TestEventDebugFromJson(json);
@@ -2767,6 +2788,9 @@ class _$TestEventDebug implements TestEventDebug {
   @override
   final String? remoteDebugger;
 
+  @JsonKey(name: 'type')
+  final String $type;
+
   @override
   String toString() {
     return 'TestEvent.debug(time: $time, suiteID: $suiteID, observatory: $observatory, remoteDebugger: $remoteDebugger)';
@@ -2775,27 +2799,23 @@ class _$TestEventDebug implements TestEventDebug {
   @override
   bool operator ==(dynamic other) {
     return identical(this, other) ||
-        (other is TestEventDebug &&
-            (identical(other.time, time) ||
-                const DeepCollectionEquality().equals(other.time, time)) &&
-            (identical(other.suiteID, suiteID) ||
-                const DeepCollectionEquality()
-                    .equals(other.suiteID, suiteID)) &&
-            (identical(other.observatory, observatory) ||
-                const DeepCollectionEquality()
-                    .equals(other.observatory, observatory)) &&
-            (identical(other.remoteDebugger, remoteDebugger) ||
-                const DeepCollectionEquality()
-                    .equals(other.remoteDebugger, remoteDebugger)));
+        (other.runtimeType == runtimeType &&
+            other is TestEventDebug &&
+            const DeepCollectionEquality().equals(other.time, time) &&
+            const DeepCollectionEquality().equals(other.suiteID, suiteID) &&
+            const DeepCollectionEquality()
+                .equals(other.observatory, observatory) &&
+            const DeepCollectionEquality()
+                .equals(other.remoteDebugger, remoteDebugger));
   }
 
   @override
-  int get hashCode =>
-      runtimeType.hashCode ^
-      const DeepCollectionEquality().hash(time) ^
-      const DeepCollectionEquality().hash(suiteID) ^
-      const DeepCollectionEquality().hash(observatory) ^
-      const DeepCollectionEquality().hash(remoteDebugger);
+  int get hashCode => Object.hash(
+      runtimeType,
+      const DeepCollectionEquality().hash(time),
+      const DeepCollectionEquality().hash(suiteID),
+      const DeepCollectionEquality().hash(observatory),
+      const DeepCollectionEquality().hash(remoteDebugger));
 
   @JsonKey(ignore: true)
   @override
@@ -2948,7 +2968,7 @@ class _$TestEventDebug implements TestEventDebug {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$TestEventDebugToJson(this)..['type'] = 'debug';
+    return _$$TestEventDebugToJson(this);
   }
 }
 
@@ -2963,10 +2983,10 @@ abstract class TestEventDebug implements TestEvent {
       _$TestEventDebug.fromJson;
 
   @override
-  int get time => throw _privateConstructorUsedError;
-  int get suiteID => throw _privateConstructorUsedError;
-  String? get observatory => throw _privateConstructorUsedError;
-  String? get remoteDebugger => throw _privateConstructorUsedError;
+  int get time;
+  int get suiteID;
+  String? get observatory;
+  String? get remoteDebugger;
   @override
   @JsonKey(ignore: true)
   $TestEventDebugCopyWith<TestEventDebug> get copyWith =>
@@ -3009,13 +3029,17 @@ class _$TestEventUnknownCopyWithImpl<$Res> extends _$TestEventCopyWithImpl<$Res>
 /// @nodoc
 @JsonSerializable()
 class _$TestEventUnknown implements TestEventUnknown {
-  _$TestEventUnknown({required this.time});
+  _$TestEventUnknown({required this.time, String? $type})
+      : $type = $type ?? 'unknown';
 
   factory _$TestEventUnknown.fromJson(Map<String, dynamic> json) =>
       _$$TestEventUnknownFromJson(json);
 
   @override
   final int time;
+
+  @JsonKey(name: 'type')
+  final String $type;
 
   @override
   String toString() {
@@ -3025,14 +3049,14 @@ class _$TestEventUnknown implements TestEventUnknown {
   @override
   bool operator ==(dynamic other) {
     return identical(this, other) ||
-        (other is TestEventUnknown &&
-            (identical(other.time, time) ||
-                const DeepCollectionEquality().equals(other.time, time)));
+        (other.runtimeType == runtimeType &&
+            other is TestEventUnknown &&
+            const DeepCollectionEquality().equals(other.time, time));
   }
 
   @override
   int get hashCode =>
-      runtimeType.hashCode ^ const DeepCollectionEquality().hash(time);
+      Object.hash(runtimeType, const DeepCollectionEquality().hash(time));
 
   @JsonKey(ignore: true)
   @override
@@ -3185,7 +3209,7 @@ class _$TestEventUnknown implements TestEventUnknown {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$TestEventUnknownToJson(this)..['type'] = 'unknown';
+    return _$$TestEventUnknownToJson(this);
   }
 }
 
@@ -3196,7 +3220,7 @@ abstract class TestEventUnknown implements TestEvent {
       _$TestEventUnknown.fromJson;
 
   @override
-  int get time => throw _privateConstructorUsedError;
+  int get time;
   @override
   @JsonKey(ignore: true)
   $TestEventUnknownCopyWith<TestEventUnknown> get copyWith =>
@@ -3238,7 +3262,7 @@ class _$TestTearOff {
     );
   }
 
-  Test fromJson(Map<String, Object> json) {
+  Test fromJson(Map<String, Object?> json) {
     return Test.fromJson(json);
   }
 }
@@ -3567,51 +3591,36 @@ class _$_Test implements _Test {
   @override
   bool operator ==(dynamic other) {
     return identical(this, other) ||
-        (other is _Test &&
-            (identical(other.id, id) ||
-                const DeepCollectionEquality().equals(other.id, id)) &&
-            (identical(other.name, name) ||
-                const DeepCollectionEquality().equals(other.name, name)) &&
-            (identical(other.suiteID, suiteID) ||
-                const DeepCollectionEquality()
-                    .equals(other.suiteID, suiteID)) &&
-            (identical(other.groupIDs, groupIDs) ||
-                const DeepCollectionEquality()
-                    .equals(other.groupIDs, groupIDs)) &&
-            (identical(other.line, line) ||
-                const DeepCollectionEquality().equals(other.line, line)) &&
-            (identical(other.column, column) ||
-                const DeepCollectionEquality().equals(other.column, column)) &&
-            (identical(other.url, url) ||
-                const DeepCollectionEquality().equals(other.url, url)) &&
-            (identical(other.root_line, root_line) ||
-                const DeepCollectionEquality()
-                    .equals(other.root_line, root_line)) &&
-            (identical(other.root_column, root_column) ||
-                const DeepCollectionEquality()
-                    .equals(other.root_column, root_column)) &&
-            (identical(other.root_url, root_url) ||
-                const DeepCollectionEquality()
-                    .equals(other.root_url, root_url)) &&
-            (identical(other.metadata, metadata) ||
-                const DeepCollectionEquality()
-                    .equals(other.metadata, metadata)));
+        (other.runtimeType == runtimeType &&
+            other is _Test &&
+            const DeepCollectionEquality().equals(other.id, id) &&
+            const DeepCollectionEquality().equals(other.name, name) &&
+            const DeepCollectionEquality().equals(other.suiteID, suiteID) &&
+            const DeepCollectionEquality().equals(other.groupIDs, groupIDs) &&
+            const DeepCollectionEquality().equals(other.line, line) &&
+            const DeepCollectionEquality().equals(other.column, column) &&
+            const DeepCollectionEquality().equals(other.url, url) &&
+            const DeepCollectionEquality().equals(other.root_line, root_line) &&
+            const DeepCollectionEquality()
+                .equals(other.root_column, root_column) &&
+            const DeepCollectionEquality().equals(other.root_url, root_url) &&
+            const DeepCollectionEquality().equals(other.metadata, metadata));
   }
 
   @override
-  int get hashCode =>
-      runtimeType.hashCode ^
-      const DeepCollectionEquality().hash(id) ^
-      const DeepCollectionEquality().hash(name) ^
-      const DeepCollectionEquality().hash(suiteID) ^
-      const DeepCollectionEquality().hash(groupIDs) ^
-      const DeepCollectionEquality().hash(line) ^
-      const DeepCollectionEquality().hash(column) ^
-      const DeepCollectionEquality().hash(url) ^
-      const DeepCollectionEquality().hash(root_line) ^
-      const DeepCollectionEquality().hash(root_column) ^
-      const DeepCollectionEquality().hash(root_url) ^
-      const DeepCollectionEquality().hash(metadata);
+  int get hashCode => Object.hash(
+      runtimeType,
+      const DeepCollectionEquality().hash(id),
+      const DeepCollectionEquality().hash(name),
+      const DeepCollectionEquality().hash(suiteID),
+      const DeepCollectionEquality().hash(groupIDs),
+      const DeepCollectionEquality().hash(line),
+      const DeepCollectionEquality().hash(column),
+      const DeepCollectionEquality().hash(url),
+      const DeepCollectionEquality().hash(root_line),
+      const DeepCollectionEquality().hash(root_column),
+      const DeepCollectionEquality().hash(root_url),
+      const DeepCollectionEquality().hash(metadata));
 
   @JsonKey(ignore: true)
   @override
@@ -3643,56 +3652,56 @@ abstract class _Test implements Test {
   @override
 
   /// An opaque ID for the test.
-  int get id => throw _privateConstructorUsedError;
+  int get id;
   @override
 
   /// The name of the test, including prefixes from any containing groups.
-  String get name => throw _privateConstructorUsedError;
+  String get name;
   @override
 
   /// The ID of the suite containing this test.
-  int get suiteID => throw _privateConstructorUsedError;
+  int get suiteID;
   @override
 
   /// The IDs of groups containing this test, in order from outermost to
   /// innermost.
-  List<int> get groupIDs => throw _privateConstructorUsedError;
+  List<int> get groupIDs;
   @override
 
   /// The (1-based) line on which the test was defined, or `null`.
-  int? get line => throw _privateConstructorUsedError;
+  int? get line;
   @override
 
   /// The (1-based) column on which the test was defined, or `null`.
-  int? get column => throw _privateConstructorUsedError;
+  int? get column;
   @override
 
   /// The URL for the file in which the test was defined, or `null`.
-  String? get url => throw _privateConstructorUsedError;
+  String? get url;
   @override
 
   /// The (1-based) line in the original test suite from which the test
   /// originated.
   ///
   /// Will only be present if `root_url` is different from `url`.
-  int? get root_line => throw _privateConstructorUsedError;
+  int? get root_line;
   @override
 
   /// The (1-based) line on in the original test suite from which the test
   /// originated.
   ///
   /// Will only be present if `root_url` is different from `url`.
-  int? get root_column => throw _privateConstructorUsedError;
+  int? get root_column;
   @override
 
   /// The URL for the original test suite in which the test was defined.
   ///
   /// Will only be present if different from `url`.
-  String? get root_url => throw _privateConstructorUsedError;
+  String? get root_url;
   @override
 
   /// This field is deprecated and should not be used.
-  Metadata get metadata => throw _privateConstructorUsedError;
+  Metadata get metadata;
   @override
   @JsonKey(ignore: true)
   _$TestCopyWith<_Test> get copyWith => throw _privateConstructorUsedError;
@@ -3714,7 +3723,7 @@ class _$SuiteTearOff {
     );
   }
 
-  Suite fromJson(Map<String, Object> json) {
+  Suite fromJson(Map<String, Object?> json) {
     return Suite.fromJson(json);
   }
 }
@@ -3845,22 +3854,19 @@ class _$_Suite implements _Suite {
   @override
   bool operator ==(dynamic other) {
     return identical(this, other) ||
-        (other is _Suite &&
-            (identical(other.id, id) ||
-                const DeepCollectionEquality().equals(other.id, id)) &&
-            (identical(other.platform, platform) ||
-                const DeepCollectionEquality()
-                    .equals(other.platform, platform)) &&
-            (identical(other.path, path) ||
-                const DeepCollectionEquality().equals(other.path, path)));
+        (other.runtimeType == runtimeType &&
+            other is _Suite &&
+            const DeepCollectionEquality().equals(other.id, id) &&
+            const DeepCollectionEquality().equals(other.platform, platform) &&
+            const DeepCollectionEquality().equals(other.path, path));
   }
 
   @override
-  int get hashCode =>
-      runtimeType.hashCode ^
-      const DeepCollectionEquality().hash(id) ^
-      const DeepCollectionEquality().hash(platform) ^
-      const DeepCollectionEquality().hash(path);
+  int get hashCode => Object.hash(
+      runtimeType,
+      const DeepCollectionEquality().hash(id),
+      const DeepCollectionEquality().hash(platform),
+      const DeepCollectionEquality().hash(path));
 
   @JsonKey(ignore: true)
   @override
@@ -3882,15 +3888,15 @@ abstract class _Suite implements Suite {
   @override
 
   /// An opaque ID for the group.
-  int get id => throw _privateConstructorUsedError;
+  int get id;
   @override
 
   /// The platform on which the suite is running.
-  String get platform => throw _privateConstructorUsedError;
+  String get platform;
   @override
 
   /// The path to the suite's file, or `null` if that path is unknown.
-  String? get path => throw _privateConstructorUsedError;
+  String? get path;
   @override
   @JsonKey(ignore: true)
   _$SuiteCopyWith<_Suite> get copyWith => throw _privateConstructorUsedError;
@@ -3927,7 +3933,7 @@ class _$GroupTearOff {
     );
   }
 
-  Group fromJson(Map<String, Object> json) {
+  Group fromJson(Map<String, Object?> json) {
     return Group.fromJson(json);
   }
 }
@@ -4199,43 +4205,31 @@ class _$_Group implements _Group {
   @override
   bool operator ==(dynamic other) {
     return identical(this, other) ||
-        (other is _Group &&
-            (identical(other.id, id) ||
-                const DeepCollectionEquality().equals(other.id, id)) &&
-            (identical(other.name, name) ||
-                const DeepCollectionEquality().equals(other.name, name)) &&
-            (identical(other.suiteID, suiteID) ||
-                const DeepCollectionEquality()
-                    .equals(other.suiteID, suiteID)) &&
-            (identical(other.parentID, parentID) ||
-                const DeepCollectionEquality()
-                    .equals(other.parentID, parentID)) &&
-            (identical(other.testCount, testCount) ||
-                const DeepCollectionEquality()
-                    .equals(other.testCount, testCount)) &&
-            (identical(other.line, line) ||
-                const DeepCollectionEquality().equals(other.line, line)) &&
-            (identical(other.column, column) ||
-                const DeepCollectionEquality().equals(other.column, column)) &&
-            (identical(other.url, url) ||
-                const DeepCollectionEquality().equals(other.url, url)) &&
-            (identical(other.metadata, metadata) ||
-                const DeepCollectionEquality()
-                    .equals(other.metadata, metadata)));
+        (other.runtimeType == runtimeType &&
+            other is _Group &&
+            const DeepCollectionEquality().equals(other.id, id) &&
+            const DeepCollectionEquality().equals(other.name, name) &&
+            const DeepCollectionEquality().equals(other.suiteID, suiteID) &&
+            const DeepCollectionEquality().equals(other.parentID, parentID) &&
+            const DeepCollectionEquality().equals(other.testCount, testCount) &&
+            const DeepCollectionEquality().equals(other.line, line) &&
+            const DeepCollectionEquality().equals(other.column, column) &&
+            const DeepCollectionEquality().equals(other.url, url) &&
+            const DeepCollectionEquality().equals(other.metadata, metadata));
   }
 
   @override
-  int get hashCode =>
-      runtimeType.hashCode ^
-      const DeepCollectionEquality().hash(id) ^
-      const DeepCollectionEquality().hash(name) ^
-      const DeepCollectionEquality().hash(suiteID) ^
-      const DeepCollectionEquality().hash(parentID) ^
-      const DeepCollectionEquality().hash(testCount) ^
-      const DeepCollectionEquality().hash(line) ^
-      const DeepCollectionEquality().hash(column) ^
-      const DeepCollectionEquality().hash(url) ^
-      const DeepCollectionEquality().hash(metadata);
+  int get hashCode => Object.hash(
+      runtimeType,
+      const DeepCollectionEquality().hash(id),
+      const DeepCollectionEquality().hash(name),
+      const DeepCollectionEquality().hash(suiteID),
+      const DeepCollectionEquality().hash(parentID),
+      const DeepCollectionEquality().hash(testCount),
+      const DeepCollectionEquality().hash(line),
+      const DeepCollectionEquality().hash(column),
+      const DeepCollectionEquality().hash(url),
+      const DeepCollectionEquality().hash(metadata));
 
   @JsonKey(ignore: true)
   @override
@@ -4265,39 +4259,39 @@ abstract class _Group implements Group {
   @override
 
   /// An opaque ID for the group.
-  int get id => throw _privateConstructorUsedError;
+  int get id;
   @override
 
   /// The name of the group, including prefixes from any containing groups.
-  String get name => throw _privateConstructorUsedError;
+  String get name;
   @override
 
   /// The ID of the suite containing this group.
-  int get suiteID => throw _privateConstructorUsedError;
+  int get suiteID;
   @override
 
   /// The ID of the group's parent group, unless it's the root group.
-  int? get parentID => throw _privateConstructorUsedError;
+  int? get parentID;
   @override
 
   /// The number of tests (recursively) within this group.
-  int get testCount => throw _privateConstructorUsedError;
+  int get testCount;
   @override
 
   /// The (1-based) line on which the group was defined, or `null`.
-  int? get line => throw _privateConstructorUsedError;
+  int? get line;
   @override
 
   /// The (1-based) column on which the group was defined, or `null`.
-  int? get column => throw _privateConstructorUsedError;
+  int? get column;
   @override
 
   /// The URL for the file in which the group was defined, or `null`.
-  String? get url => throw _privateConstructorUsedError;
+  String? get url;
   @override
 
   /// This field is deprecated and should not be used.
-  Metadata get metadata => throw _privateConstructorUsedError;
+  Metadata get metadata;
   @override
   @JsonKey(ignore: true)
   _$GroupCopyWith<_Group> get copyWith => throw _privateConstructorUsedError;
@@ -4318,7 +4312,7 @@ class _$MetadataTearOff {
     );
   }
 
-  Metadata fromJson(Map<String, Object> json) {
+  Metadata fromJson(Map<String, Object?> json) {
     return Metadata.fromJson(json);
   }
 }
@@ -4427,19 +4421,18 @@ class _$_Metadata implements _Metadata {
   @override
   bool operator ==(dynamic other) {
     return identical(this, other) ||
-        (other is _Metadata &&
-            (identical(other.skip, skip) ||
-                const DeepCollectionEquality().equals(other.skip, skip)) &&
-            (identical(other.skipReason, skipReason) ||
-                const DeepCollectionEquality()
-                    .equals(other.skipReason, skipReason)));
+        (other.runtimeType == runtimeType &&
+            other is _Metadata &&
+            const DeepCollectionEquality().equals(other.skip, skip) &&
+            const DeepCollectionEquality()
+                .equals(other.skipReason, skipReason));
   }
 
   @override
-  int get hashCode =>
-      runtimeType.hashCode ^
-      const DeepCollectionEquality().hash(skip) ^
-      const DeepCollectionEquality().hash(skipReason);
+  int get hashCode => Object.hash(
+      runtimeType,
+      const DeepCollectionEquality().hash(skip),
+      const DeepCollectionEquality().hash(skipReason));
 
   @JsonKey(ignore: true)
   @override
@@ -4458,9 +4451,9 @@ abstract class _Metadata implements Metadata {
   factory _Metadata.fromJson(Map<String, dynamic> json) = _$_Metadata.fromJson;
 
   @override
-  bool get skip => throw _privateConstructorUsedError;
+  bool get skip;
   @override // The reason the tests was skipped, or `null` if it wasn't skipped.
-  String? get skipReason => throw _privateConstructorUsedError;
+  String? get skipReason;
   @override
   @JsonKey(ignore: true)
   _$MetadataCopyWith<_Metadata> get copyWith =>

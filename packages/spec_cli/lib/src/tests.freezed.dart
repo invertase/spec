@@ -1,5 +1,6 @@
 // coverage:ignore-file
 // GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target
 
 part of 'tests.dart';
@@ -142,7 +143,8 @@ class _$_TestStatusPass extends _TestStatusPass {
 
   @override
   bool operator ==(dynamic other) {
-    return identical(this, other) || (other is _TestStatusPass);
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType && other is _TestStatusPass);
   }
 
   @override
@@ -282,19 +284,18 @@ class _$_TestStatusFail extends _TestStatusFail {
   @override
   bool operator ==(dynamic other) {
     return identical(this, other) ||
-        (other is _TestStatusFail &&
-            (identical(other.error, error) ||
-                const DeepCollectionEquality().equals(other.error, error)) &&
-            (identical(other.stackTrace, stackTrace) ||
-                const DeepCollectionEquality()
-                    .equals(other.stackTrace, stackTrace)));
+        (other.runtimeType == runtimeType &&
+            other is _TestStatusFail &&
+            const DeepCollectionEquality().equals(other.error, error) &&
+            const DeepCollectionEquality()
+                .equals(other.stackTrace, stackTrace));
   }
 
   @override
-  int get hashCode =>
-      runtimeType.hashCode ^
-      const DeepCollectionEquality().hash(error) ^
-      const DeepCollectionEquality().hash(stackTrace);
+  int get hashCode => Object.hash(
+      runtimeType,
+      const DeepCollectionEquality().hash(error),
+      const DeepCollectionEquality().hash(stackTrace));
 
   @JsonKey(ignore: true)
   @override
@@ -381,8 +382,8 @@ abstract class _TestStatusFail extends TestStatus {
       _$_TestStatusFail;
   const _TestStatusFail._() : super._();
 
-  String get error => throw _privateConstructorUsedError;
-  String get stackTrace => throw _privateConstructorUsedError;
+  String get error;
+  String get stackTrace;
   @JsonKey(ignore: true)
   _$TestStatusFailCopyWith<_TestStatusFail> get copyWith =>
       throw _privateConstructorUsedError;
@@ -435,15 +436,15 @@ class _$_TestStatusSkip extends _TestStatusSkip {
   @override
   bool operator ==(dynamic other) {
     return identical(this, other) ||
-        (other is _TestStatusSkip &&
-            (identical(other.skipReason, skipReason) ||
-                const DeepCollectionEquality()
-                    .equals(other.skipReason, skipReason)));
+        (other.runtimeType == runtimeType &&
+            other is _TestStatusSkip &&
+            const DeepCollectionEquality()
+                .equals(other.skipReason, skipReason));
   }
 
   @override
   int get hashCode =>
-      runtimeType.hashCode ^ const DeepCollectionEquality().hash(skipReason);
+      Object.hash(runtimeType, const DeepCollectionEquality().hash(skipReason));
 
   @JsonKey(ignore: true)
   @override
@@ -529,7 +530,7 @@ abstract class _TestStatusSkip extends TestStatus {
   const factory _TestStatusSkip({String? skipReason}) = _$_TestStatusSkip;
   const _TestStatusSkip._() : super._();
 
-  String? get skipReason => throw _privateConstructorUsedError;
+  String? get skipReason;
   @JsonKey(ignore: true)
   _$TestStatusSkipCopyWith<_TestStatusSkip> get copyWith =>
       throw _privateConstructorUsedError;
@@ -566,7 +567,8 @@ class _$_TestStatusPending extends _TestStatusPending {
 
   @override
   bool operator ==(dynamic other) {
-    return identical(this, other) || (other is _TestStatusPending);
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType && other is _TestStatusPending);
   }
 
   @override
