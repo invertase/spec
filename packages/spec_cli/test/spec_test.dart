@@ -25,7 +25,45 @@ void main() {
     testScope('handle test failure after test done', (ref) async {},
         skip: true);
 
-    testScope('handles skipped groups', (ref) async {}, skip: true);
+    testScope('handles skipped groups', (ref) async {
+      final exitCode = await runTest({
+        'my_test.dart': r'''
+import 'package:test/test.dart';
+
+void main() {
+  group('skipped group', () {
+    test('test', () {});
+  }, skip: true);
+  test('pass', () => Future.delayed(Duration(seconds: 1)));
+}
+''',
+      });
+
+      expect(
+        testRenderer!.frames,
+        framesMatch(
+          '''
+ RUNS  test/my_test.dart
+---
+ RUNS  test/my_test.dart
+  skipped group
+---
+ RUNS  test/my_test.dart
+  skipped group
+    ○ test
+---
+ RUNS  test/my_test.dart
+  ... pass
+  skipped group
+    ○ test
+---
+ PASS  test/my_test.dart
+''',
+        ),
+      );
+
+      expect(exitCode, 0);
+    });
 
     testScope('handles skipped tests', (ref) async {
       final exitCode = await runTest({
