@@ -27,6 +27,7 @@ class FullScreenRenderer implements Renderer {
 
   @override
   void renderFrame(String output) {
+    // TODO update renderer to use ansi to only output the diff of the previous vs new frame
     stdout
       ..write('${VT100.moveCursorToTopLeft}${VT100.clearScreenFromCursorDown}')
       ..writeln(output);
@@ -61,6 +62,7 @@ class BacktrackingRenderer implements Renderer {
         VT100.moveCursorUp(lastOutputHeight - 1) + VT100.moveCursorToColumn(0),
       );
     }
+    // TODO update renderer to use ansi to only output the diff of the previous vs new frame
     stdout.write(VT100.clearScreenFromCursorDown);
     stdout.write(output);
 
