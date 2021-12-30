@@ -53,11 +53,11 @@ Stream<List<TestEvent>> dartTest({
 }
 
 Stream<List<TestEvent>> _parseTestJsonOutput(
-  Future<Process> Function() process,
-) {
-  final events = process()
-      .asStream()
-      .asyncExpand((process) => process.stdout)
+  Future<Process> Function() processCb,
+) async* {
+  final process = await processCb();
+
+  final events = process.stdout
       .map(utf8.decode)
       // Sometimes a message contains multiple JSON map at once
       // so we split the message in multiple events
@@ -72,19 +72,13 @@ Stream<List<TestEvent>> _parseTestJsonOutput(
       .map((json) => TestEvent.fromJson(Map.from(json)));
 
   final allEvents = <TestEvent>[];
-  final controller = StreamController<List<TestEvent>>();
 
-  late StreamSubscription sub;
-  controller.onListen = () {
-    sub = events.listen((event) {
+  try {
+    await for (final event in events) {
       allEvents.add(event);
-      controller.add(allEvents.toList());
-    });
-  };
-  controller.onCancel = () {
-    sub.cancel();
-    controller.close();
-  };
-
-  return controller.stream;
+      yield allEvents.toList();
+    }
+  } finally {
+    process.kill();
+  }
 }
