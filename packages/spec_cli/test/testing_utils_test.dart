@@ -81,7 +81,6 @@ void main() {
         testRenderer!.frames.last,
         '''
  FAIL  test/my_test.dart
-  ✓ works
   ✕ fails
     Expected: <1>
       Actual: <0>

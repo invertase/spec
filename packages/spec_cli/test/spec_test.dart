@@ -114,8 +114,6 @@ void main() {
     test/my_test.dart 6:22  main.<fn>
 ---
  FAIL  test/my_test.dart
-  ○ skipped
-  ✓ pass
   ✕ fail
     Bad state: fail
     test/my_test.dart 6:22  main.<fn>
@@ -167,23 +165,15 @@ void main() {
         testRenderer!.frames.last,
         '''
  FAIL  test/my_test.dart
-  ✓ root-test
   ✕ root failing test
     Bad state: fail
     test/my_test.dart 26:35  main.<fn>
   root
-    ✓ root-test
-    mid
-      ✓ test
-hello world
     mid-2
       ✕ test-2
         Bad state: fail
         test/my_test.dart 11:28  main.<fn>.<fn>.<fn>
   root2
-    ✓ root-test2
-    mid2
-      ✓ test2
     mid2-2
       ✕ test2-2
         Bad state: fail
@@ -479,12 +469,6 @@ another
     test/my_test.dart 11:5  main.<fn>
 ---
  FAIL  test/my_test.dart
-  ✓ second
-hello
-second
-  ✓ third
-hello
-third
   ✕ first
 hello
 first
@@ -699,8 +683,6 @@ void main() {
     test/my_test.dart 9:5  main.<fn>
 ---
  FAIL  test/my_test.dart
-  ✓ second
-  ✓ third
   ✕ first
     Bad state: first
     test/my_test.dart 9:5  main.<fn>
@@ -763,8 +745,6 @@ void main() {
     Bad state: fail
     test/failing_test.dart 3:25  main.<fn>
 ---
- PASS  test/passing_test.dart
-
  FAIL  test/failing_test.dart
   ✕ failing
     Bad state: fail
@@ -775,6 +755,53 @@ Tests:       1 failed, 1 passed, 2 total
 Time:        00:00:00
 '''),
       );
+
+      expect(exitCode, -1);
+    });
+
+    testScope(
+        'summary contains list of all errors independently from suites/groups',
+        (ref) async {
+      final exitCode = await runTest({
+        'failing_test.dart': '''
+import 'package:test/test.dart';
+void main() {
+  test('failing', () => throw StateError('fail'));
+  test('passing', () {});
+}
+''',
+        'failing_group_test.dart': '''
+import 'package:test/test.dart';
+void main() {
+  group('group', () {
+    test('failing', () => throw StateError('fail'));
+  });
+  test('passing', () {});
+}
+''',
+        'passing_test.dart': '''
+import 'package:test/test.dart';
+void main() {
+  test('passing', () {});
+}
+''',
+      });
+
+      expect(testRenderer!.frames.last, '''
+ FAIL  test/failing_group_test.dart
+  group
+    ✕ failing
+      Bad state: fail
+      test/failing_group_test.dart 4:27  main.<fn>.<fn>
+ FAIL  test/failing_test.dart
+  ✕ failing
+    Bad state: fail
+    test/failing_test.dart 3:25  main.<fn>
+
+Test Suites: 2 failed, 1 passed, 3 total
+Tests:       2 failed, 3 passed, 5 total
+Time:        00:00:00
+''');
 
       expect(exitCode, -1);
     });

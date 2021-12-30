@@ -113,8 +113,8 @@ ${stack.trim()}''';
   );
 }, dependencies: [$test, $testStatus, $spinner, $testName]);
 
-final AutoDisposeProviderFamily<AsyncValue<String>, GroupKey> $groupOutput =
-    Provider.autoDispose.family<AsyncValue<String>, GroupKey>((ref, groupKey) {
+final AutoDisposeProviderFamily<AsyncValue<String?>, GroupKey> $groupOutput =
+    Provider.autoDispose.family<AsyncValue<String?>, GroupKey>((ref, groupKey) {
   return merge((unwrap) {
     final groupDepth = unwrap(ref.watch($groupDepth(groupKey)));
     final label = unwrap(ref.watch($groupName(groupKey)));
@@ -125,6 +125,7 @@ final AutoDisposeProviderFamily<AsyncValue<String>, GroupKey> $groupOutput =
         .sortedByStatus(ref)
         .map((test) {
           return _renderTest(
+            onlyShowErrors: ref.watch($done) != null,
             messages: ref.watch($testMessages(test.key)),
             error: ref.watch($testError(test.key)),
             label: ref.watch($testLabel(test.key)),
@@ -139,6 +140,8 @@ final AutoDisposeProviderFamily<AsyncValue<String>, GroupKey> $groupOutput =
         .whereNotNull()
         .join('\n');
 
+    if (testContent.isEmpty && childrenGroups.isEmpty) return null;
+
     return [
       label.multilinePadLeft(groupDepth * 2 + 2),
       if (testContent.isNotEmpty) testContent,
@@ -147,6 +150,7 @@ final AutoDisposeProviderFamily<AsyncValue<String>, GroupKey> $groupOutput =
   });
 }, dependencies: [
   $groupName,
+  $done,
   $groupDepth,
   $testsForGroup,
   $testError,
@@ -156,11 +160,13 @@ final AutoDisposeProviderFamily<AsyncValue<String>, GroupKey> $groupOutput =
 ]);
 
 String? _renderTest({
+  required bool onlyShowErrors,
   required List<String> messages,
   required String? error,
   required String? label,
   required int depth,
 }) {
+  if (onlyShowErrors && error == null) return null;
   if (messages.isEmpty && error == null && label == null) return null;
 
   error = error?.multilinePadLeft(depth * 2 + 4);
@@ -189,6 +195,7 @@ final $suiteOutput =
             .sortedByStatus(ref)
             .map((test) {
               return _renderTest(
+                onlyShowErrors: ref.watch($done) != null,
                 messages: ref.watch($testMessages(test.key)),
                 error: ref.watch($testError(test.key)),
                 label: ref.watch($testLabel(test.key)),
@@ -222,6 +229,7 @@ final $suiteOutput =
   $rootGroupsForSuite,
   $groupOutput,
   $testLabel,
+  $done,
   $suiteOutputLabel,
   $rootTestsForSuite,
 ]);
@@ -267,6 +275,7 @@ ${'Time:'.bold}        $timeDescription''';
 
 final $output = Provider.autoDispose<AsyncValue<String>>((ref) {
   return merge((unwrap) {
+    final isDone = ref.watch($done) != null;
     final suites =
         ref.watch($suites).sorted((a, b) => a.path!.compareTo(b.path!));
 
@@ -285,15 +294,19 @@ final $output = Provider.autoDispose<AsyncValue<String>>((ref) {
 
     final summary = ref.watch($summary);
 
+    // During the summary, only show passing suites if there are not failures
+    final shouldShowPassingSuites = !isDone || failingSuites.isEmpty;
+
     return [
-      if (passingSuites.isNotEmpty) passingSuites,
-      if (loadingSuites.isNotEmpty) loadingSuites,
+      if (shouldShowPassingSuites && passingSuites.isNotEmpty) passingSuites,
+      if (!isDone && loadingSuites.isNotEmpty) loadingSuites,
       if (failingSuites.isNotEmpty) failingSuites,
       if (summary != null) summary,
     ].join('\n\n');
   });
 }, dependencies: [
   $suites,
+  $done,
   $suiteOutput,
   $suiteStatus,
   $summary,
