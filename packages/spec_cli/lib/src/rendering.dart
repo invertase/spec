@@ -90,7 +90,7 @@ final $testLabel =
         fail: (err, stack) => '${'✕'.red} $name',
         pending: () => '${ref.watch($spinner)} $name',
         // TODO show skipReason
-        skip: (skipReason) => '○ $name',
+        skip: (skipReason) => '${'○'.yellow} $name',
       );
     }
 
