@@ -54,17 +54,17 @@ void main() {
   ... pass
 ---
  RUNS  test/my_test.dart
-  ✓ pass
   ○ skipped
+  ✓ pass
 ---
  RUNS  test/my_test.dart
-  ✓ pass
   ○ skipped
+  ✓ pass
   ... fail
 ---
  FAIL  test/my_test.dart
-  ✓ pass
   ○ skipped
+  ✓ pass
   ✕ fail
     Bad state: fail
     test/my_test.dart 6:22  main.<fn>

@@ -106,8 +106,8 @@ extension TestListExt on List<Test> {
   List<Test> sortedByStatus(Ref ref) {
     return sortedBy<num>((test) {
       return ref.watch($testStatus(test.key)).map(
-            pass: (_) => 0,
-            skip: (_) => 1,
+            skip: (_) => 0,
+            pass: (_) => 1,
             pending: (_) => 2,
             fail: (_) => 3,
           );
