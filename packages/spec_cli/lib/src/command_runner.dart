@@ -53,7 +53,10 @@ Future<int> fest({
         value.when(
           data: (value) => _lastFailedTests = value,
           loading: () => _lastFailedTests = [],
-          error: (err, stack) => print('error'),
+          error: (err, stack) {
+            print('Error: failed to obtain failing tests\n$err\n$stack');
+            exit(-1);
+          },
         );
       });
 
@@ -78,7 +81,10 @@ Future<int> fest({
       (lastOutput, output) {
         output.when(
           loading: () {}, // nothing to do
-          error: (err, stack) => print('Error: failed to render\n$err\n$stack'),
+          error: (err, stack) {
+            print('Error: failed to render\n$err\n$stack');
+            exit(-1);
+          },
           data: (output) {
             if (output.trim().isNotEmpty) renderer.renderFrame(output);
           },
