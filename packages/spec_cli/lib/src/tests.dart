@@ -111,6 +111,17 @@ final $allFailedTests = Provider<List<Test>>((ref) {
 final $testStatus = Provider.family<TestStatus, TestKey>((ref, testKey) {
   final events = ref.watch($events);
 
+  final test = ref.watch($test(testKey)).value;
+  if (test == null) return const TestStatus.pending();
+
+  // Rely on test metadatas to determine if a test is skipped instead of the
+  // done event's "skipped" property, because the latter will arrive later.
+  // This ensures that we're not showing the test as "pending" when it's known
+  // to be skipped.
+  if (test.metadata.skip) {
+    return TestStatus.skip(skipReason: test.metadata.skipReason);
+  }
+
   final error = events
       .whereType<TestEventTestError>()
       // TODO can we have the groupID/suiteID too?
@@ -130,13 +141,7 @@ final $testStatus = Provider.family<TestStatus, TestKey>((ref, testKey) {
       .firstOrNull;
 
   if (done != null) {
-    if (done.skipped) {
-      // It is safe to obtain the test synchronously here, because test events
-      // are always emitted before start events
-      final skipReason = ref.watch($test(testKey)).value!.metadata.skipReason;
-
-      return TestStatus.skip(skipReason: skipReason);
-    }
+    assert(!done.skipped && done.result == TestDoneStatus.success);
     return const TestStatus.pass();
   }
 

@@ -35,7 +35,7 @@ import 'package:test/test.dart';
 void main() {
   test('skipped', () => throw StateError('??'), skip: true);
   test('pass', () => Future.delayed(Duration(seconds: 1)));
-  test('fail', () => thow StateError('fail'));
+  test('fail', () => throw StateError('fail'));
 }
 ''',
       });
@@ -47,18 +47,32 @@ void main() {
  RUNS  test/my_test.dart
 ---
  RUNS  test/my_test.dart
-   ○ skipped
+  ○ skipped
 ---
  RUNS  test/my_test.dart
-   ○ skipped
-   ... pass
+  ○ skipped
+  ... pass
 ---
- PASS  test/my_test.dart
+ RUNS  test/my_test.dart
+  ✓ pass
+  ○ skipped
+---
+ RUNS  test/my_test.dart
+  ✓ pass
+  ○ skipped
+  ... fail
+---
+ FAIL  test/my_test.dart
+  ✓ pass
+  ○ skipped
+  ✕ fail
+    Bad state: fail
+    test/my_test.dart 6:22  main.<fn>
 ''',
         ),
       );
 
-      expect(exitCode, 0);
+      expect(exitCode, -1);
     });
 
     testScope('handles nested groups', (ref) async {
