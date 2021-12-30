@@ -110,6 +110,10 @@ Future<int> fest({
       );
     }
 
+    await exitCodeCompleter.future;
+    print('got exit code');
+    await Future.delayed(Duration(seconds: 2));
+    print('done');
     return exitCodeCompleter.future;
   }, overrides: [
     if (workingDirectory != null)

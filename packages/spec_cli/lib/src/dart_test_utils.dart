@@ -106,9 +106,10 @@ extension TestListExt on List<Test> {
   List<Test> sortedByStatus(Ref ref) {
     return sortedBy<num>((test) {
       return ref.watch($testStatus(test.key)).map(
-            data: (_) => 0,
-            loading: (_) => 1,
-            error: (_) => 2,
+            pass: (_) => 0,
+            skip: (_) => 1,
+            pending: (_) => 2,
+            fail: (_) => 3,
           );
     });
   }

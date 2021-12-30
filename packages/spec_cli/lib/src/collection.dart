@@ -6,11 +6,6 @@ extension IterableExt<T> on Iterable<T> {
     return firstWhereOrNull((element) => element is R) as R?;
   }
 
-  T? get firstOrNull {
-    if (isEmpty) return null;
-    return first;
-  }
-
   AsyncValue<T> get firstDataOrLoading {
     if (isEmpty) return AsyncLoading();
     return AsyncData(first);

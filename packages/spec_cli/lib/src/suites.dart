@@ -56,13 +56,13 @@ final $suiteStatus =
     }
 
     // any loading leads to RUNNING, even if there's an error/success
-    final hasLoading = tests.keys
-        .any((testKey) => ref.watch($testStatus(testKey)) is AsyncLoading);
+    final hasLoading =
+        tests.keys.any((testKey) => ref.watch($testStatus(testKey)).pending);
     if (hasLoading) unwrap(const AsyncLoading());
 
     final error = tests.keys
         .map((id) => ref.watch($testStatus(id)))
-        .firstWhereOrNull((status) => status is AsyncError) as AsyncError?;
+        .firstWhereOrNull((status) => status.failing) as AsyncError?;
 
     if (error != null) {
       unwrap(

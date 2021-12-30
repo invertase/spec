@@ -15,7 +15,6 @@ void main() {
         (ref) async {},
         skip: true);
 
-    testScope('handles skipped tests', (ref) async {}, skip: true);
     testScope('handles skipped tests with a reason', (ref) async {},
         skip: true);
 
@@ -25,6 +24,42 @@ void main() {
 
     testScope('handle test failure after test done', (ref) async {},
         skip: true);
+
+    testScope('handles skipped groups', (ref) async {}, skip: true);
+
+    testScope('handles skipped tests', (ref) async {
+      final exitCode = await runTest({
+        'my_test.dart': r'''
+import 'package:test/test.dart';
+
+void main() {
+  test('skipped', () => throw StateError('??'), skip: true);
+  test('pass', () => Future.delayed(Duration(seconds: 1)));
+  test('fail', () => thow StateError('fail'));
+}
+''',
+      });
+
+      expect(
+        testRenderer!.frames,
+        framesMatch(
+          '''
+ RUNS  test/my_test.dart
+---
+ RUNS  test/my_test.dart
+   ○ skipped
+---
+ RUNS  test/my_test.dart
+   ○ skipped
+   ... pass
+---
+ PASS  test/my_test.dart
+''',
+        ),
+      );
+
+      expect(exitCode, 0);
+    });
 
     testScope('handles nested groups', (ref) async {
       final exitCode = await runTest({

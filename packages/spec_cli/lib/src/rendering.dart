@@ -61,8 +61,6 @@ final $spinner = Provider.autoDispose<String>((ref) {
   ref.onDispose(inverval.listen((_) {}).cancel);
 
   return charForOffset(offset);
-
-  return '○';
 });
 
 final $testMessages =
@@ -88,9 +86,11 @@ final $testLabel =
       // Tests with a null URL are non-user-defined tests (such as setup/teardown).
       // They can fail, but we don't want to show their name.
       return status.when(
-        data: (data) => '${'✓'.green} ${name}',
-        error: (err, stack) => '${'✕'.red} ${name}',
-        loading: () => '${ref.watch($spinner)} ${name}',
+        pass: () => '${'✓'.green} $name',
+        fail: (err, stack) => '${'✕'.red} $name',
+        pending: () => '${ref.watch($spinner)} $name',
+        // TODO show skipReason
+        skip: (skipReason) => '○ $name',
       );
     }
 
@@ -103,16 +103,10 @@ final $testError =
   final status = ref.watch($testStatus(testKey));
 
   return status.whenOrNull<String?>(
-    error: (err, stack) {
-      final error = err is FailedTestException ? err.testError.error : err;
-
-      final stackTrace = err is FailedTestException
-          ? err.testError.stackTrace
-          : stack.toString();
-
+    fail: (err, stack) {
       return '''
-${error.toString()}
-${stackTrace.trim()}''';
+$err
+${stack.trim()}''';
     },
   );
 }, dependencies: [$test, $testStatus, $spinner, $testName]);

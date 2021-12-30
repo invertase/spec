@@ -1,4 +1,5 @@
 import 'package:dart_test_adapter/dart_test_adapter.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:spec_cli/src/collection.dart';
 
@@ -7,6 +8,26 @@ import 'dart_test_utils.dart';
 import 'groups.dart';
 import 'provider_utils.dart';
 import 'suites.dart';
+
+part 'tests.freezed.dart';
+
+@freezed
+class TestStatus with _$TestStatus {
+  const TestStatus._();
+
+  const factory TestStatus.pass() = _TestStatusPass;
+  const factory TestStatus.fail(
+    String error, {
+    required String stackTrace,
+  }) = _TestStatusFail;
+  const factory TestStatus.skip({String? skipReason}) = _TestStatusSkip;
+  const factory TestStatus.pending() = _TestStatusPending;
+
+  bool get passing => this is _TestStatusPass;
+  bool get failing => this is _TestStatusFail;
+  bool get skipped => this is _TestStatusSkip;
+  bool get pending => this is _TestStatusPending;
+}
 
 final $rootTestsForSuite =
     Provider.autoDispose.family<List<Test>, SuiteKey>((ref, suiteKey) {
@@ -87,7 +108,7 @@ final $allFailedTests = Provider<List<Test>>((ref) {
       .toList();
 }, dependencies: [$allTests, $testStatus]);
 
-final $testStatus = Provider.family<AsyncValue<void>, TestKey>((ref, testKey) {
+final $testStatus = Provider.family<TestStatus, TestKey>((ref, testKey) {
   final events = ref.watch($events);
 
   final error = events
@@ -96,9 +117,9 @@ final $testStatus = Provider.family<AsyncValue<void>, TestKey>((ref, testKey) {
       .where((e) => e.testID == testKey.testID)
       .firstOrNull;
   if (error != null) {
-    return AsyncError(
+    return TestStatus.fail(
       error.error,
-      stackTrace: StackTrace.fromString(error.stackTrace),
+      stackTrace: error.stackTrace,
     );
   }
 
@@ -107,9 +128,19 @@ final $testStatus = Provider.family<AsyncValue<void>, TestKey>((ref, testKey) {
       // TODO can we have the groupID/suiteID too?
       .where((e) => e.testID == testKey.testID)
       .firstOrNull;
-  if (done != null) return const AsyncData(null);
 
-  return const AsyncLoading();
+  if (done != null) {
+    if (done.skipped) {
+      // It is safe to obtain the test synchronously here, because test events
+      // are always emitted before start events
+      final skipReason = ref.watch($test(testKey)).value!.metadata.skipReason;
+
+      return TestStatus.skip(skipReason: skipReason);
+    }
+    return const TestStatus.pass();
+  }
+
+  return const TestStatus.pending();
 }, dependencies: [$events]);
 
 final $currentlyFailedTestsLocation =
