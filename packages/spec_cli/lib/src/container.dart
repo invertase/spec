@@ -42,6 +42,8 @@ abstract class DartRef {
 
   T refresh<T>(ProviderBase<T> provider) => _container.refresh(provider);
 
+  Future<void> pump() => _container.pump();
+
   ProviderSubscription<T> listen<T>(
     ProviderBase<T> provider,
     void Function(T? previous, T current) listener, {

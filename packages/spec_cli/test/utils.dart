@@ -76,9 +76,12 @@ class TestRenderer extends Renderer {
 
   @override
   void renderFrame(String output) {
-    final outputWithoutAnsi = output.replaceAll(ansiRegex, '');
+    final normalizedOutput = output.replaceAll(ansiRegex, '').replaceFirst(
+          RegExp(r'Time:.+$', multiLine: true),
+          r'Time:        00:00:00',
+        );
 
-    frames.add(outputWithoutAnsi + '\n');
+    frames.add(normalizedOutput + '\n');
   }
 }
 

@@ -58,6 +58,12 @@ void main() {
     ○ test
 ---
  PASS  test/my_test.dart
+---
+ PASS  test/my_test.dart
+
+Test Suites: 1 passed, 1 total
+Tests:       1 passed, 1 skipped, 2 total
+Time:        00:00:00
 ''',
         ),
       );
@@ -106,6 +112,17 @@ void main() {
   ✕ fail
     Bad state: fail
     test/my_test.dart 6:22  main.<fn>
+---
+ FAIL  test/my_test.dart
+  ○ skipped
+  ✓ pass
+  ✕ fail
+    Bad state: fail
+    test/my_test.dart 6:22  main.<fn>
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 1 passed, 1 skipped, 3 total
+Time:        00:00:00
 ''',
         ),
       );
@@ -171,6 +188,10 @@ hello world
       ✕ test2-2
         Bad state: fail
         test/my_test.dart 21:29  main.<fn>.<fn>.<fn>
+
+Test Suites: 1 failed, 1 total
+Tests:       3 failed, 5 passed, 8 total
+Time:        00:00:00
 ''',
       );
 
@@ -195,6 +216,12 @@ void main() {}
  RUNS  test/my_test.dart
 ---
  PASS  test/my_test.dart
+---
+ PASS  test/my_test.dart
+
+Test Suites: 1 passed, 1 total
+Tests:       1 passed, 1 total
+Time:        00:00:00
 ''',
           ),
         );
@@ -225,6 +252,12 @@ void main() {
  RUNS  test/my_test.dart
 ---
  PASS  test/my_test.dart
+---
+ PASS  test/my_test.dart
+
+Test Suites: 1 passed, 1 total
+Tests:       0 total
+Time:        00:00:00
 ''',
           ),
         );
@@ -296,6 +329,12 @@ hello
 this is an error
 ---
  PASS  test/my_test.dart
+---
+ PASS  test/my_test.dart
+
+Test Suites: 1 passed, 1 total
+Tests:       1 passed, 1 total
+Time:        00:00:00
 ''',
         ),
       );
@@ -438,6 +477,25 @@ another
 
     Bad state: first
     test/my_test.dart 11:5  main.<fn>
+---
+ FAIL  test/my_test.dart
+  ✓ second
+hello
+second
+  ✓ third
+hello
+third
+  ✕ first
+hello
+first
+another
+
+    Bad state: first
+    test/my_test.dart 11:5  main.<fn>
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 2 passed, 3 total
+Time:        00:00:00
 ''',
         ),
       );
@@ -497,6 +555,13 @@ void main() {
 ---
  PASS  test/passing_test.dart
  PASS  test/pending_test.dart
+---
+ PASS  test/passing_test.dart
+ PASS  test/pending_test.dart
+
+Test Suites: 2 passed, 2 total
+Tests:       2 passed, 2 total
+Time:        00:00:00
 ''',
         ]),
       );
@@ -555,6 +620,12 @@ void main() {
   ... third
 ---
  PASS  test/my_test.dart
+---
+ PASS  test/my_test.dart
+
+Test Suites: 1 passed, 1 total
+Tests:       3 passed, 3 total
+Time:        00:00:00
 ''',
         ),
       );
@@ -626,6 +697,17 @@ void main() {
   ✕ first
     Bad state: first
     test/my_test.dart 9:5  main.<fn>
+---
+ FAIL  test/my_test.dart
+  ✓ second
+  ✓ third
+  ✕ first
+    Bad state: first
+    test/my_test.dart 9:5  main.<fn>
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 2 passed, 3 total
+Time:        00:00:00
 ''',
         ),
       );
@@ -680,6 +762,17 @@ void main() {
   ✕ failing
     Bad state: fail
     test/failing_test.dart 3:25  main.<fn>
+---
+ PASS  test/passing_test.dart
+
+ FAIL  test/failing_test.dart
+  ✕ failing
+    Bad state: fail
+    test/failing_test.dart 3:25  main.<fn>
+
+Test Suites: 1 failed, 1 passed, 2 total
+Tests:       1 failed, 1 passed, 2 total
+Time:        00:00:00
 '''),
       );
 

@@ -50,6 +50,12 @@ void main() {
   ... Counter defaults to 0
 ---
  PASS  test/my_test.dart
+---
+ PASS  test/my_test.dart
+
+Test Suites: 1 passed, 1 total
+Tests:       1 passed, 1 total
+Time:        00:00:00
 ''',
         ),
       );
@@ -82,6 +88,10 @@ void main() {
 
     package:test_api       expect
     test/my_test.dart 8:5  main.<fn>
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 1 passed, 2 total
+Time:        00:00:00
 ''',
       );
     });

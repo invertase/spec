@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:args/args.dart';
 import 'package:dart_test_adapter/dart_test_adapter.dart';
+import 'package:collection/collection.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:spec_cli/src/collection.dart';
 import 'package:spec_cli/src/container.dart';
@@ -110,9 +111,20 @@ Future<int> fest({
       );
     }
 
+    await exitCodeCompleter.future;
+    // Wait for the summary to be printed, since it is renderer right after the
+    // exit code is obtained to obtain the time spent
+    await ref.pump();
+
     return exitCodeCompleter.future;
   }, overrides: [
     if (workingDirectory != null)
       $workingDirectory.overrideWithValue(Directory(workingDirectory)),
   ]);
 }
+
+final $done = Provider.autoDispose<TestEventDone?>((ref) {
+  final events = ref.watch($events);
+
+  return events.whereType<TestEventDone>().firstOrNull;
+}, dependencies: [$events]);

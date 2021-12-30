@@ -1,6 +1,8 @@
 import 'package:dart_test_adapter/dart_test_adapter.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:collection/collection.dart';
+import 'package:spec_cli/src/command_runner.dart';
+import 'package:duration/duration.dart';
 
 import 'dart_test.dart';
 import 'dart_test_utils.dart';
@@ -18,9 +20,9 @@ final $suiteOutputLabel =
 
     return [
       suiteStatus.map(
-        data: (_) => ' PASS '.black.bgGreen,
-        error: (_) => ' FAIL '.white.bgRed,
-        loading: (_) => ' RUNS '.black.bgYellow,
+        data: (_) => ' PASS '.black.bgGreen.bold,
+        error: (_) => ' FAIL '.white.bgRed.bold,
+        loading: (_) => ' RUNS '.black.bgYellow.bold,
       ),
       if (suite.path != null) suite.path!,
     ].join(' ');
@@ -224,6 +226,45 @@ final $suiteOutput =
   $rootTestsForSuite,
 ]);
 
+final $summary = Provider.autoDispose<String?>((ref) {
+  final done = ref.watch($done);
+  if (done == null) return null;
+
+  final suites = ref.watch($suites);
+  final failingSuitesCount =
+      suites.where((e) => ref.watch($suiteStatus(e.key)) is AsyncError).length;
+  final passingSuitesCount =
+      suites.where((e) => ref.watch($suiteStatus(e.key)) is AsyncData).length;
+
+  final tests = ref.watch($allTests).where((test) => !test.isHidden).toList();
+  final failingTestsCount =
+      tests.where((e) => ref.watch($testStatus(e.key)).failing).length;
+  final passingTestsCount =
+      tests.where((e) => ref.watch($testStatus(e.key)).passing).length;
+  final skippedTestsCount =
+      tests.where((e) => ref.watch($testStatus(e.key)).skipped).length;
+
+  final suitesDescription = [
+    if (failingSuitesCount > 0) '$failingSuitesCount failed'.bold.red,
+    if (passingSuitesCount > 0) '$passingSuitesCount passed'.bold.green,
+    '${suites.length} total',
+  ].join(', ');
+
+  final testsDescription = [
+    if (failingTestsCount > 0) '$failingTestsCount failed'.bold.red,
+    if (passingTestsCount > 0) '$passingTestsCount passed'.bold.green,
+    if (skippedTestsCount > 0) '$skippedTestsCount skipped'.bold.yellow,
+    '${tests.length} total',
+  ].join(', ');
+
+  final timeDescription = prettyDuration(Duration(milliseconds: done.time));
+
+  return '''
+${'Test Suites:'.bold} $suitesDescription
+${'Tests:'.bold}       $testsDescription
+${'Time:'.bold}        $timeDescription''';
+}, dependencies: [$done, $suites, $allTests, $testStatus, $suiteStatus]);
+
 final $output = Provider.autoDispose<AsyncValue<String>>((ref) {
   return merge((unwrap) {
     final suites =
@@ -242,16 +283,20 @@ final $output = Provider.autoDispose<AsyncValue<String>>((ref) {
         .map((suite) => unwrap(ref.watch($suiteOutput(suite.key))))
         .join('\n');
 
+    final summary = ref.watch($summary);
+
     return [
       if (passingSuites.isNotEmpty) passingSuites,
       if (loadingSuites.isNotEmpty) loadingSuites,
       if (failingSuites.isNotEmpty) failingSuites,
+      if (summary != null) summary,
     ].join('\n\n');
   });
 }, dependencies: [
   $suites,
   $suiteOutput,
   $suiteStatus,
+  $summary,
 ]);
 
 extension StringExt on String {
