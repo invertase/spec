@@ -1,4 +1,5 @@
 import 'package:dart_test_adapter/dart_test_adapter.dart';
+import 'package:path/path.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:collection/collection.dart';
 import 'package:duration/duration.dart';
@@ -17,6 +18,19 @@ final $suiteOutputLabel =
   return merge((unwrap) {
     final suite = unwrap(ref.watch($suite(suiteKey)));
     final suiteStatus = ref.watch($suiteStatus(suiteKey));
+    final workingDir = ref.watch($workingDirectory);
+
+    String? relativeSuitePath;
+    if (suite.path != null) {
+      // Converting relative suite paths to absolute, such that later calls to
+      // [relative] correctly understand what the suite path is based on.
+      final absoluteSuitePath = isRelative(suite.path!)
+          // TODO should be based on the package path not the workspace path
+          ? join(workingDir.path, suite.path)
+          : suite.path!;
+
+      relativeSuitePath = relative(absoluteSuitePath, from: workingDir.path);
+    }
 
     return [
       suiteStatus.map(
@@ -27,10 +41,16 @@ final $suiteOutputLabel =
           return ' RUNS '.black.bgYellow.bold;
         },
       ),
-      if (suite.path != null) suite.path!,
+      if (relativeSuitePath != null) relativeSuitePath,
     ].join(' ');
   });
-}, dependencies: [$suite, $scaffoldGroup, $suiteStatus, $isEarlyAbort]);
+}, dependencies: [
+  $suite,
+  $scaffoldGroup,
+  $suiteStatus,
+  $isEarlyAbort,
+  $workingDirectory,
+]);
 
 final $spinner = Provider.autoDispose<String>((ref) {
   String charForOffset(int offset) {
@@ -198,9 +218,9 @@ final $suiteOutput =
   return merge((unwrap) {
     final suiteStatus = ref.watch($suiteStatus(suiteKey));
     final showContent = suiteStatus.map(
-      data: (_) => false,
+      data: (_) => true,
       error: (_) => true,
-      loading: (_) => true,
+      loading: (_) => false,
     );
 
     final rootTestsOutput = showContent
