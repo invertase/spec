@@ -19,7 +19,6 @@ Stream<List<TestEvent>> flutterTest({
         ...?arguments,
         '--reporter=json',
         '--no-pub',
-        '--chain-stack-traces',
         ...?tests,
       ],
       environment: environment,
