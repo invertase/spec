@@ -54,8 +54,7 @@ Future<int> fest({
           data: (value) => _lastFailedTests = value,
           loading: () => _lastFailedTests = [],
           error: (err, stack) {
-            print('Error: failed to obtain failing tests\n$err\n$stack');
-            exit(-1);
+            Zone.current.handleUncaughtError(err, stack!);
           },
         );
       });
@@ -82,8 +81,7 @@ Future<int> fest({
         output.when(
           loading: () {}, // nothing to do
           error: (err, stack) {
-            print('Error: failed to render\n$err\n$stack');
-            exit(-1);
+            Zone.current.handleUncaughtError(err, stack!);
           },
           data: (output) {
             if (output.trim().isNotEmpty) renderer.renderFrame(output);
