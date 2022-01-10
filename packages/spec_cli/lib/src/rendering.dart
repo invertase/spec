@@ -267,7 +267,7 @@ final $suiteOutput =
   $hasExitCode,
   $suiteOutputLabel,
   $rootTestsForSuite,
-]);
+], name: 'suiteOutput');
 
 final $summary = Provider.autoDispose<String?>((ref) {
   // Don't show the summary until the very last render
@@ -356,7 +356,7 @@ final $output = Provider.autoDispose<AsyncValue<String>>((ref) {
   $suiteOutput,
   $suiteStatus,
   $summary,
-]);
+], name: 'output');
 
 extension StringExt on String {
   String multilinePadLeft(int tab) {
