@@ -122,4 +122,4 @@ final $hasExitCode = Provider<bool>((ref) {
         error: (_, __) => false,
         loading: () => false,
       );
-}, dependencies: [$exitCode]);
+}, dependencies: [$exitCode], name: 'hasExitCode');
