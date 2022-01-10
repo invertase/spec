@@ -117,9 +117,9 @@ final $exitCode = Provider<AsyncValue<int>>((ref) {
 }, dependencies: [$suites, $suiteStatus, $isEarlyAbort, $hasAllSuites]);
 
 final $hasExitCode = Provider<bool>((ref) {
-  return ref.watch($exitCode).when(
-        data: (_) => true,
-        error: (_, __) => false,
-        loading: () => false,
+  return ref.watch($exitCode).map(
+        data: (d) => d.isRefreshing == false,
+        error: (_) => false,
+        loading: (_) => false,
       );
 }, dependencies: [$exitCode], name: 'hasExitCode');

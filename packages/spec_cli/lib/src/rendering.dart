@@ -218,7 +218,7 @@ final $suiteOutput =
   return merge((unwrap) {
     final suiteStatus = ref.watch($suiteStatus(suiteKey));
     final showContent = suiteStatus.map(
-      data: (_) => true,
+      data: (_) => false,
       error: (_) => true,
       loading: (_) => false,
     );
@@ -271,8 +271,8 @@ final $suiteOutput =
 
 final $summary = Provider.autoDispose<String?>((ref) {
   // Don't show the summary until the very last render
-  final exitCode = ref.watch($exitCode);
-  if (exitCode is! AsyncData) return null;
+  final hasExitCode = ref.watch($hasExitCode);
+  if (!hasExitCode) return null;
 
   final suites = ref.watch($suites);
   final failingSuitesCount =
@@ -311,7 +311,7 @@ ${'Test Suites:'.bold} $suitesDescription
 ${'Tests:'.bold}       $testsDescription
 ${'Time:'.bold}        $timeDescription''';
 }, dependencies: [
-  $exitCode,
+  $hasExitCode,
   $suites,
   $allTests,
   $testStatus,

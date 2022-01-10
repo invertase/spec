@@ -491,6 +491,10 @@ void main() {
  PASS  test/passing_test.dart
 
  RUNS  test/pending_test.dart
+---
+ PASS  test/passing_test.dart
+
+ RUNS  test/pending_test.dart
   ... pending
 ---
  PASS  test/passing_test.dart
@@ -675,6 +679,11 @@ void main() {
   ... failing
  RUNS  test/passing_test.dart
   ... passing
+---
+ RUNS  test/passing_test.dart
+
+ FAIL  test/failing_test.dart
+  ✕ failing
 ---
  RUNS  test/passing_test.dart
   ... passing
