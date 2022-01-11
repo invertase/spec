@@ -1,5 +1,4 @@
 import 'package:spec_cli/src/command_runner.dart';
-import 'package:test/scaffolding.dart';
 import 'package:test/test.dart';
 
 void main() {
