@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:dart_test_adapter/dart_test_adapter.dart';
 import 'package:path/path.dart';
 import 'package:pubspec/pubspec.dart';
-import 'package:pubspec_parse/pubspec_parse.dart';
 import 'package:riverpod/riverpod.dart';
 
 import 'io.dart';
