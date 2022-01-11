@@ -1,3 +1,4 @@
+import 'package:spec_cli/src/command_runner.dart';
 import 'package:spec_cli/src/rendering.dart';
 import 'package:test/test.dart';
 
@@ -35,6 +36,101 @@ void main() {
 
     testScope('handle test failure after test done', (ref) async {},
         skip: true);
+
+    testScope('can filter tests by name', (ref) async {
+      final exitCode = await runTest(
+        {
+          'my_test.dart': r'''
+import 'package:test/test.dart';
+void main() {
+  test('hello world', () {});
+  test('fail', () => throw StateError('fail'));
+  test('hello baz', () {});
+}
+''',
+        },
+        options: SpecOptions.fromArgs(['--name=hello']),
+      );
+
+      expect(testRenderer!.frames.last, '''
+ PASS  test/my_test.dart
+
+Test Suites: 1 passed, 1 total
+Tests:       2 passed, 2 total
+Time:        00:00:00
+''');
+
+      expect(exitCode, 0);
+    });
+
+    testScope('supports empty suites due to test name filter', (ref) async {
+      final exitCode = await runTest(
+        {
+          'my_test.dart': r'''
+import 'package:test/test.dart';
+void main() {
+  test('hello', () {});
+}
+''',
+          'maybe_empty_test.dart': r'''
+import 'package:test/test.dart';
+void main() {
+  test('fail', () => throw StateError('fail'));
+}
+''',
+        },
+        options: SpecOptions.fromArgs(['--name=hello']),
+      );
+
+      expect(testRenderer!.frames.last, '''
+ PASS  test/my_test.dart
+
+Test Suites: 1 passed, 2 total
+Tests:       1 passed, 1 total
+Time:        00:00:00
+''');
+
+      expect(exitCode, 0);
+    });
+
+    testScope('can filter suites by path', (ref) async {
+      final exitCode = await runTest(
+        {
+          'my_test.dart': r'''
+import 'package:test/test.dart';
+void main() {
+  test('hello world', () {});
+}
+''',
+          'another_test.dart': r'''
+import 'package:test/test.dart';
+void main() {
+  test('pass', () {});
+}
+''',
+          'excuded_test.dart': r'''
+import 'package:test/test.dart';
+void main() {
+  test('fail', () => throw StateError('fail'));
+}
+''',
+        },
+        options: SpecOptions.fromArgs(
+          ['test/my_test.dart', 'test/another_test.dart'],
+        ),
+      );
+
+      expect(testRenderer!.frames.last, '''
+ PASS  test/another_test.dart
+ PASS  test/my_test.dart
+
+Test Suites: 2 passed, 2 total
+Tests:       2 passed, 2 total
+Time:        00:00:00
+''');
+
+      expect(exitCode, 0);
+    });
 
     testScope('handles flutter packages', (ref) async {
       final exitCode = await runTest({

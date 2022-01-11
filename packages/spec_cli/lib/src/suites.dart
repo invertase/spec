@@ -93,28 +93,48 @@ final $suiteStatus =
   $testStatus,
 ]);
 
-final $exitCode = Provider<AsyncValue<int>>((ref) {
-  // The exit code will be preemptively obtained when a signal is sent.
-  // No matter whether all tests executed are passing or not, since the command
-  // didn't have the time to complete, we consider the command as failing
-  if (ref.watch($isEarlyAbort)) return AsyncData(-1);
+final $exitCode = Provider<AsyncValue<int>>(
+  (ref) {
+    // The exit code will be preemptively obtained when a signal is sent.
+    // No matter whether all tests executed are passing or not, since the command
+    // didn't have the time to complete, we consider the command as failing
+    if (ref.watch($isEarlyAbort)) return AsyncData(-1);
 
-  if (!ref.watch($hasAllSuites)) return const AsyncLoading();
+    final doneEvent = ref
+        .watch($events)
+        .firstWhereOrNull((event) => event is TestEventDone) as TestEventDone?;
+    if (doneEvent != null) {
+      // Something probably went wrong as we likely should've been able to quit
+      // before obtaining the true "done" event, so we'll safely quit.
+      return doneEvent.success == true
+          ? const AsyncData(0)
+          : const AsyncData(-1);
+    }
 
-  final suites = ref.watch($suites);
+    if (!ref.watch($hasAllSuites)) return const AsyncLoading();
 
-  final hasPendingSuite =
-      suites.any((suite) => ref.watch($suiteStatus(suite.key)) is AsyncLoading);
-  if (hasPendingSuite) return const AsyncLoading();
+    final suites = ref.watch($suites);
 
-  final hasErroredSuite = suites.any(
-    (suite) => ref.watch($suiteStatus(suite.key)) is AsyncError,
-  );
-  if (hasErroredSuite) return const AsyncData(-1);
+    final hasPendingSuite = suites
+        .any((suite) => ref.watch($suiteStatus(suite.key)) is AsyncLoading);
+    if (hasPendingSuite) return const AsyncLoading();
 
-  // All suites are completed and passing
-  return AsyncData(0);
-}, dependencies: [$suites, $suiteStatus, $isEarlyAbort, $hasAllSuites]);
+    final hasErroredSuite = suites.any(
+      (suite) => ref.watch($suiteStatus(suite.key)) is AsyncError,
+    );
+    if (hasErroredSuite) return const AsyncData(-1);
+
+    // All suites are completed and passing
+    return AsyncData(0);
+  },
+  dependencies: [
+    $suites,
+    $suiteStatus,
+    $isEarlyAbort,
+    $hasAllSuites,
+    $events,
+  ],
+);
 
 final $hasExitCode = Provider<bool>((ref) {
   return ref.watch($exitCode).map(

@@ -99,6 +99,10 @@ Future<int> spec({
   SpecOptions options = const SpecOptions(),
 }) {
   return runScoped((ref) async {
+    // initializing option providers from command line options.
+    ref.read($testNameFilters.notifier).state = options.testNameFilters;
+    ref.read($filePathFilters.notifier).state = options.fileFilters;
+
     if (options.watch) {
       stdout.write('${VT100.clearScreen}${VT100.moveCursorToTopLeft}');
 

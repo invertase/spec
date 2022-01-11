@@ -10,17 +10,24 @@ import 'io.dart';
 final $failedTestsLocationFromPreviousRun =
     StateProvider<List<FailedTestLocation>?>((ref) => null);
 
+final $testNameFilters = StateProvider<List<String>>((ref) => []);
+final $filePathFilters = StateProvider<List<String>>((ref) => []);
+
 final $events = Provider<List<TestEvent>>(
   (ref) {
-    final locations =
-        ref.watch($failedTestsLocationFromPreviousRun.notifier).state;
+    final locations = ref.watch($failedTestsLocationFromPreviousRun) ?? [];
 
-    final tests = locations
-        ?.map(
-          (location) =>
-              '${location.path}?full-name=${Uri.encodeQueryComponent(location.name)}',
-        )
-        .toList();
+    final tests = locations.isNotEmpty
+        ? locations
+            .map(
+              (location) =>
+                  '${location.path}?full-name=${Uri.encodeQueryComponent(location.name)}',
+            )
+            .toList()
+        : ref.watch($filePathFilters);
+
+    final arguments =
+        ref.watch($testNameFilters).map((name) => '--name=$name').toList();
 
     final workingDir = ref.watch($workingDirectory);
 
@@ -32,10 +39,12 @@ final $events = Provider<List<TestEvent>>(
       final eventsStream = package.isFlutter
           ? flutterTest(
               tests: tests,
+              arguments: arguments,
               workdingDirectory: ref.watch($workingDirectory).path,
             )
           : dartTest(
               tests: tests,
+              arguments: arguments,
               workdingDirectory: ref.watch($workingDirectory).path,
             );
 
@@ -48,8 +57,10 @@ final $events = Provider<List<TestEvent>>(
     return [];
   },
   dependencies: [
+    $testNameFilters,
+    $filePathFilters,
     $workingDirectory,
-    $failedTestsLocationFromPreviousRun.notifier
+    $failedTestsLocationFromPreviousRun
   ],
 );
 

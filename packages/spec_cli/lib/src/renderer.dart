@@ -53,6 +53,7 @@ class BacktrackingRenderer implements Renderer {
 
   @override
   void renderFrame(String output) {
+    // TODO fix update incorrectly overriding terminal prompt
     if (_lastFrame != null) {
       final lastOutputHeight = computeOutputHeight(
         _lastFrame!,

@@ -373,6 +373,7 @@ TestRenderer? testRenderer;
 Future<int> runTest(
   Map<String, String> tests, {
   bool isFlutter = false,
+  SpecOptions options = const SpecOptions(),
 }) async {
   if (testRenderer == null) {
     testRenderer = rendererOverride = TestRenderer();
@@ -391,6 +392,7 @@ Future<int> runTest(
 
   return spec(
     workingDirectory: dir.path + '/packages/a',
+    options: options,
   );
 }
 
