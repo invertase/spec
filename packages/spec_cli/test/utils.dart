@@ -389,7 +389,7 @@ Future<int> runTest(
     ),
   ]);
 
-  return fest(
+  return spec(
     workingDirectory: dir.path + '/packages/a',
   );
 }

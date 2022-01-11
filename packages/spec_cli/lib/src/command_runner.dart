@@ -14,8 +14,8 @@ import 'rendering.dart';
 import 'tests.dart';
 import 'vt100.dart';
 
-Future<int> festCommandRunner(List<String> args) async {
-  return fest(options: SpecOptions.fromArgs(args));
+Future<int> specCommandRunner(List<String> args) async {
+  return spec(options: SpecOptions.fromArgs(args));
 }
 
 @immutable
@@ -94,7 +94,7 @@ class SpecOptions {
   }
 }
 
-Future<int> fest({
+Future<int> spec({
   String? workingDirectory,
   SpecOptions options = const SpecOptions(),
 }) {

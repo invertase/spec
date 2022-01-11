@@ -36,7 +36,7 @@ void main() {
         ),
       ]);
 
-      await fest(
+      await spec(
         workingDirectory: dir.path + '/packages/a',
       );
 
