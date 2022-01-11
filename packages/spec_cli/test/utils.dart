@@ -356,7 +356,6 @@ Future<Directory> createProject(List<PackageInfo> packages) async {
           'get',
           // Some flags to speed up the bootstrap
           '--offline',
-          '--no-precompile',
         ],
         workingDirectory: packagePath,
       );
