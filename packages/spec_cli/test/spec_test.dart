@@ -7,6 +7,8 @@ void main() {
   groupScope('Spec', () {
     // TODO on sigint/sigterm, report suites/tests that were not executed. Blocked by https://github.com/dart-lang/test/issues/1654
 
+    testScope('pipe stderr of dart/flutter test', (ref) async {});
+
     testScope(
         'on sigint/sigterm, abort and show failures details', (ref) async {},
         skip: true);
@@ -30,6 +32,35 @@ void main() {
 
     testScope('handle test failure after test done', (ref) async {},
         skip: true);
+
+    testScope('handles flutter packages', (ref) async {
+      final exitCode = await runTest({
+        'my_test.dart': r'''
+import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/material.dart';
+
+void main() {
+  testWidgets('example', (tester) async {
+    await tester.pumpWidget(
+      Text('foo', textDirection: TextDirection.ltr),
+    );
+
+    expect(find.text('foo'), findsOneWidget);
+  });
+}
+''',
+      }, isFlutter: true);
+
+      expect(testRenderer!.frames.last, '''
+ PASS  test/my_test.dart
+
+Test Suites: 1 passed, 1 total
+Tests:       1 passed, 1 total
+Time:        00:00:00
+''');
+
+      expect(exitCode, 0);
+    });
 
     testScope('handles skipped groups', (ref) async {
       final exitCode = await runTest({

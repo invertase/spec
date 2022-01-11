@@ -350,7 +350,7 @@ Future<Directory> createProject(List<PackageInfo> packages) async {
       );
 
       await Process.run(
-        'dart',
+        package.isFlutterPackage ? 'flutter' : 'dart',
         [
           'pub',
           'get',
@@ -371,7 +371,10 @@ TestRenderer? testRenderer;
 /// Runs a single test
 ///
 /// For more advanced use-cases, use [createProject].
-Future<int> runTest(Map<String, String> tests) async {
+Future<int> runTest(
+  Map<String, String> tests, {
+  bool isFlutter = false,
+}) async {
   if (testRenderer == null) {
     testRenderer = rendererOverride = TestRenderer();
     addTearDown(() => testRenderer = rendererOverride = null);
@@ -383,6 +386,7 @@ Future<int> runTest(Map<String, String> tests) async {
       files: {
         for (final entry in tests.entries) 'test/' + entry.key: entry.value,
       },
+      isFlutterPackage: isFlutter,
     ),
   ]);
 
@@ -399,17 +403,31 @@ class PackageInfo {
   }) : files = {
           ...files,
           if (!files.containsKey('pubspec.yaml'))
-            'pubspec.yaml': '''
+            if (isFlutterPackage)
+              'pubspec.yaml': '''
+name: $name
+environment:
+  sdk: ">=2.13.0 <3.0.0"
+  flutter: ">=2.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  test:
+'''
+            else
+              'pubspec.yaml': '''
 name: $name
 environment:
   sdk: ">=2.13.0 <3.0.0"
 
-
-${isFlutterPackage ? 'dependencies: flutter: sdk' : ''}
-
 dev_dependencies:
   test:
-''',
+'''
         };
 
   final String name;

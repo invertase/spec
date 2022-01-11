@@ -53,31 +53,57 @@ Stream<List<TestEvent>> dartTest({
 
 Stream<List<TestEvent>> _parseTestJsonOutput(
   Future<Process> Function() processCb,
-) async* {
-  final process = await processCb();
+) {
+  final controller = StreamController<List<TestEvent>>();
+  late StreamSubscription errSub;
+  late StreamSubscription eventSub;
+  late Future<Process> processFuture;
 
-  final events = process.stdout
-      .map(utf8.decode)
-      // Sometimes a message contains multiple JSON map at once
-      // so we split the message in multiple events
-      .expand<String>((msg) sync* {
-        for (final value in msg.split('\n')) {
-          final trimmedValue = value.trim();
-          if (trimmedValue.isNotEmpty) yield trimmedValue;
-        }
-      })
-      .map(json.decode)
-      .cast<Map<Object?, Object?>>()
-      .map((json) => TestEvent.fromJson(Map.from(json)));
+  controller.onListen = () async {
+    processFuture = processCb();
+    final process = await processFuture;
 
-  final allEvents = <TestEvent>[];
+    errSub = process.stderr.map(utf8.decode).listen((err) {
+      controller.addError(err);
+    });
 
-  try {
-    await for (final event in events) {
-      allEvents.add(event);
-      yield allEvents.toList();
-    }
-  } finally {
-    process.kill();
-  }
+    final events = process.stdout
+        .map(utf8.decode)
+        // Sometimes a message contains multiple JSON map at once
+        // so we split the message in multiple events
+        .expand<String>((msg) sync* {
+          for (final value in msg.split('\n')) {
+            final trimmedValue = value.trim();
+            if (trimmedValue.isNotEmpty) yield trimmedValue;
+          }
+        })
+        .expand((j) {
+          try {
+            return [json.decode(j)];
+          } on FormatException {
+            // Flutter may send non-json logs, so we're ignoring those
+            return [];
+          }
+        })
+        .cast<Map<Object?, Object?>>()
+        .map((json) => TestEvent.fromJson(Map.from(json)));
+
+    var allEvents = const <TestEvent>[];
+
+    eventSub = events.listen(
+      (event) {
+        allEvents = [...allEvents, event];
+        controller.add(allEvents);
+      },
+      onError: controller.addError,
+    );
+  };
+
+  controller.onCancel = () async {
+    (await processFuture).kill();
+    errSub.cancel();
+    eventSub.cancel();
+  };
+
+  return controller.stream;
 }
