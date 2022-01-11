@@ -55,7 +55,6 @@ Stream<List<TestEvent>> _parseTestJsonOutput(
   Future<Process> Function() processCb,
 ) {
   final controller = StreamController<List<TestEvent>>();
-  late StreamSubscription errSub;
   late StreamSubscription eventSub;
   late Future<Process> processFuture;
 
@@ -63,9 +62,8 @@ Stream<List<TestEvent>> _parseTestJsonOutput(
     processFuture = processCb();
     final process = await processFuture;
 
-    errSub = process.stderr.map(utf8.decode).listen((err) {
-      controller.addError(err);
-    });
+    // TODO what do to with stderr? Since Flutter may send error messages there
+    // but tests may print to stderr on purpose
 
     final events = process.stdout
         .map(utf8.decode)
@@ -101,7 +99,6 @@ Stream<List<TestEvent>> _parseTestJsonOutput(
 
   controller.onCancel = () async {
     (await processFuture).kill();
-    errSub.cancel();
     eventSub.cancel();
   };
 
