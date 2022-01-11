@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:args/args.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:spec_cli/src/container.dart';
 import 'package:spec_cli/src/renderer.dart';
@@ -14,29 +15,91 @@ import 'tests.dart';
 import 'vt100.dart';
 
 Future<int> festCommandRunner(List<String> args) async {
-  final parser = ArgParser();
-  parser.addFlag(
-    'watch',
-    abbr: 'w',
-    defaultsTo: false,
-    negatable: false,
-    help: 'Listens to changes in the project and '
-        'run tests whenever something changed',
-  );
+  return fest(options: SpecOptions.fromArgs(args));
+}
 
-  final result = parser.parse(args);
+@immutable
+class SpecOptions {
+  const SpecOptions({
+    this.fileFilters = const [],
+    this.testNameFilters = const [],
+    this.watch = false,
+    this.coverage = false,
+  });
 
-  return fest(
-    watch: result['watch'] as bool,
-  );
+  factory SpecOptions.fromArgs(List<String> args) {
+    final parser = ArgParser()
+      ..addFlag(
+        'watch',
+        abbr: 'w',
+        defaultsTo: false,
+        negatable: false,
+        help: 'Listens to changes in the project and '
+            'run tests whenever something changed',
+      )
+      ..addFlag(
+        'coverage',
+        abbr: 'c',
+        defaultsTo: false,
+        negatable: false,
+        help: 'Extract code coverage reports.',
+      )
+      ..addMultiOption(
+        'name',
+        abbr: 'n',
+        help: 'Filters tests by name.',
+      );
+
+    final result = parser.parse(args);
+
+    return SpecOptions(
+      watch: result['watch'] as bool,
+      fileFilters: result.rest,
+      testNameFilters: result['name'] as List<String>,
+      coverage: result['coverage'] as bool,
+    );
+  }
+
+  final List<String> fileFilters;
+  final List<String> testNameFilters;
+  final bool watch;
+  final bool coverage;
+
+  operator ==(Object other) =>
+      other is SpecOptions &&
+      other.runtimeType == runtimeType &&
+      other.coverage == coverage &&
+      other.watch == watch &&
+      const DeepCollectionEquality().equals(other.fileFilters, fileFilters) &&
+      const DeepCollectionEquality()
+          .equals(testNameFilters, other.testNameFilters);
+
+  @override
+  int get hashCode => Object.hash(
+        runtimeType,
+        coverage,
+        watch,
+        const DeepCollectionEquality().hash(fileFilters),
+        const DeepCollectionEquality().hash(testNameFilters),
+      );
+
+  @override
+  String toString() {
+    return 'SpecOptions('
+        'watch: $watch, '
+        'coverage: $coverage, '
+        'fileFilters: $fileFilters, '
+        'testNameFilters: $testNameFilters'
+        ')';
+  }
 }
 
 Future<int> fest({
-  bool watch = false,
   String? workingDirectory,
+  SpecOptions options = const SpecOptions(),
 }) {
   return runScoped((ref) async {
-    if (watch) {
+    if (options.watch) {
       stdout.write('${VT100.clearScreen}${VT100.moveCursorToTopLeft}');
 
       ref.listen(
@@ -73,7 +136,7 @@ Future<int> fest({
     }
 
     final renderer = rendererOverride ??
-        (watch ? FullScreenRenderer() : BacktrackingRenderer());
+        (options.watch ? FullScreenRenderer() : BacktrackingRenderer());
 
     ref.listen<AsyncValue<String>>(
       $output,
