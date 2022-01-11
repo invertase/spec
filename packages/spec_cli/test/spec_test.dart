@@ -7,6 +7,9 @@ void main() {
   groupScope('Spec', () {
     // TODO on sigint/sigterm, report suites/tests that were not executed. Blocked by https://github.com/dart-lang/test/issues/1654
 
+    testScope(
+        'handles non-json logs from the test output (such as Flutter\'s "Downloading ...")',
+        (ref) async {});
     testScope('pipe stderr of dart/flutter test', (ref) async {});
 
     testScope(
