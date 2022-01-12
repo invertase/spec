@@ -13,7 +13,7 @@ final $fileChange = StreamProvider<void>((ref) {
 
   final dir = ref.watch($workingDirectory);
   final libChange = Directory(join(dir.path, 'lib')).watch(recursive: true);
-  final testChange = Directory(join(dir.path, 'lib')).watch(recursive: true);
+  final testChange = Directory(join(dir.path, 'test')).watch(recursive: true);
 
   final libSub = libChange.listen((event) => controller.add(null));
   ref.onDispose(libSub.cancel);

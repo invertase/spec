@@ -107,12 +107,10 @@ Future<int> spec({
     if (options.watch) {
       stdout.write('${VT100.clearScreen}${VT100.moveCursorToTopLeft}');
 
-      // ref.listen(
-      //   $fileChange,
-      //   (prev, value) {
-      //     ref.refresh($events);
-      //   },
-      // );
+      ref.listen(
+        $fileChange,
+        (prev, value) => ref.refresh($events),
+      );
 
       var lastFailedTests = <FailedTestLocation>[];
       ref.listen<AsyncValue<List<FailedTestLocation>>>(
