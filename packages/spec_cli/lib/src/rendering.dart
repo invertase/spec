@@ -17,7 +17,6 @@ final $suiteOutputLabel =
     Provider.family<AsyncValue<String>, SuiteKey>((ref, suiteKey) {
   return merge((unwrap) {
     final suite = unwrap(ref.watch($suite(suiteKey)));
-    final suiteStatus = ref.watch($suiteStatus(suiteKey));
     final workingDir = ref.watch($workingDirectory);
 
     String? relativeSuitePath;
@@ -32,15 +31,23 @@ final $suiteOutputLabel =
       relativeSuitePath = relative(absoluteSuitePath, from: workingDir.path);
     }
 
+    String statusLabel;
+    switch (ref.watch($suiteStatus(suiteKey))) {
+      case SuiteStatus.fail:
+        statusLabel = ' FAIL '.white.bgRed.bold;
+        break;
+      case SuiteStatus.pass:
+        statusLabel = ' PASS '.black.bgGreen.bold;
+        break;
+      case SuiteStatus.pending:
+        statusLabel = ref.watch($isEarlyAbort)
+            ? ' STOP '.white.bgGrey.bold
+            : ' RUNS '.black.bgYellow.bold;
+        break;
+    }
+
     return [
-      suiteStatus.map(
-        data: (_) => ' PASS '.black.bgGreen.bold,
-        error: (_) => ' FAIL '.white.bgRed.bold,
-        loading: (_) {
-          if (ref.watch($isEarlyAbort)) return ' STOP '.white.bgGrey.bold;
-          return ' RUNS '.black.bgYellow.bold;
-        },
-      ),
+      statusLabel,
       if (relativeSuitePath != null) relativeSuitePath,
     ].join(' ');
   });
@@ -90,7 +97,7 @@ final $spinner = Provider.autoDispose<String>((ref) {
 
 final $testMessages =
     Provider.autoDispose.family<List<String>, TestKey>((ref, testKey) {
-  final events = ref.watch($events);
+  final events = ref.watch($events).events;
 
   return events
       .whereType<TestEventMessage>()
@@ -130,7 +137,7 @@ final $testLabel =
 
 final $testError =
     Provider.autoDispose.family<String?, TestKey>((ref, testKey) {
-  if (!ref.watch($hasExitCode)) return null;
+  if (!ref.watch($isDone)) return null;
 
   final status = ref.watch($testStatus(testKey));
 
@@ -141,7 +148,7 @@ $err
 ${stack.trim()}''';
     },
   );
-}, dependencies: [$test, $testStatus, $spinner, $testName, $hasExitCode]);
+}, dependencies: [$test, $testStatus, $spinner, $testName, $isDone]);
 
 final AutoDisposeProviderFamily<AsyncValue<String?>, GroupKey> $groupOutput =
     Provider.autoDispose.family<AsyncValue<String?>, GroupKey>((ref, groupKey) {
@@ -156,7 +163,7 @@ final AutoDisposeProviderFamily<AsyncValue<String?>, GroupKey> $groupOutput =
         .map((test) {
           return _renderTest(
             status: ref.watch($testStatus(test.key)),
-            hasExitCode: ref.watch($hasExitCode),
+            hasExitCode: ref.watch($isDone),
             messages: ref.watch($testMessages(test.key)),
             error: ref.watch($testError(test.key)),
             label: ref.watch($testLabel(test.key)),
@@ -181,7 +188,7 @@ final AutoDisposeProviderFamily<AsyncValue<String?>, GroupKey> $groupOutput =
   });
 }, dependencies: [
   $groupName,
-  $hasExitCode,
+  $isDone,
   $groupDepth,
   $testsForGroup,
   $testError,
@@ -216,12 +223,16 @@ String? _renderTest({
 final $suiteOutput =
     Provider.autoDispose.family<AsyncValue<String>, SuiteKey>((ref, suiteKey) {
   return merge((unwrap) {
-    final suiteStatus = ref.watch($suiteStatus(suiteKey));
-    final showContent = suiteStatus.map(
-      data: (_) => false,
-      error: (_) => true,
-      loading: (_) => false,
-    );
+    bool showContent;
+    switch (ref.watch($suiteStatus(suiteKey))) {
+      case SuiteStatus.fail:
+        showContent = true;
+        break;
+      case SuiteStatus.pass:
+      case SuiteStatus.pending:
+        showContent = false;
+        break;
+    }
 
     final rootTestsOutput = showContent
         ? ref
@@ -230,7 +241,7 @@ final $suiteOutput =
             .map((test) {
               return _renderTest(
                 status: ref.watch($testStatus(test.key)),
-                hasExitCode: ref.watch($hasExitCode),
+                hasExitCode: ref.watch($isDone),
                 messages: ref.watch($testMessages(test.key)),
                 error: ref.watch($testError(test.key)),
                 label: ref.watch($testLabel(test.key)),
@@ -264,21 +275,23 @@ final $suiteOutput =
   $rootGroupsForSuite,
   $groupOutput,
   $testLabel,
-  $hasExitCode,
+  $isDone,
   $suiteOutputLabel,
   $rootTestsForSuite,
 ], name: 'suiteOutput');
 
 final $summary = Provider.autoDispose<String?>((ref) {
   // Don't show the summary until the very last render
-  final hasExitCode = ref.watch($hasExitCode);
+  final hasExitCode = ref.watch($isDone);
   if (!hasExitCode) return null;
 
   final suites = ref.watch($suites);
-  final failingSuitesCount =
-      suites.where((e) => ref.watch($suiteStatus(e.key)) is AsyncError).length;
-  final passingSuitesCount =
-      suites.where((e) => ref.watch($suiteStatus(e.key)) is AsyncData).length;
+  final failingSuitesCount = suites
+      .where((e) => ref.watch($suiteStatus(e.key)) == SuiteStatus.fail)
+      .length;
+  final passingSuitesCount = suites
+      .where((e) => ref.watch($suiteStatus(e.key)) == SuiteStatus.pass)
+      .length;
 
   final tests = ref.watch($allTests).where((test) => !test.isHidden).toList();
   final failingTestsCount =
@@ -311,7 +324,7 @@ ${'Test Suites:'.bold} $suitesDescription
 ${'Tests:'.bold}       $testsDescription
 ${'Time:'.bold}        $timeDescription''';
 }, dependencies: [
-  $hasExitCode,
+  $isDone,
   $suites,
   $allTests,
   $testStatus,
@@ -321,20 +334,23 @@ ${'Time:'.bold}        $timeDescription''';
 
 final $output = Provider.autoDispose<AsyncValue<String>>((ref) {
   return merge((unwrap) {
-    final isDone = ref.watch($hasExitCode);
+    final isDone = ref.watch($isDone);
     final suites =
         ref.watch($suites).sorted((a, b) => a.path!.compareTo(b.path!));
 
     final passingSuites = suites
-        .where((suite) => ref.watch($suiteStatus(suite.key)) is AsyncData)
+        .where(
+            (suite) => ref.watch($suiteStatus(suite.key)) == SuiteStatus.pass)
         .map((suite) => unwrap(ref.watch($suiteOutput(suite.key))))
         .join('\n');
     final failingSuites = suites
-        .where((suite) => ref.watch($suiteStatus(suite.key)) is AsyncError)
+        .where(
+            (suite) => ref.watch($suiteStatus(suite.key)) == SuiteStatus.fail)
         .map((suite) => unwrap(ref.watch($suiteOutput(suite.key))))
         .join('\n');
     final loadingSuites = suites
-        .where((suite) => ref.watch($suiteStatus(suite.key)) is AsyncLoading)
+        .where((suite) =>
+            ref.watch($suiteStatus(suite.key)) == SuiteStatus.pending)
         .map((suite) => unwrap(ref.watch($suiteOutput(suite.key))))
         .join('\n');
 
@@ -348,14 +364,27 @@ final $output = Provider.autoDispose<AsyncValue<String>>((ref) {
       if (!isDone && loadingSuites.isNotEmpty) loadingSuites,
       if (failingSuites.isNotEmpty) failingSuites,
       if (summary != null) summary,
+      if (ref.watch($events).isInterrupted) 'Test run was interrupted.'.red,
+      if (summary != null && ref.watch($isWatchMode))
+        '''
+Watch Usage
+ › Press a to run all tests.
+ › Press f to run only failed tests.
+ › Press p to filter by a filename regex pattern.
+ › Press t to filter by a test name regex pattern.
+ › Press q to quit watch mode.
+ › Press Enter to trigger a test run.
+''',
     ].join('\n\n');
   });
 }, dependencies: [
+  $events,
   $suites,
-  $hasExitCode,
+  $isDone,
   $suiteOutput,
   $suiteStatus,
   $summary,
+  $isWatchMode,
 ], name: 'output');
 
 extension StringExt on String {

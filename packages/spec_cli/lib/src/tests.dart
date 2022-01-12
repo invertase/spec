@@ -77,6 +77,7 @@ final $testsForSuite =
   return Map.fromEntries(
     ref
         .watch($events)
+        .events
         .whereType<TestEventTestStart>()
         .where((event) => event.test.suiteKey == suiteKey)
         .where((event) => !event.test.isHidden)
@@ -87,6 +88,7 @@ final $testsForSuite =
 final $test = Provider.family<AsyncValue<Test>, TestKey>((ref, testKey) {
   return ref
       .watch($events)
+      .events
       .whereType<TestEventTestStart>()
       .where((event) => event.test.key == testKey)
       .map((e) => e.test)
@@ -96,6 +98,7 @@ final $test = Provider.family<AsyncValue<Test>, TestKey>((ref, testKey) {
 final $allTests = Provider<List<Test>>((ref) {
   return ref
       .watch($events)
+      .events
       .whereType<TestEventTestStart>()
       .map((e) => e.test)
       .toList();
@@ -104,13 +107,11 @@ final $allTests = Provider<List<Test>>((ref) {
 final $allFailedTests = Provider<List<Test>>((ref) {
   return ref
       .watch($allTests)
-      .where((test) => ref.watch($testStatus(test.key)) is AsyncError)
+      .where((test) => ref.watch($testStatus(test.key)).failing)
       .toList();
 }, dependencies: [$allTests, $testStatus]);
 
 final $testStatus = Provider.family<TestStatus, TestKey>((ref, testKey) {
-  final events = ref.watch($events);
-
   final test = ref.watch($test(testKey)).value;
   if (test == null) return const TestStatus.pending();
 
@@ -122,6 +123,7 @@ final $testStatus = Provider.family<TestStatus, TestKey>((ref, testKey) {
     return TestStatus.skip(skipReason: test.metadata.skipReason);
   }
 
+  final events = ref.watch($events).events;
   final error = events
       .whereType<TestEventTestError>()
       // TODO can we have the groupID/suiteID too?

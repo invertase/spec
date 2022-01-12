@@ -7,19 +7,19 @@ import 'dart_test.dart';
 import 'dart_test_utils.dart';
 import 'groups.dart';
 import 'io.dart';
-import 'provider_utils.dart';
 import 'tests.dart';
 
 final $suiteCount = Provider<AsyncValue<int>>((ref) {
   return ref
       .watch($events)
+      .events
       .whereType<TestEventAllSuites>()
       .map((e) => e.count)
       .firstDataOrLoading;
 }, dependencies: [$events]);
 
 final $suites = Provider<List<Suite>>((ref) {
-  final events = ref.watch($events);
+  final events = ref.watch($events).events;
 
   return events
       .whereType<TestEventSuite>()
@@ -41,52 +41,51 @@ final $hasAllSuites = Provider<bool>((ref) {
 final $suite = Provider.family<AsyncValue<Suite>, SuiteKey>((ref, suiteKey) {
   return ref
       .watch($events)
+      .events
       .whereType<TestEventSuite>()
       .where((e) => e.suite.key == suiteKey)
       .map((event) => event.suite)
       .firstDataOrLoading;
 }, dependencies: [$events]);
 
-final $suiteStatus =
-    Provider.family<AsyncValue<void>, SuiteKey>((ref, suiteKey) {
-  return merge((unwrap) {
-    final tests = ref.watch($testsForSuite(suiteKey));
-    final visibleTests = tests.values.where((test) => !test.isHidden).toList();
+enum SuiteStatus {
+  pass,
+  fail,
+  pending,
+}
 
-    /// We verify that "testIds" contains all ids that this suite is supposed
-    /// to have. In case we have yet to receive some test events.
-    final hasAllVisibleIds = ref.watch(
-      $scaffoldGroup(suiteKey).select(
-        (rootGroup) =>
-            rootGroup.asData != null &&
-            visibleTests.length == rootGroup.asData!.value.testCount,
-      ),
-    );
-    if (!hasAllVisibleIds) {
-      // TODO update after https://github.com/dart-lang/test/issues/1652 is resolved
-      unwrap(const AsyncLoading<void>());
-    }
+final $suiteStatus = Provider.family<SuiteStatus, SuiteKey>((ref, suiteKey) {
+  final tests = ref.watch($testsForSuite(suiteKey));
+  final visibleTests = tests.values.where((test) => !test.isHidden).toList();
 
-    // any loading leads to RUNNING, even if there's an error/success
-    final hasLoading =
-        tests.keys.any((testKey) => ref.watch($testStatus(testKey)).pending);
-    if (hasLoading) unwrap(const AsyncLoading<void>());
+  /// We verify that "testIds" contains all ids that this suite is supposed
+  /// to have. In case we have yet to receive some test events.
+  final hasAllVisibleIds = ref.watch(
+    $scaffoldGroup(suiteKey).select(
+      (rootGroup) =>
+          rootGroup.asData != null &&
+          visibleTests.length == rootGroup.asData!.value.testCount,
+    ),
+  );
+  if (!hasAllVisibleIds) {
+    // TODO update after https://github.com/dart-lang/test/issues/1652 is resolved
+    return SuiteStatus.pending;
+  }
 
-    final error = tests.keys
-        .map((id) => ref.watch($testStatus(id)))
-        .firstWhereOrNull((status) => status.failing) as AsyncError?;
+  // any loading leads to RUNNING, even if there's an error/success
+  final hasLoading =
+      tests.keys.any((testKey) => ref.watch($testStatus(testKey)).pending);
+  if (hasLoading) return SuiteStatus.pending;
 
-    if (error != null) {
-      unwrap(
-        AsyncError<void>(
-          error.error,
-          stackTrace: error.stackTrace,
-        ),
-      );
-    }
+  final hasErroredTest = tests.keys
+      .map((id) => ref.watch($testStatus(id)))
+      .any((status) => status.failing);
 
-    return;
-  });
+  if (hasErroredTest) {
+    return SuiteStatus.fail;
+  }
+
+  return SuiteStatus.pass;
 }, dependencies: [
   $testsForSuite,
   $scaffoldGroup,
@@ -102,6 +101,7 @@ final $exitCode = Provider<AsyncValue<int>>(
 
     final doneEvent = ref
         .watch($events)
+        .events
         .firstWhereOrNull((event) => event is TestEventDone) as TestEventDone?;
     if (doneEvent != null) {
       // Something probably went wrong as we likely should've been able to quit
@@ -115,12 +115,12 @@ final $exitCode = Provider<AsyncValue<int>>(
 
     final suites = ref.watch($suites);
 
-    final hasPendingSuite = suites
-        .any((suite) => ref.watch($suiteStatus(suite.key)) is AsyncLoading);
+    final hasPendingSuite = suites.any(
+        (suite) => ref.watch($suiteStatus(suite.key)) == SuiteStatus.pending);
     if (hasPendingSuite) return const AsyncLoading();
 
     final hasErroredSuite = suites.any(
-      (suite) => ref.watch($suiteStatus(suite.key)) is AsyncError,
+      (suite) => ref.watch($suiteStatus(suite.key)) == SuiteStatus.fail,
     );
     if (hasErroredSuite) return const AsyncData(-1);
 
@@ -136,10 +136,15 @@ final $exitCode = Provider<AsyncValue<int>>(
   ],
 );
 
-final $hasExitCode = Provider<bool>((ref) {
-  return ref.watch($exitCode).map(
-        data: (d) => d.isRefreshing == false,
-        error: (_) => false,
-        loading: (_) => false,
-      );
-}, dependencies: [$exitCode], name: 'hasExitCode');
+final $isDone = Provider<bool>(
+  (ref) {
+    return ref.watch($exitCode).map(
+              data: (d) => d.isRefreshing == false,
+              error: (_) => false,
+              loading: (_) => false,
+            ) ||
+        ref.watch($events).isInterrupted;
+  },
+  dependencies: [$exitCode, $events],
+  name: 'isDone',
+);

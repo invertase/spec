@@ -101,16 +101,18 @@ Future<int> spec({
     // initializing option providers from command line options.
     ref.read($testNameFilters.notifier).state = options.testNameFilters;
     ref.read($filePathFilters.notifier).state = options.fileFilters;
+    ref.read($isWatchMode.notifier).state = options.watch;
+    ref.read($startTime.notifier).state = DateTime.now();
 
     if (options.watch) {
       stdout.write('${VT100.clearScreen}${VT100.moveCursorToTopLeft}');
 
-      ref.listen(
-        $fileChange,
-        (prev, value) {
-          ref.refresh($events);
-        },
-      );
+      // ref.listen(
+      //   $fileChange,
+      //   (prev, value) {
+      //     ref.refresh($events);
+      //   },
+      // );
 
       var lastFailedTests = <FailedTestLocation>[];
       ref.listen<AsyncValue<List<FailedTestLocation>>>(
@@ -124,15 +126,22 @@ Future<int> spec({
         );
       });
 
-      ref.listen($fileChange, (prev, value) {
-        ref.read($failedTestsLocationFromPreviousRun.notifier).state =
-            lastFailedTests;
-      });
+      // ref.listen($fileChange, (prev, value) {
+      //   ref.read($failedTestsLocationFromPreviousRun.notifier).state =
+      //       lastFailedTests;
+      // });
       stdin.listen((event) {
         if (event.first == 10) {
           // enter
-          ref.read($failedTestsLocationFromPreviousRun.notifier).state =
-              lastFailedTests;
+          if (!ref.read($events).isInterrupted && !ref.read($isDone)) {
+            ref.read($events.notifier).stop();
+          } else {
+            ref.read($startTime.notifier).state = DateTime.now();
+            ref.refresh($events);
+          }
+
+          // ref.read($failedTestsLocationFromPreviousRun.notifier).state =
+          //     lastFailedTests;
         }
       });
     }
@@ -156,9 +165,18 @@ Future<int> spec({
       fireImmediately: true,
     );
 
-    return ref.read($exitCode.future);
+    if (options.watch) {
+      // In watch mode, don't quite until sigint/sigterm is sent
+      final completer = Completer<int>();
+      ref.listen<bool>($isEarlyAbort, (previous, isEarlyAbort) {
+        if (isEarlyAbort) completer.complete(-1);
+      });
+      return completer.future;
+    } else {
+      // Outside of watch mode, quite as soon we know what the exit code should be
+      return ref.read($exitCode.future);
+    }
   }, overrides: [
-    $startTime.overrideWithValue(DateTime.now()),
     if (workingDirectory != null)
       $workingDirectory.overrideWithValue(Directory(workingDirectory)),
   ]);

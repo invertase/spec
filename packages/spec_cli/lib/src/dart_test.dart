@@ -1,20 +1,49 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:dart_test_adapter/dart_test_adapter.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:path/path.dart';
 import 'package:pubspec/pubspec.dart';
 import 'package:riverpod/riverpod.dart';
 
 import 'io.dart';
 
+part 'dart_test.freezed.dart';
+
 final $failedTestsLocationFromPreviousRun =
     StateProvider<List<FailedTestLocation>?>((ref) => null);
 
 final $testNameFilters = StateProvider<List<String>>((ref) => []);
 final $filePathFilters = StateProvider<List<String>>((ref) => []);
+final $isWatchMode = StateProvider<bool>((ref) => false);
 
-final $events = Provider<List<TestEvent>>(
-  (ref) {
+final $events = StateNotifierProvider<TestEventsNotifier, TestEventsState>(
+  (ref) => TestEventsNotifier(ref),
+  dependencies: [
+    $testNameFilters,
+    $filePathFilters,
+    $workingDirectory,
+    $failedTestsLocationFromPreviousRun,
+  ],
+);
+
+@freezed
+class TestEventsState with _$TestEventsState {
+  const factory TestEventsState({
+    required bool isInterrupted,
+    required List<TestEvent> events,
+  }) = _TestEventsState;
+}
+
+class TestEventsNotifier extends StateNotifier<TestEventsState> {
+  TestEventsNotifier(Ref ref)
+      : super(
+          const TestEventsState(
+            isInterrupted: false,
+            events: [],
+          ),
+        ) {
     final locations = ref.watch($failedTestsLocationFromPreviousRun) ?? [];
 
     final tests = locations.isNotEmpty
@@ -48,21 +77,27 @@ final $events = Provider<List<TestEvent>>(
               workdingDirectory: ref.watch($workingDirectory).path,
             );
 
-      final sub = eventsStream.listen((events) {
-        ref.state = events;
+      _eventsSub = eventsStream.listen((events) {
+        state = TestEventsState(isInterrupted: false, events: events);
       });
-      ref.onDispose(sub.cancel);
     });
+  }
 
-    return [];
-  },
-  dependencies: [
-    $testNameFilters,
-    $filePathFilters,
-    $workingDirectory,
-    $failedTestsLocationFromPreviousRun
-  ],
-);
+  StreamSubscription<List<TestEvent>>? _eventsSub;
+
+  /// Stops the test process
+  void stop() {
+    // Cancelling the stream subscription will ultimately kill the process
+    _eventsSub!.cancel();
+    state = state.copyWith(isInterrupted: true);
+  }
+
+  @override
+  void dispose() {
+    _eventsSub?.cancel();
+    super.dispose();
+  }
+}
 
 Future<List<_Package>> _getPackageList(Directory workingDir) async {
   final pubspec = await PubSpec.load(workingDir);

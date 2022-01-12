@@ -8,7 +8,8 @@ import 'provider_utils.dart';
 
 final $group = Provider.family<AsyncValue<Group>, GroupKey>((ref, groupKey) {
   return ref
-      .watch($events) //
+      .watch($events)
+      .events
       .whereType<TestEventGroup>()
       .where((e) => e.group.key == groupKey)
       .map((e) => e.group)
@@ -54,6 +55,7 @@ final $scaffoldGroup =
     Provider.family<AsyncValue<Group>, SuiteKey>((ref, suiteKey) {
   return ref
       .watch($events)
+      .events
       .whereType<TestEventGroup>()
       .where(
         (e) => e.group.parentID == null && e.group.suiteKey == suiteKey,
@@ -75,6 +77,7 @@ final $rootGroupsForSuite =
     data: (scaffoldGroup) {
       return ref
           .watch($events)
+          .events
           .whereType<TestEventGroup>()
           .where((e) => e.group.parentKey == scaffoldGroup.key)
           .map((e) => e.group)
@@ -87,6 +90,7 @@ final $childrenGroupsForGroup =
     Provider.family<List<Group>, GroupKey>((ref, groupKey) {
   return ref
       .watch($events)
+      .events
       .whereType<TestEventGroup>()
       .where((e) => e.group.parentKey == groupKey)
       .map((e) => e.group)
