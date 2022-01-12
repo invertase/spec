@@ -7,6 +7,7 @@ import 'vt100.dart';
 
 Renderer? rendererOverride;
 
+// ignore: one_member_abstracts, may have more methods in the future
 abstract class Renderer {
   void renderFrame(String output);
 }

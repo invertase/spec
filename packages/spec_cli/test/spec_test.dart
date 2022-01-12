@@ -40,7 +40,7 @@ void main() {
     testScope('can filter tests by name', (ref) async {
       final exitCode = await runTest(
         {
-          'my_test.dart': r'''
+          'my_test.dart': '''
 import 'package:test/test.dart';
 void main() {
   test('hello world', () {});
@@ -49,7 +49,7 @@ void main() {
 }
 ''',
         },
-        options: SpecOptions.fromArgs(['--name=hello']),
+        options: SpecOptions.fromArgs(const ['--name=hello']),
       );
 
       expect(testRenderer!.frames.last, '''
@@ -66,20 +66,20 @@ Time:        00:00:00
     testScope('supports empty suites due to test name filter', (ref) async {
       final exitCode = await runTest(
         {
-          'my_test.dart': r'''
+          'my_test.dart': '''
 import 'package:test/test.dart';
 void main() {
   test('hello', () {});
 }
 ''',
-          'maybe_empty_test.dart': r'''
+          'maybe_empty_test.dart': '''
 import 'package:test/test.dart';
 void main() {
   test('fail', () => throw StateError('fail'));
 }
 ''',
         },
-        options: SpecOptions.fromArgs(['--name=hello']),
+        options: SpecOptions.fromArgs(const ['--name=hello']),
       );
 
       expect(testRenderer!.frames.last, '''
@@ -96,19 +96,19 @@ Time:        00:00:00
     testScope('can filter suites by path', (ref) async {
       final exitCode = await runTest(
         {
-          'my_test.dart': r'''
+          'my_test.dart': '''
 import 'package:test/test.dart';
 void main() {
   test('hello world', () {});
 }
 ''',
-          'another_test.dart': r'''
+          'another_test.dart': '''
 import 'package:test/test.dart';
 void main() {
   test('pass', () {});
 }
 ''',
-          'excuded_test.dart': r'''
+          'excuded_test.dart': '''
 import 'package:test/test.dart';
 void main() {
   test('fail', () => throw StateError('fail'));
@@ -116,7 +116,7 @@ void main() {
 ''',
         },
         options: SpecOptions.fromArgs(
-          ['test/my_test.dart', 'test/another_test.dart'],
+          const ['test/my_test.dart', 'test/another_test.dart'],
         ),
       );
 
@@ -134,7 +134,7 @@ Time:        00:00:00
 
     testScope('handles flutter packages', (ref) async {
       final exitCode = await runTest({
-        'my_test.dart': r'''
+        'my_test.dart': '''
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 
@@ -163,7 +163,7 @@ Time:        00:00:00
 
     testScope('handles skipped groups', (ref) async {
       final exitCode = await runTest({
-        'my_test.dart': r'''
+        'my_test.dart': '''
 import 'package:test/test.dart';
 
 void main() {
@@ -209,7 +209,7 @@ Time:        00:00:00
 
     testScope('handles skipped tests', (ref) async {
       final exitCode = await runTest({
-        'my_test.dart': r'''
+        'my_test.dart': '''
 import 'package:test/test.dart';
 
 void main() {
@@ -266,7 +266,7 @@ Time:        00:00:00
 
     testScope('handles nested groups', (ref) async {
       final exitCode = await runTest({
-        'my_test.dart': r'''
+        'my_test.dart': '''
 import 'package:test/test.dart';
 
 void main() {
@@ -328,7 +328,7 @@ Time:        00:00:00
       'handles empty suites',
       (ref) async {
         final exitCode = await runTest({
-          'my_test.dart': r'''
+          'my_test.dart': '''
 import 'package:test/test.dart';
 
 void main() {}
@@ -362,7 +362,7 @@ Time:        00:00:00
       'handle empty groups',
       (ref) async {
         final exitCode = await runTest({
-          'my_test.dart': r'''
+          'my_test.dart': '''
 import 'package:test/test.dart';
 
 void main() {
@@ -406,11 +406,11 @@ Time:        00:00:00
  FAIL  test/my_test.dart
 
     Failed to load "test/my_test.dart":
-    test/my_test.dart:1:1: Error: Variables must be declared using the keywords \'const\', \'final\', \'var\' or a type name.
-    Try adding the name of the type of the variable or the keyword \'var\'.
+    test/my_test.dart:1:1: Error: Variables must be declared using the keywords 'const', 'final', 'var' or a type name.
+    Try adding the name of the type of the variable or the keyword 'var'.
     invalid
     ^^^^^^^
-    test/my_test.dart:1:1: Error: Expected \';\' after this.
+    test/my_test.dart:1:1: Error: Expected ';' after this.
     invalid
     ^^^^^^^
 '''),
@@ -422,7 +422,7 @@ Time:        00:00:00
 
     testScope('render error logs made during tests', (ref) async {
       final exitCode = await runTest({
-        'my_test.dart': r'''
+        'my_test.dart': '''
 import 'package:test/test.dart';
 import 'dart:io';
 

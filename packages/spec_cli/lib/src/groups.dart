@@ -1,7 +1,7 @@
 import 'package:dart_test_adapter/dart_test_adapter.dart';
 import 'package:riverpod/riverpod.dart';
-import 'package:spec_cli/src/collection.dart';
 
+import 'collection.dart';
 import 'dart_test.dart';
 import 'dart_test_utils.dart';
 import 'provider_utils.dart';

@@ -7,7 +7,7 @@ extension IterableExt<T> on Iterable<T> {
   }
 
   AsyncValue<T> get firstDataOrLoading {
-    if (isEmpty) return AsyncLoading();
+    if (isEmpty) return AsyncLoading<T>();
     return AsyncData(first);
   }
 }

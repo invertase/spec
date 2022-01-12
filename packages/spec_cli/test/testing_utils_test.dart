@@ -37,7 +37,7 @@ void main() {
       ]);
 
       await spec(
-        workingDirectory: dir.path + '/packages/a',
+        workingDirectory: '${dir.path}/packages/a',
       );
 
       expect(

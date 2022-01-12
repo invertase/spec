@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'test_protocol.dart';
 
+/// Executes `flutter test` and decode the output
 Stream<List<TestEvent>> flutterTest({
   Map<String, String>? environment,
   List<String>? arguments,
@@ -27,6 +28,7 @@ Stream<List<TestEvent>> flutterTest({
   );
 }
 
+/// Executes `dart test` and decode the output
 Stream<List<TestEvent>> dartTest({
   Map<String, String>? environment,
   List<String>? arguments,
@@ -75,7 +77,7 @@ Stream<List<TestEvent>> _parseTestJsonOutput(
             if (trimmedValue.isNotEmpty) yield trimmedValue;
           }
         })
-        .expand((j) {
+        .expand<Object?>((j) {
           try {
             return [json.decode(j)];
           } on FormatException {
@@ -98,8 +100,9 @@ Stream<List<TestEvent>> _parseTestJsonOutput(
   };
 
   controller.onCancel = () async {
+    await controller.close();
     (await processFuture).kill();
-    eventSub.cancel();
+    await eventSub.cancel();
   };
 
   return controller.stream;

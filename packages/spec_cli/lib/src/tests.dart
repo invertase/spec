@@ -1,8 +1,8 @@
 import 'package:dart_test_adapter/dart_test_adapter.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:riverpod/riverpod.dart';
-import 'package:spec_cli/src/collection.dart';
 
+import 'collection.dart';
 import 'dart_test.dart';
 import 'dart_test_utils.dart';
 import 'groups.dart';
@@ -141,7 +141,10 @@ final $testStatus = Provider.family<TestStatus, TestKey>((ref, testKey) {
       .firstOrNull;
 
   if (done != null) {
-    assert(!done.skipped && done.result == TestDoneStatus.success);
+    assert(
+      !done.skipped && done.result == TestDoneStatus.success,
+      'Failing tests should already be dealt with previously',
+    );
     return const TestStatus.pass();
   }
 

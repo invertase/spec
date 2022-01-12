@@ -1,13 +1,13 @@
+import 'package:collection/collection.dart';
 import 'package:dart_test_adapter/dart_test_adapter.dart';
 import 'package:meta/meta.dart';
-import 'package:collection/collection.dart';
 import 'package:riverpod/riverpod.dart';
 
 import 'tests.dart';
 
 @immutable
 class TestKey {
-  TestKey({
+  const TestKey({
     required this.testID,
     required this.groupID,
     required this.suiteID,
@@ -31,7 +31,7 @@ class TestKey {
 
 @immutable
 class GroupKey {
-  GroupKey({
+  const GroupKey({
     required this.groupID,
     required this.suiteID,
   });
@@ -52,7 +52,7 @@ class GroupKey {
 
 @immutable
 class SuiteKey {
-  SuiteKey({required this.suiteID});
+  const SuiteKey({required this.suiteID});
 
   final int suiteID;
 

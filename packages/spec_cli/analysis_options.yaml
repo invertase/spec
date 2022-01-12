@@ -1,0 +1,5 @@
+include: ../../analysis_options.yaml
+linter:
+  rules:
+    # spec has no real public API since it's a command line
+    public_member_api_docs: false

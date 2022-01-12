@@ -2,8 +2,8 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:spec_cli/src/command_runner.dart';
 import 'package:riverpod/riverpod.dart';
+import 'package:spec_cli/src/command_runner.dart';
 import 'package:spec_cli/src/container.dart';
 import 'package:spec_cli/src/renderer.dart';
 import 'package:test/expect.dart';
@@ -51,7 +51,8 @@ void testScope(
   Object? tags,
   String? testOn,
 }) {
-  final defaultOverrides = Zone.current[_defaultOverridesKey];
+  final defaultOverrides =
+      Zone.current[_defaultOverridesKey] as List<Override>?;
   return test(
     description,
     () {
@@ -78,10 +79,10 @@ class TestRenderer extends Renderer {
   void renderFrame(String output) {
     final normalizedOutput = output.replaceAll(ansiRegex, '').replaceFirst(
           RegExp(r'Time:.+$', multiLine: true),
-          r'Time:        00:00:00',
+          'Time:        00:00:00',
         );
 
-    frames.add(normalizedOutput + '\n');
+    frames.add('$normalizedOutput\n');
   }
 }
 
@@ -132,7 +133,10 @@ class TestRenderer extends Renderer {
 /// - "A then G", because even if B/C were skipped, G is not a known frame
 /// - "A then B then C then C", because this defines 4 frames instead of 3
 Matcher framesMatch(Object expectation) {
-  assert(expectation is String || expectation is List);
+  assert(
+    expectation is String || expectation is List,
+    'Only List or Strings are supported',
+  );
 
   List<Matcher> splitStringFrame(String frame) {
     return frame
@@ -146,7 +150,7 @@ Matcher framesMatch(Object expectation) {
       : (expectation as List<Object?>).expand((matcher) {
           return matcher is String
               ? splitStringFrame(matcher)
-              : [matcher as Matcher];
+              : [matcher! as Matcher];
         }).toList();
 
   return _FramesMatch(expectedFrames);
@@ -257,8 +261,8 @@ class _FramesMatch extends Matcher {
 // Cloned from https://github.com/chalk/ansi-regex/blob/main/index.js
 final ansiRegex = RegExp(
   [
-    '[\\u001B\\u009B][[\\]()#;?]*(?:(?:(?:(?:;[-a-zA-Z\\d\\/#&.:=?%@~_]+)*|[a-zA-Z\\d]+(?:;[-a-zA-Z\\d\\/#&.:=?%@~_]*)*)?\\u0007)',
-    '(?:(?:\\d{1,4}(?:;\\d{0,4})*)?[\\dA-PR-TZcf-nq-uy=><~]))'
+    r'[\u001B\u009B][[\]()#;?]*(?:(?:(?:(?:;[-a-zA-Z\d\\/#&.:=?%@~_]+)*|[a-zA-Z\d]+(?:;[-a-zA-Z\d\/#&.:=?%@~_]*)*)?\u0007)',
+    r'(?:(?:\d{1,4}(?:;\d{0,4})*)?[\dA-PR-TZcf-nq-uy=><~]))'
   ].join('|'),
 );
 
@@ -322,12 +326,13 @@ Future<Directory> createProject(List<PackageInfo> packages) async {
   addTearDown(() async {
     for (var i = 0; i < 5; i++) {
       try {
+        await workingDir.delete(recursive: true);
+        break;
+      } on FileSystemException {
         // Sometimes the deletion fails to complete (likely because .dart_tool
         // takes too long to delete).
         // So we use a retry mechanism.
-        await workingDir.delete(recursive: true);
-        break;
-      } on FileSystemException {}
+      }
     }
 
     // After all the retries, check that the folder was properly deleted.
@@ -343,7 +348,7 @@ Future<Directory> createProject(List<PackageInfo> packages) async {
       await Future.wait(
         package.files.entries.map((entry) async {
           final file =
-              await File('${packagePath}/${entry.key}').create(recursive: true);
+              await File('$packagePath/${entry.key}').create(recursive: true);
 
           await file.writeAsString(entry.value);
         }),
@@ -384,14 +389,14 @@ Future<int> runTest(
     PackageInfo(
       name: 'a',
       files: {
-        for (final entry in tests.entries) 'test/' + entry.key: entry.value,
+        for (final entry in tests.entries) 'test/${entry.key}': entry.value,
       },
       isFlutterPackage: isFlutter,
     ),
   ]);
 
   return spec(
-    workingDirectory: dir.path + '/packages/a',
+    workingDirectory: '${dir.path}/packages/a',
     options: options,
   );
 }

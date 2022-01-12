@@ -5,14 +5,14 @@ void main() {
   group('SpecOptions.fromArgs', () {
     test('supports empty args', () {
       expect(
-        SpecOptions.fromArgs([]),
+        SpecOptions.fromArgs(const []),
         const SpecOptions(),
       );
     });
 
     test('can specify test names', () {
       expect(
-        SpecOptions.fromArgs(['--name=foo', '--name=bar']),
+        SpecOptions.fromArgs(const ['--name=foo', '--name=bar']),
         const SpecOptions(
           testNameFilters: ['foo', 'bar'],
         ),
@@ -21,7 +21,7 @@ void main() {
 
     test('can specify file filters', () {
       expect(
-        SpecOptions.fromArgs(['test/my_test.dart', 'test/dir/**.dart']),
+        SpecOptions.fromArgs(const ['test/my_test.dart', 'test/dir/**.dart']),
         const SpecOptions(
           fileFilters: ['test/my_test.dart', 'test/dir/**.dart'],
         ),
@@ -30,18 +30,18 @@ void main() {
 
     test('can specify --coverage', () {
       expect(
-        SpecOptions.fromArgs(['--coverage']),
+        SpecOptions.fromArgs(const ['--coverage']),
         const SpecOptions(coverage: true),
       );
     });
 
     test('can specify --watch', () {
       expect(
-        SpecOptions.fromArgs(['--watch']),
+        SpecOptions.fromArgs(const ['--watch']),
         const SpecOptions(watch: true),
       );
       expect(
-        SpecOptions.fromArgs(['-w']),
+        SpecOptions.fromArgs(const ['-w']),
         const SpecOptions(watch: true),
       );
     });

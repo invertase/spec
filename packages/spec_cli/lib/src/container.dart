@@ -26,7 +26,8 @@ Future<T> runScoped<T>(
 }
 
 extension on Zone {
-  ProviderContainer? get _container => this[_providerContainerZoneKey];
+  ProviderContainer? get _container =>
+      this[_providerContainerZoneKey] as ProviderContainer?;
 }
 
 class _DartRef extends DartRef {}
@@ -67,12 +68,15 @@ abstract class DartRef {
           (prev, value) {
             value.when(
               data: controller.add,
-              error: (error, stack) => controller.addError(error, stack),
+              error: controller.addError,
               loading: () {},
             );
           },
         );
-    controller.onCancel = () => sub.close();
+    controller.onCancel = () {
+      sub.close();
+      controller.close();
+    };
 
     return controller.stream;
   }

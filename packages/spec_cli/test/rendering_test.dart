@@ -32,7 +32,7 @@ void main() {
       // 45
       // 678
       // 90
-      final output = '''
+      const output = '''
 12345
 67890''';
       expect(

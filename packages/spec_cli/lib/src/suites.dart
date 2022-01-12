@@ -1,12 +1,12 @@
+import 'package:collection/collection.dart';
 import 'package:dart_test_adapter/dart_test_adapter.dart';
 import 'package:riverpod/riverpod.dart';
-import 'package:collection/collection.dart';
-import 'package:spec_cli/src/io.dart';
 
 import 'collection.dart';
 import 'dart_test.dart';
 import 'dart_test_utils.dart';
 import 'groups.dart';
+import 'io.dart';
 import 'provider_utils.dart';
 import 'tests.dart';
 
@@ -64,13 +64,13 @@ final $suiteStatus =
     );
     if (!hasAllVisibleIds) {
       // TODO update after https://github.com/dart-lang/test/issues/1652 is resolved
-      unwrap(const AsyncLoading());
+      unwrap(const AsyncLoading<void>());
     }
 
     // any loading leads to RUNNING, even if there's an error/success
     final hasLoading =
         tests.keys.any((testKey) => ref.watch($testStatus(testKey)).pending);
-    if (hasLoading) unwrap(const AsyncLoading());
+    if (hasLoading) unwrap(const AsyncLoading<void>());
 
     final error = tests.keys
         .map((id) => ref.watch($testStatus(id)))
@@ -78,7 +78,7 @@ final $suiteStatus =
 
     if (error != null) {
       unwrap(
-        AsyncError(
+        AsyncError<void>(
           error.error,
           stackTrace: error.stackTrace,
         ),
@@ -98,7 +98,7 @@ final $exitCode = Provider<AsyncValue<int>>(
     // The exit code will be preemptively obtained when a signal is sent.
     // No matter whether all tests executed are passing or not, since the command
     // didn't have the time to complete, we consider the command as failing
-    if (ref.watch($isEarlyAbort)) return AsyncData(-1);
+    if (ref.watch($isEarlyAbort)) return const AsyncData(-1);
 
     final doneEvent = ref
         .watch($events)
@@ -106,7 +106,7 @@ final $exitCode = Provider<AsyncValue<int>>(
     if (doneEvent != null) {
       // Something probably went wrong as we likely should've been able to quit
       // before obtaining the true "done" event, so we'll safely quit.
-      return doneEvent.success == true
+      return doneEvent.success ?? true
           ? const AsyncData(0)
           : const AsyncData(-1);
     }
@@ -125,7 +125,7 @@ final $exitCode = Provider<AsyncValue<int>>(
     if (hasErroredSuite) return const AsyncData(-1);
 
     // All suites are completed and passing
-    return AsyncData(0);
+    return const AsyncData(0);
   },
   dependencies: [
     $suites,

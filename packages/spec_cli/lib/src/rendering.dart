@@ -1,16 +1,16 @@
+import 'package:collection/collection.dart';
 import 'package:dart_test_adapter/dart_test_adapter.dart';
+import 'package:duration/duration.dart';
 import 'package:path/path.dart';
 import 'package:riverpod/riverpod.dart';
-import 'package:collection/collection.dart';
-import 'package:duration/duration.dart';
-import 'package:spec_cli/src/io.dart';
 
+import 'ansi.dart';
 import 'dart_test.dart';
 import 'dart_test_utils.dart';
 import 'groups.dart';
+import 'io.dart';
 import 'provider_utils.dart';
 import 'suites.dart';
-import 'ansi.dart';
 import 'tests.dart';
 
 final $suiteOutputLabel =
@@ -58,7 +58,7 @@ final $spinner = Provider.autoDispose<String>((ref) {
       case 0:
         return '|';
       case 1:
-        return '\\';
+        return r'\';
       case 2:
         return '–';
       case 3:
@@ -66,10 +66,10 @@ final $spinner = Provider.autoDispose<String>((ref) {
       case 4:
         return '|';
       case 5:
-        return '\\';
+        return r'\';
       case 6:
         return '–';
-      case 6:
+      case 7:
         return '/';
       default:
         throw FallThroughError();
@@ -77,9 +77,9 @@ final $spinner = Provider.autoDispose<String>((ref) {
   }
 
   var offset = 0;
-  final inverval = Stream.periodic(Duration(milliseconds: 200), (_) {
+  final inverval = Stream.periodic(const Duration(milliseconds: 200), (_) {
     offset++;
-    if (offset > 6) offset = 0;
+    if (offset > 7) offset = 0;
     ref.state = charForOffset(offset);
   });
 
@@ -202,14 +202,14 @@ String? _renderTest({
   if (hasExitCode && !status.failing) return null;
   if (messages.isEmpty && error == null && label == null) return null;
 
-  error = error?.multilinePadLeft(depth * 2 + 4);
+  final paddedError = error?.multilinePadLeft(depth * 2 + 4);
 
   return [
     if (label != null) label.multilinePadLeft(depth * 2 + 2),
     if (status.pending || (status.failing && hasExitCode))
       ...messages, // messages are voluntarily not indented
-    if (error != null && hasExitCode)
-      if (messages.isNotEmpty) '\n$error' else error,
+    if (paddedError != null && hasExitCode)
+      if (messages.isNotEmpty) '\n$paddedError' else paddedError,
   ].join('\n');
 }
 

@@ -1,14 +1,14 @@
 import 'dart:async';
 
-import 'package:test/test.dart' as dart_test;
 import 'package:meta/meta.dart';
+import 'package:test/test.dart' as dart_test;
 
-part 'future_expect.dart';
-part 'stream_expect.dart';
 part 'bool_expect.dart';
-part 'num_expect.dart';
 part 'error_expect.dart';
 part 'function_expect.dart';
+part 'future_expect.dart';
+part 'num_expect.dart';
+part 'stream_expect.dart';
 part 'string_expect.dart';
 
 Expectation<Actual> expect<Actual>(Actual value) {

@@ -4,13 +4,13 @@ import 'dart:io';
 import 'package:args/args.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:riverpod/riverpod.dart';
-import 'package:spec_cli/src/container.dart';
-import 'package:spec_cli/src/renderer.dart';
-import 'package:spec_cli/src/suites.dart';
 
+import 'container.dart';
 import 'dart_test.dart';
 import 'io.dart';
+import 'renderer.dart';
 import 'rendering.dart';
+import 'suites.dart';
 import 'tests.dart';
 import 'vt100.dart';
 
@@ -32,7 +32,6 @@ class SpecOptions {
       ..addFlag(
         'watch',
         abbr: 'w',
-        defaultsTo: false,
         negatable: false,
         help: 'Listens to changes in the project and '
             'run tests whenever something changed',
@@ -40,7 +39,6 @@ class SpecOptions {
       ..addFlag(
         'coverage',
         abbr: 'c',
-        defaultsTo: false,
         negatable: false,
         help: 'Extract code coverage reports.',
       )
@@ -65,7 +63,8 @@ class SpecOptions {
   final bool watch;
   final bool coverage;
 
-  operator ==(Object other) =>
+  @override
+  bool operator ==(Object other) =>
       other is SpecOptions &&
       other.runtimeType == runtimeType &&
       other.coverage == coverage &&
@@ -113,13 +112,12 @@ Future<int> spec({
         },
       );
 
-      List<FailedTestLocation> _lastFailedTests = [];
-
+      var lastFailedTests = <FailedTestLocation>[];
       ref.listen<AsyncValue<List<FailedTestLocation>>>(
           $currentlyFailedTestsLocation, (prev, value) {
         value.when(
-          data: (value) => _lastFailedTests = value,
-          loading: () => _lastFailedTests = [],
+          data: (value) => lastFailedTests = value,
+          loading: () => lastFailedTests = [],
           error: (err, stack) {
             Zone.current.handleUncaughtError(err, stack!);
           },
@@ -128,13 +126,13 @@ Future<int> spec({
 
       ref.listen($fileChange, (prev, value) {
         ref.read($failedTestsLocationFromPreviousRun.notifier).state =
-            _lastFailedTests;
+            lastFailedTests;
       });
       stdin.listen((event) {
         if (event.first == 10) {
           // enter
           ref.read($failedTestsLocationFromPreviousRun.notifier).state =
-              _lastFailedTests;
+              lastFailedTests;
         }
       });
     }
