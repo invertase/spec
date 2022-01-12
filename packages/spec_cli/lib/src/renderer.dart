@@ -51,6 +51,9 @@ class BacktrackingRenderer implements Renderer {
         );
 
   String? _lastFrame;
+  // For some reasons, going from first frame to second frame clears one more line
+  // than needed. This workaround fixes it.
+  var _didAddOneLine = false;
 
   @override
   void renderFrame(String output) {
@@ -60,12 +63,18 @@ class BacktrackingRenderer implements Renderer {
         _lastFrame!,
         terminalWidth: stdout.terminalColumns,
       );
+
+      final inc = _didAddOneLine ? 1 : 2;
+      _didAddOneLine = true;
+
       stdout.write(
-        VT100.moveCursorUp(lastOutputHeight - 1) + VT100.moveCursorToColumn(0),
+        VT100.moveCursorUp(lastOutputHeight - inc) +
+            VT100.moveCursorToColumn(0),
       );
+      stdout.write(VT100.clearScreenFromCursorDown);
     }
     // TODO update renderer to use ansi to only output the diff of the previous vs new frame
-    stdout.write(VT100.clearScreenFromCursorDown);
+    if (_lastFrame == null) stdout.write('first render');
     stdout.write(output);
 
     _lastFrame = output;
