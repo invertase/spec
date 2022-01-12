@@ -332,6 +332,13 @@ ${'Time:'.bold}        $timeDescription''';
   $startTime,
 ]);
 
+final $showWatchUsage = StateProvider<bool>((ref) {
+  // collapse watch usage when the tests are restarted
+  ref.watch($events.notifier);
+
+  return false;
+});
+
 final $output = Provider.autoDispose<AsyncValue<String>>((ref) {
   return merge((unwrap) {
     final isDone = ref.watch($isDone);
@@ -366,19 +373,23 @@ final $output = Provider.autoDispose<AsyncValue<String>>((ref) {
       if (summary != null) summary,
       if (ref.watch($events).isInterrupted) 'Test run was interrupted.'.red,
       if (summary != null && ref.watch($isWatchMode))
-        '''
-Watch Usage
+        if (ref.watch($showWatchUsage))
+          '''
+${'Watch Usage:'.bold}
  › Press a to run all tests.
  › Press f to run only failed tests.
  › Press p to filter by a filename regex pattern.
  › Press t to filter by a test name regex pattern.
  › Press q to quit watch mode.
  › Press Enter to trigger a test run.
-''',
+'''
+        else
+          '${'Watch Usage:'.bold} Press w to show more.',
     ].join('\n\n');
   });
 }, dependencies: [
   $events,
+  $showWatchUsage,
   $suites,
   $isDone,
   $suiteOutput,

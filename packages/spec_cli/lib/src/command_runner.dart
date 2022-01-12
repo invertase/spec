@@ -98,6 +98,14 @@ Future<int> spec({
   SpecOptions options = const SpecOptions(),
 }) {
   return runScoped((ref) async {
+    // Stop your keystrokes being printed automatically.
+    // Needs to be disabled for lineMode to be disabled too.
+    stdin.echoMode = false;
+
+    // This will cause the stdin stream to provide the input as soon as it
+    // arrives, so in interactive mode this will be one key press at a time.
+    stdin.lineMode = false;
+
     // initializing option providers from command line options.
     ref.read($testNameFilters.notifier).state = options.testNameFilters;
     ref.read($filePathFilters.notifier).state = options.fileFilters;
@@ -129,6 +137,10 @@ Future<int> spec({
       //       lastFailedTests;
       // });
       stdin.listen((event) {
+        if (event.first == 'w'.codeUnits.single) {
+          ref.read($showWatchUsage.notifier).state = true;
+        }
+
         if (event.first == 10) {
           // enter
           if (!ref.read($events).isInterrupted && !ref.read($isDone)) {
