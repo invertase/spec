@@ -60,8 +60,6 @@ class TestEventsNotifier extends StateNotifier<TestEventsState> {
         '--name=${ref.watch($testNameFilters)!.pattern}',
     ];
 
-    print('arguments $arguments');
-
     final workingDir = ref.watch($workingDirectory);
 
     Future(() async {
