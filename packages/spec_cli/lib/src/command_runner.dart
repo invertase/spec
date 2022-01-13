@@ -102,13 +102,15 @@ Future<int> spec({
 }) {
   return runScoped((ref) async {
     try {
-      // Stop your keystrokes being printed automatically.
-      // Needs to be disabled for lineMode to be disabled too.
-      stdin.echoMode = false;
+      if (stdin.hasTerminal) {
+        // Stop your keystrokes being printed automatically.
+        // Needs to be disabled for lineMode to be disabled too.
+        stdin.echoMode = false;
 
-      // This will cause the stdin stream to provide the input as soon as it
-      // arrives, so in interactive mode this will be one key press at a time.
-      stdin.lineMode = false;
+        // This will cause the stdin stream to provide the input as soon as it
+        // arrives, so in interactive mode this will be one key press at a time.
+        stdin.lineMode = false;
+      }
 
       // initializing option providers from command line options.
       ref.read($testNameFilters.notifier).state =
