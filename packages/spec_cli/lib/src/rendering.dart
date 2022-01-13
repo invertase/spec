@@ -392,19 +392,17 @@ final $output = Provider.autoDispose<AsyncValue<String>>((ref) {
     // During the summary, only show passing suites if there are not failures
     final shouldShowPassingSuites = !isDone || failingSuites.isEmpty;
 
-    return VT100.hideCursor +
-        [
-          if (shouldShowPassingSuites && passingSuites.isNotEmpty)
-            passingSuites,
-          if (!isDone && loadingSuites.isNotEmpty) loadingSuites,
-          if (failingSuites.isNotEmpty) failingSuites,
-          if (summary != null) summary,
-          if (ref.watch($events).isInterrupted) 'Test run was interrupted.'.red,
-          if (summary != null &&
-              ref.watch($isWatchMode) &&
-              !ref.watch($isEarlyAbort))
-            if (ref.watch($showWatchUsage))
-              '''
+    final result = [
+      if (shouldShowPassingSuites && passingSuites.isNotEmpty) passingSuites,
+      if (!isDone && loadingSuites.isNotEmpty) loadingSuites,
+      if (failingSuites.isNotEmpty) failingSuites,
+      if (summary != null) summary,
+      if (ref.watch($events).isInterrupted) 'Test run was interrupted.'.red,
+      if (summary != null &&
+          ref.watch($isWatchMode) &&
+          !ref.watch($isEarlyAbort))
+        if (ref.watch($showWatchUsage))
+          '''
 ${'Watch Usage:'.bold}
  › Press a to run all tests.
  › Press f to run only failed tests.
@@ -413,9 +411,12 @@ ${'Watch Usage:'.bold}
  › Press q to quit watch mode.
  › Press Enter to trigger a test run.
 '''
-            else
-              '${'Watch Usage:'.bold} Press w to show more.',
-        ].join('\n\n');
+        else
+          '${'Watch Usage:'.bold} Press w to show more.',
+    ].join('\n\n');
+
+    if (result.isNotEmpty) return VT100.hideCursor + result;
+    return '';
   });
 }, dependencies: [
   $editingTestNameOutput,
