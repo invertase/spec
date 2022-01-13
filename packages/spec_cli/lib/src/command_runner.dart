@@ -136,24 +136,7 @@ Future<int> spec({
       //   ref.read($failedTestsLocationFromPreviousRun.notifier).state =
       //       lastFailedTests;
       // });
-      stdin.listen((event) {
-        if (event.first == 'w'.codeUnits.single) {
-          ref.read($showWatchUsage.notifier).state = true;
-        }
-
-        if (event.first == 10) {
-          // enter
-          if (!ref.read($events).isInterrupted && !ref.read($isDone)) {
-            ref.read($events.notifier).stop();
-          } else {
-            ref.read($startTime.notifier).state = DateTime.now();
-            ref.refresh($events);
-          }
-
-          // ref.read($failedTestsLocationFromPreviousRun.notifier).state =
-          //     lastFailedTests;
-        }
-      });
+      stdin.listen((event) => _handleKeyPress(event.single, ref));
     }
 
     final renderer = rendererOverride ??
@@ -190,4 +173,28 @@ Future<int> spec({
     if (workingDirectory != null)
       $workingDirectory.overrideWithValue(Directory(workingDirectory)),
   ]);
+}
+
+void _handleKeyPress(int keyCode, DartRef ref) {
+  if (keyCode == 'q'.codeUnits.single) {
+    // stop the watch mode
+    ref.read($didPressQ.notifier).state = true;
+  } else if (keyCode == 'w'.codeUnits.single) {
+    // pressed `w`, expanding the tooltip explaining the various commands
+    // during watch mode
+    ref.read($showWatchUsage.notifier).state = true;
+  } else if (keyCode == 10) {
+    // enter
+    // Aborting/resuming tests
+
+    if (!ref.read($events).isInterrupted && !ref.read($isDone)) {
+      ref.read($events.notifier).stop();
+    } else {
+      ref.read($startTime.notifier).state = DateTime.now();
+      ref.refresh($events);
+    }
+
+    // ref.read($failedTestsLocationFromPreviousRun.notifier).state =
+    //     lastFailedTests;
+  }
 }

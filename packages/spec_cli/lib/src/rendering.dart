@@ -372,7 +372,9 @@ final $output = Provider.autoDispose<AsyncValue<String>>((ref) {
       if (failingSuites.isNotEmpty) failingSuites,
       if (summary != null) summary,
       if (ref.watch($events).isInterrupted) 'Test run was interrupted.'.red,
-      if (summary != null && ref.watch($isWatchMode))
+      if (summary != null &&
+          ref.watch($isWatchMode) &&
+          !ref.watch($isEarlyAbort))
         if (ref.watch($showWatchUsage))
           '''
 ${'Watch Usage:'.bold}
@@ -389,6 +391,7 @@ ${'Watch Usage:'.bold}
   });
 }, dependencies: [
   $events,
+  $isEarlyAbort,
   $showWatchUsage,
   $suites,
   $isDone,

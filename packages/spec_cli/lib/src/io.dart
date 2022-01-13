@@ -4,6 +4,8 @@ import 'dart:io';
 import 'package:path/path.dart';
 import 'package:riverpod/riverpod.dart';
 
+import 'dart_test.dart';
+
 final $workingDirectory = Provider((ref) => Directory.current);
 
 final $fileChange = StreamProvider<void>((ref) {
@@ -27,8 +29,18 @@ final $fileChange = StreamProvider<void>((ref) {
 final $sigint = StreamProvider<void>((ref) => ProcessSignal.sigint.watch());
 final $sigterm = StreamProvider<void>((ref) => ProcessSignal.sigterm.watch());
 
+final $didPressQ = StateProvider<bool>((ref) => false);
+
 final $isEarlyAbort = Provider<bool>((ref) {
-  return ref.watch($sigint).isData || ref.watch($sigterm).isData;
-}, dependencies: [$sigint, $sigterm]);
+  return ref.watch($sigint).isData ||
+      ref.watch($sigterm).isData ||
+      // During watch mode, pressing `q` quits early
+      (ref.watch($isWatchMode) && ref.watch($didPressQ));
+}, dependencies: [
+  $sigint,
+  $sigterm,
+  $isWatchMode,
+  $didPressQ,
+]);
 
 final $startTime = StateProvider<DateTime>((ref) => DateTime(0));
