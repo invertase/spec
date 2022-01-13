@@ -11,12 +11,13 @@ import 'io.dart';
 
 part 'dart_test.freezed.dart';
 
-final $failedTestsLocationFromPreviousRun =
+final $failedTestLocationToExecute =
     StateProvider<List<FailedTestLocation>?>((ref) => null);
 
 final $testNameFilters = StateProvider<RegExp?>((ref) => null);
 final $filePathFilters = StateProvider<List<String>>((ref) => []);
 final $isWatchMode = StateProvider<bool>((ref) => false);
+final $isRunningOnlyFailingTests = StateProvider<bool>((ref) => false);
 
 final $events = StateNotifierProvider<TestEventsNotifier, TestEventsState>(
   (ref) => TestEventsNotifier(ref),
@@ -24,7 +25,8 @@ final $events = StateNotifierProvider<TestEventsNotifier, TestEventsState>(
     $testNameFilters,
     $filePathFilters,
     $workingDirectory,
-    $failedTestsLocationFromPreviousRun,
+    $failedTestLocationToExecute,
+    $isRunningOnlyFailingTests,
   ],
 );
 
@@ -44,10 +46,12 @@ class TestEventsNotifier extends StateNotifier<TestEventsState> {
             events: [],
           ),
         ) {
-    final locations = ref.watch($failedTestsLocationFromPreviousRun) ?? [];
+    final failedTestsLocation = ref.watch($isRunningOnlyFailingTests)
+        ? (ref.watch($failedTestLocationToExecute) ?? [])
+        : <FailedTestLocation>[];
 
-    final tests = locations.isNotEmpty
-        ? locations
+    final tests = failedTestsLocation.isNotEmpty
+        ? failedTestsLocation
             .map(
               (location) =>
                   '${location.path}?full-name=${Uri.encodeQueryComponent(location.name)}',
@@ -117,9 +121,20 @@ class _Package {
   final String path;
 }
 
+@immutable
 class FailedTestLocation {
-  FailedTestLocation({required this.path, required this.name});
+  const FailedTestLocation({required this.path, required this.name});
 
   final String path;
   final String name;
+
+  @override
+  bool operator ==(Object other) =>
+      other is FailedTestLocation &&
+      other.runtimeType == runtimeType &&
+      other.path == path &&
+      other.name == name;
+
+  @override
+  int get hashCode => Object.hash(runtimeType, path, name);
 }

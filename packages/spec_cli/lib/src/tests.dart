@@ -158,15 +158,21 @@ final $currentlyFailedTestsLocation =
   return merge((unwrap) {
     final failedTests = ref.watch($allFailedTests);
 
-    return failedTests.map((test) {
-      final suite = unwrap(
-        ref.watch($suite(test.suiteKey)),
-      );
+    return failedTests
+        .map((test) {
+          final suite = unwrap(
+            ref.watch($suite(test.suiteKey)),
+          );
 
-      return FailedTestLocation(
-        path: suite.path!,
-        name: test.name,
-      );
-    }).toList();
+          return FailedTestLocation(
+            path: suite.path!,
+            name: test.name,
+          );
+        })
+        // TODO remove once https://github.com/dart-lang/test/issues/1663 is fixed
+        // Due to some issue with `dart test`, it's possible that `dart test` will
+        // execute twice the same file. So we're removing the duplicate ourselves.
+        .toSet()
+        .toList();
   });
 }, dependencies: [$allFailedTests, $suite]);

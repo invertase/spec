@@ -94,6 +94,8 @@ class SpecOptions {
   }
 }
 
+final _$lastFailedTests = StateProvider<List<FailedTestLocation>>((ref) => []);
+
 Future<int> spec({
   String? workingDirectory,
   SpecOptions options = const SpecOptions(),
@@ -122,27 +124,24 @@ Future<int> spec({
       if (options.watch) {
         stdout.write('${VT100.clearScreen}${VT100.moveCursorToTopLeft}');
 
-        ref.listen(
-          $fileChange,
-          (prev, value) => ref.refresh($events),
-        );
-
-        var lastFailedTests = <FailedTestLocation>[];
         ref.listen<AsyncValue<List<FailedTestLocation>>>(
             $currentlyFailedTestsLocation, (prev, value) {
           value.when(
-            data: (value) => lastFailedTests = value,
-            loading: () => lastFailedTests = [],
+            data: (value) => ref.read(_$lastFailedTests.notifier).state = value,
+            loading: () => ref.read(_$lastFailedTests.notifier).state = [],
             error: (err, stack) {
               Zone.current.handleUncaughtError(err, stack!);
             },
           );
         });
 
-        // ref.listen($fileChange, (prev, value) {
-        //   ref.read($failedTestsLocationFromPreviousRun.notifier).state =
-        //       lastFailedTests;
-        // });
+        ref.listen(
+          $fileChange,
+          (prev, value) {
+            resartTests(ref);
+          },
+        );
+
         stdin.listen((event) {
           if (ref.read($isEditingTestNameFilter)) {
             _handleTestNameEditKeyPress(event, ref);
@@ -232,12 +231,19 @@ void _handleWatchKeyPress(List<int> keyCodes, DartRef ref) {
         // during watch mode
         ref.read($showWatchUsage.notifier).state = true;
         break;
+      case KeyCode.f:
+        // pressed `f`, toggling "run failing tests" mode
+
+        ref.read($isRunningOnlyFailingTests.notifier).update((state) => !state);
+        resartTests(ref);
+        break;
       case KeyCode.t:
         // pressed `t`, starting the editing of "filter by name"
 
         ref.read($editingTestNameTextField.notifier).state =
             ref.read($testNameFilters)?.pattern ?? '';
         ref.read($isEditingTestNameFilter.notifier).state = true;
+        resartTests(ref);
         break;
       case KeyCode.enter:
         // stop the watch mode
@@ -259,5 +265,7 @@ void _handleWatchKeyPress(List<int> keyCodes, DartRef ref) {
 
 void resartTests(DartRef ref) {
   ref.read($startTime.notifier).state = DateTime.now();
+  ref.read($failedTestLocationToExecute.notifier).state =
+      ref.read(_$lastFailedTests);
   ref.refresh($events);
 }
