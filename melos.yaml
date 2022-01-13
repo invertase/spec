@@ -1,5 +1,40 @@
-name: my_project
-
+name: Spec
+repository: https://github.com/invertase/spec
 packages:
   - packages/**
-  - examples/**
+
+command:
+  version:
+    # Generate commit links in package changelogs.
+    linkToCommits: true
+    # Only allow versioning to happen on main branch.
+    branch: main
+    # Additionally build a changelog at the root of the workspace.
+    workspaceChangelog: true
+
+scripts:
+  analyze:
+    run: dart analyze --fatal-infos --fatal-warnings .
+    description: Run Dart analyzer.
+
+  format:
+    run: dart format -o write .
+    description: Run Dart formatter.
+
+  build_runner:build:
+    run: |
+      melos exec -- \
+        "dart pub run build_runner build --delete-conflicting-outputs"
+    description: Run a build_runner build in the example apps.
+    select-package:
+      depends-on: "build_runner"
+  test:
+    run: |
+      melos exec -- \
+        "dart test"
+    description: Run Dart tests.
+    select-package:
+      dir-exists: "test"
+      depends-on: "test"
+
+  postbootstrap: melos run build_runner:build --no-select
