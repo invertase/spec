@@ -12,6 +12,7 @@ import 'io.dart';
 import 'provider_utils.dart';
 import 'suites.dart';
 import 'tests.dart';
+import 'vt100.dart';
 
 final $suiteOutputLabel =
     Provider.family<AsyncValue<String>, SuiteKey>((ref, suiteKey) {
@@ -337,10 +338,35 @@ final $showWatchUsage = StateProvider<bool>((ref) {
   ref.watch($events.notifier);
 
   return false;
-});
+}, dependencies: [$events.notifier]);
+
+final $isEditingTestNameFilter = StateProvider<bool>((ref) {
+  // collapse watch usage when the tests are restarted
+  ref.watch($events.notifier);
+
+  return false;
+}, dependencies: [$events.notifier]);
+
+final $editingTestNameTextField = StateProvider.autoDispose((ref) => '');
+
+final $editingTestNameOutput = Provider.autoDispose<String>(
+  (ref) {
+    return '''
+Pattern Mode Usage
+ › Press Esc to exit pattern mode.
+ › Press Enter to filter by a tests regex pattern.
+
+ pattern › ${ref.watch($editingTestNameTextField)}${VT100.showCursor}''';
+  },
+  dependencies: [$editingTestNameTextField],
+);
 
 final $output = Provider.autoDispose<AsyncValue<String>>((ref) {
   return merge((unwrap) {
+    if (ref.watch($isEditingTestNameFilter)) {
+      return ref.watch($editingTestNameOutput);
+    }
+
     final isDone = ref.watch($isDone);
     final suites =
         ref.watch($suites).sorted((a, b) => a.path!.compareTo(b.path!));
@@ -366,17 +392,19 @@ final $output = Provider.autoDispose<AsyncValue<String>>((ref) {
     // During the summary, only show passing suites if there are not failures
     final shouldShowPassingSuites = !isDone || failingSuites.isEmpty;
 
-    return [
-      if (shouldShowPassingSuites && passingSuites.isNotEmpty) passingSuites,
-      if (!isDone && loadingSuites.isNotEmpty) loadingSuites,
-      if (failingSuites.isNotEmpty) failingSuites,
-      if (summary != null) summary,
-      if (ref.watch($events).isInterrupted) 'Test run was interrupted.'.red,
-      if (summary != null &&
-          ref.watch($isWatchMode) &&
-          !ref.watch($isEarlyAbort))
-        if (ref.watch($showWatchUsage))
-          '''
+    return VT100.hideCursor +
+        [
+          if (shouldShowPassingSuites && passingSuites.isNotEmpty)
+            passingSuites,
+          if (!isDone && loadingSuites.isNotEmpty) loadingSuites,
+          if (failingSuites.isNotEmpty) failingSuites,
+          if (summary != null) summary,
+          if (ref.watch($events).isInterrupted) 'Test run was interrupted.'.red,
+          if (summary != null &&
+              ref.watch($isWatchMode) &&
+              !ref.watch($isEarlyAbort))
+            if (ref.watch($showWatchUsage))
+              '''
 ${'Watch Usage:'.bold}
  › Press a to run all tests.
  › Press f to run only failed tests.
@@ -385,11 +413,13 @@ ${'Watch Usage:'.bold}
  › Press q to quit watch mode.
  › Press Enter to trigger a test run.
 '''
-        else
-          '${'Watch Usage:'.bold} Press w to show more.',
-    ].join('\n\n');
+            else
+              '${'Watch Usage:'.bold} Press w to show more.',
+        ].join('\n\n');
   });
 }, dependencies: [
+  $editingTestNameOutput,
+  $isEditingTestNameFilter,
   $events,
   $isEarlyAbort,
   $showWatchUsage,

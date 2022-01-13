@@ -31,7 +31,7 @@ class FullScreenRenderer implements Renderer {
     // TODO update renderer to use ansi to only output the diff of the previous vs new frame
     stdout
       ..write('${VT100.moveCursorToTopLeft}${VT100.clearScreenFromCursorDown}')
-      ..writeln(output);
+      ..write(output);
   }
 }
 

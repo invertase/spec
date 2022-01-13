@@ -3,6 +3,9 @@ abstract class VT100 {
   static const String clearScreen = '$esc[2J';
   static const String moveCursorToTopLeft = '$esc[H';
 
+  static const String hideCursor = '$esc[?25l';
+  static const String showCursor = '$esc[?25h';
+
   static const String clearScreenFromCursorDown = '$esc[J';
 
   static String moveCursorUp(int lines) {

@@ -14,7 +14,7 @@ part 'dart_test.freezed.dart';
 final $failedTestsLocationFromPreviousRun =
     StateProvider<List<FailedTestLocation>?>((ref) => null);
 
-final $testNameFilters = StateProvider<List<String>>((ref) => []);
+final $testNameFilters = StateProvider<RegExp?>((ref) => null);
 final $filePathFilters = StateProvider<List<String>>((ref) => []);
 final $isWatchMode = StateProvider<bool>((ref) => false);
 
@@ -55,8 +55,12 @@ class TestEventsNotifier extends StateNotifier<TestEventsState> {
             .toList()
         : ref.watch($filePathFilters);
 
-    final arguments =
-        ref.watch($testNameFilters).map((name) => '--name=$name').toList();
+    final arguments = [
+      if (ref.watch($testNameFilters) != null)
+        '--name=${ref.watch($testNameFilters)!.pattern}',
+    ];
+
+    print('arguments $arguments');
 
     final workingDir = ref.watch($workingDirectory);
 
