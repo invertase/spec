@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:args/args.dart';
+import 'package:args/command_runner.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:riverpod/riverpod.dart';
 
@@ -16,20 +17,22 @@ import 'tests.dart';
 import 'vt100.dart';
 
 Future<int> specCommandRunner(List<String> args) async {
-  return spec(options: SpecOptions.fromArgs(args));
+  final exitCode = await _SpecCommandRunner().run(args);
+  // May return null when using -h
+  return exitCode ?? 0;
 }
 
-@immutable
-class SpecOptions {
-  const SpecOptions({
-    this.fileFilters = const [],
-    this.testNameFilters = const [],
-    this.watch = false,
-    this.coverage = false,
-  });
+class _SpecCommandRunner extends CommandRunner<int> {
+  _SpecCommandRunner()
+      : super(
+          'spec',
+          'A command line for running tests on Dart/Flutter projects',
+        ) {
+    _setupArgParser(argParser);
+  }
 
-  factory SpecOptions.fromArgs(List<String> args) {
-    final parser = ArgParser()
+  static void _setupArgParser(ArgParser argParser) {
+    argParser
       ..addFlag(
         'watch',
         abbr: 'w',
@@ -48,15 +51,43 @@ class SpecOptions {
         abbr: 'n',
         help: 'Filters tests by name.',
       );
+  }
 
-    final result = parser.parse(args);
-
+  static SpecOptions _decodeArgs(ArgResults result) {
     return SpecOptions(
       watch: result['watch'] as bool,
       fileFilters: result.rest,
       testNameFilters: result['name'] as List<String>,
       coverage: result['coverage'] as bool,
     );
+  }
+
+  @override
+  Future<int?> runCommand(ArgResults topLevelResults) {
+    if (topLevelResults['help'] as bool) {
+      return super.runCommand(topLevelResults);
+    }
+
+    return spec(options: _decodeArgs(topLevelResults));
+  }
+}
+
+@immutable
+class SpecOptions {
+  const SpecOptions({
+    this.fileFilters = const [],
+    this.testNameFilters = const [],
+    this.watch = false,
+    this.coverage = false,
+  });
+
+  factory SpecOptions.fromArgs(List<String> args) {
+    final parser = ArgParser();
+    _SpecCommandRunner._setupArgParser(parser);
+
+    final result = parser.parse(args);
+
+    return _SpecCommandRunner._decodeArgs(result);
   }
 
   final List<String> fileFilters;
