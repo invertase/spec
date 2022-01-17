@@ -3243,9 +3243,9 @@ class _$TestTearOff {
       int? line,
       int? column,
       String? url,
-      int? rootLine,
-      int? rootColumn,
-      String? rootUrl,
+      @JsonKey(name: 'root_line') int? rootLine,
+      @JsonKey(name: 'root_column') int? rootColumn,
+      @JsonKey(name: 'root_url') String? rootUrl,
       required Metadata metadata}) {
     return _Test(
       id: id,
@@ -3298,17 +3298,20 @@ mixin _$Test {
   /// originated.
   ///
   /// Will only be present if `root_url` is different from `url`.
+  @JsonKey(name: 'root_line')
   int? get rootLine => throw _privateConstructorUsedError;
 
   /// The (1-based) line on in the original test suite from which the test
   /// originated.
   ///
   /// Will only be present if `root_url` is different from `url`.
+  @JsonKey(name: 'root_column')
   int? get rootColumn => throw _privateConstructorUsedError;
 
   /// The URL for the original test suite in which the test was defined.
   ///
   /// Will only be present if different from `url`.
+  @JsonKey(name: 'root_url')
   String? get rootUrl => throw _privateConstructorUsedError;
 
   /// Metadatas about a test
@@ -3331,9 +3334,9 @@ abstract class $TestCopyWith<$Res> {
       int? line,
       int? column,
       String? url,
-      int? rootLine,
-      int? rootColumn,
-      String? rootUrl,
+      @JsonKey(name: 'root_line') int? rootLine,
+      @JsonKey(name: 'root_column') int? rootColumn,
+      @JsonKey(name: 'root_url') String? rootUrl,
       Metadata metadata});
 
   $MetadataCopyWith<$Res> get metadata;
@@ -3430,9 +3433,9 @@ abstract class _$TestCopyWith<$Res> implements $TestCopyWith<$Res> {
       int? line,
       int? column,
       String? url,
-      int? rootLine,
-      int? rootColumn,
-      String? rootUrl,
+      @JsonKey(name: 'root_line') int? rootLine,
+      @JsonKey(name: 'root_column') int? rootColumn,
+      @JsonKey(name: 'root_url') String? rootUrl,
       Metadata metadata});
 
   @override
@@ -3512,8 +3515,7 @@ class __$TestCopyWithImpl<$Res> extends _$TestCopyWithImpl<$Res>
 }
 
 /// @nodoc
-
-@JsonSerializable(fieldRename: FieldRename.snake)
+@JsonSerializable()
 class _$_Test implements _Test {
   _$_Test(
       {required this.id,
@@ -3523,9 +3525,9 @@ class _$_Test implements _Test {
       this.line,
       this.column,
       this.url,
-      this.rootLine,
-      this.rootColumn,
-      this.rootUrl,
+      @JsonKey(name: 'root_line') this.rootLine,
+      @JsonKey(name: 'root_column') this.rootColumn,
+      @JsonKey(name: 'root_url') this.rootUrl,
       required this.metadata});
 
   factory _$_Test.fromJson(Map<String, dynamic> json) => _$$_TestFromJson(json);
@@ -3565,6 +3567,7 @@ class _$_Test implements _Test {
   /// originated.
   ///
   /// Will only be present if `root_url` is different from `url`.
+  @JsonKey(name: 'root_line')
   final int? rootLine;
   @override
 
@@ -3572,12 +3575,14 @@ class _$_Test implements _Test {
   /// originated.
   ///
   /// Will only be present if `root_url` is different from `url`.
+  @JsonKey(name: 'root_column')
   final int? rootColumn;
   @override
 
   /// The URL for the original test suite in which the test was defined.
   ///
   /// Will only be present if different from `url`.
+  @JsonKey(name: 'root_url')
   final String? rootUrl;
   @override
 
@@ -3643,9 +3648,9 @@ abstract class _Test implements Test {
       int? line,
       int? column,
       String? url,
-      int? rootLine,
-      int? rootColumn,
-      String? rootUrl,
+      @JsonKey(name: 'root_line') int? rootLine,
+      @JsonKey(name: 'root_column') int? rootColumn,
+      @JsonKey(name: 'root_url') String? rootUrl,
       required Metadata metadata}) = _$_Test;
 
   factory _Test.fromJson(Map<String, dynamic> json) = _$_Test.fromJson;
@@ -3685,6 +3690,7 @@ abstract class _Test implements Test {
   /// originated.
   ///
   /// Will only be present if `root_url` is different from `url`.
+  @JsonKey(name: 'root_line')
   int? get rootLine;
   @override
 
@@ -3692,12 +3698,14 @@ abstract class _Test implements Test {
   /// originated.
   ///
   /// Will only be present if `root_url` is different from `url`.
+  @JsonKey(name: 'root_column')
   int? get rootColumn;
   @override
 
   /// The URL for the original test suite in which the test was defined.
   ///
   /// Will only be present if different from `url`.
+  @JsonKey(name: 'root_url')
   String? get rootUrl;
   @override
 

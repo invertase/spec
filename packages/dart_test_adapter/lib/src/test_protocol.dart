@@ -184,7 +184,6 @@ class TestEvent with _$TestEvent {
 @freezed
 class Test with _$Test {
   /// {@macro dart_test_adapter.test}
-  @JsonSerializable(fieldRename: FieldRename.snake)
   factory Test({
     /// An opaque ID for the test.
     required int id,
@@ -212,18 +211,18 @@ class Test with _$Test {
     /// originated.
     ///
     /// Will only be present if `root_url` is different from `url`.
-    int? rootLine,
+    @JsonKey(name: 'root_line') int? rootLine,
 
     /// The (1-based) line on in the original test suite from which the test
     /// originated.
     ///
     /// Will only be present if `root_url` is different from `url`.
-    int? rootColumn,
+    @JsonKey(name: 'root_column') int? rootColumn,
 
     /// The URL for the original test suite in which the test was defined.
     ///
     /// Will only be present if different from `url`.
-    String? rootUrl,
+    @JsonKey(name: 'root_url') String? rootUrl,
 
     /// Metadatas about a test
     required Metadata metadata,
