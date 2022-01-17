@@ -19,6 +19,9 @@ to add new features such as:
 - supporting both Dart and Flutter projects using the same command
 - support for running tests of multiple packages at the same time by using [Melos](https://github.com/invertase/melos) (coming soon)
 
+
+![Spec gif example](https://raw.githubusercontent.com/invertase/spec/main/packages/spec_cli/resources/render.git)
+
 ---
 
 <p align="center">
