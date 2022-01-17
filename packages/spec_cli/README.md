@@ -20,7 +20,7 @@ to add new features such as:
 - support for running tests of multiple packages at the same time by using [Melos](https://github.com/invertase/melos) (coming soon)
 
 
-![Spec gif example](https://raw.githubusercontent.com/invertase/spec/main/packages/spec_cli/resources/render.gif)
+![Spec gif example](https://raw.githubusercontent.com/invertase/spec/main/packages/spec_cli/resources/render.gif?token=GHSAT0AAAAAABKV7FKJSI3CGFTUJBJ6IQWEYPOYADA)
 
 ---
 
