@@ -9,17 +9,19 @@ import 'groups.dart';
 import 'io.dart';
 import 'tests.dart';
 
-final $suiteCount = Provider<AsyncValue<int>>((ref) {
+final $suiteCount =
+    Provider.autoDispose.family<AsyncValue<int>, String>((ref, packagePath) {
   return ref
-      .watch($events)
+      .watch($events(packagePath))
       .events
       .whereType<TestEventAllSuites>()
       .map((e) => e.count)
       .firstDataOrLoading;
 }, dependencies: [$events]);
 
-final $suites = Provider<List<Suite>>((ref) {
-  final events = ref.watch($events).events;
+final $suites =
+    Provider.family.autoDispose<List<Suite>, String>((ref, packagePath) {
+  final events = ref.watch($events(packagePath)).events;
 
   return events
       .whereType<TestEventSuite>()
@@ -27,23 +29,25 @@ final $suites = Provider<List<Suite>>((ref) {
       .toList();
 }, dependencies: [$events]);
 
-final $hasAllSuites = Provider<bool>((ref) {
-  return ref.watch($suiteCount).when(
+final $hasAllSuites =
+    Provider.family.autoDispose<bool, String>((ref, packagePath) {
+  return ref.watch($suiteCount(packagePath)).when(
         error: (err, stack) => false,
         loading: () => false,
         data: (suiteCount) {
-          final suites = ref.watch($suites);
+          final suites = ref.watch($suites(packagePath));
           return suites.length == suiteCount;
         },
       );
 }, dependencies: [$suites, $suiteCount]);
 
-final $suite = Provider.family<AsyncValue<Suite>, SuiteKey>((ref, suiteKey) {
+final $suite = Provider.autoDispose
+    .family<AsyncValue<Suite>, Packaged<SuiteKey>>((ref, suiteKey) {
   return ref
-      .watch($events)
+      .watch($events(suiteKey.packagePath))
       .events
       .whereType<TestEventSuite>()
-      .where((e) => e.suite.key == suiteKey)
+      .where((e) => e.suite.key == suiteKey.value)
       .map((event) => event.suite)
       .firstDataOrLoading;
 }, dependencies: [$events]);
@@ -54,7 +58,8 @@ enum SuiteStatus {
   pending,
 }
 
-final $suiteStatus = Provider.family<SuiteStatus, SuiteKey>((ref, suiteKey) {
+final $suiteStatus = Provider.family
+    .autoDispose<SuiteStatus, Packaged<SuiteKey>>((ref, suiteKey) {
   final tests = ref.watch($testsForSuite(suiteKey));
   final visibleTests = tests.values.where((test) => !test.isHidden).toList();
 
@@ -92,40 +97,69 @@ final $suiteStatus = Provider.family<SuiteStatus, SuiteKey>((ref, suiteKey) {
   $testStatus,
 ]);
 
-final $exitCode = Provider<AsyncValue<int>>(
+final $exitCode = Provider.autoDispose<AsyncValue<int>>(
   (ref) {
     // The exit code will be preemptively obtained when a signal is sent.
     // No matter whether all tests executed are passing or not, since the command
     // didn't have the time to complete, we consider the command as failing
     if (ref.watch($isEarlyAbort)) return const AsyncData(-1);
 
-    final doneEvent = ref
-        .watch($events)
-        .events
-        .firstWhereOrNull((event) => event is TestEventDone) as TestEventDone?;
-    if (doneEvent != null) {
-      // Something probably went wrong as we likely should've been able to quit
-      // before obtaining the true "done" event, so we'll safely quit.
-      return doneEvent.success ?? true
-          ? const AsyncData(0)
-          : const AsyncData(-1);
-    }
+    final packages = ref.watch($packages);
 
-    if (!ref.watch($hasAllSuites)) return const AsyncLoading();
+    return packages.when(
+      loading: () => const AsyncLoading(),
+      error: (err, stack) => AsyncError(err, stackTrace: stack),
+      data: (packages) {
+        final packageCode = packages.map<AsyncValue<int>>((package) {
+          final doneEvent = ref
+                  .watch($events(package.path))
+                  .events
+                  .firstWhereOrNull((event) => event is TestEventDone)
+              as TestEventDone?;
+          if (doneEvent != null) {
+            // Something probably went wrong as we likely should've been able to quit
+            // before obtaining the true "done" event, so we'll safely quit.
+            return doneEvent.success ?? true
+                ? const AsyncData(0)
+                : const AsyncData(-1);
+          }
 
-    final suites = ref.watch($suites);
+          if (!ref.watch($hasAllSuites(package.path))) {
+            return const AsyncLoading();
+          }
 
-    final hasPendingSuite = suites.any(
-        (suite) => ref.watch($suiteStatus(suite.key)) == SuiteStatus.pending);
-    if (hasPendingSuite) return const AsyncLoading();
+          final suites = ref.watch($suites(package.path));
 
-    final hasErroredSuite = suites.any(
-      (suite) => ref.watch($suiteStatus(suite.key)) == SuiteStatus.fail,
+          final hasPendingSuite = suites.any(
+            (suite) =>
+                ref.watch($suiteStatus(Packaged(package.path, suite.key))) ==
+                SuiteStatus.pending,
+          );
+          if (hasPendingSuite) return const AsyncLoading();
+
+          final hasErroredSuite = suites.any(
+            (suite) =>
+                ref.watch($suiteStatus(Packaged(package.path, suite.key))) ==
+                SuiteStatus.fail,
+          );
+          if (hasErroredSuite) return const AsyncData(-1);
+
+          // All suites are completed and passing
+          return const AsyncData(0);
+        }).toList();
+
+        if (packageCode.any((code) => code.isLoading)) {
+          return const AsyncLoading();
+        }
+        final error =
+            packageCode.firstWhereOrNull((element) => element.isError);
+        if (error != null) return error;
+
+        final firstFailing =
+            packageCode.firstWhereOrNull((element) => element.value != 0);
+        return AsyncData(firstFailing?.value ?? 0);
+      },
     );
-    if (hasErroredSuite) return const AsyncData(-1);
-
-    // All suites are completed and passing
-    return const AsyncData(0);
   },
   dependencies: [
     $suites,
@@ -136,15 +170,18 @@ final $exitCode = Provider<AsyncValue<int>>(
   ],
 );
 
-final $isDone = Provider<bool>(
+final $isDone = Provider.autoDispose<bool>(
   (ref) {
+    final packages = ref.watch($packages);
+    if (packages.isLoading) return false;
+
     return ref.watch($exitCode).map(
               data: (d) => d.isRefreshing == false,
               error: (_) => false,
               loading: (_) => false,
             ) ||
-        ref.watch($events).isInterrupted;
+        packages.value!.any((p) => ref.watch($events(p.path)).isInterrupted);
   },
-  dependencies: [$exitCode, $events],
+  dependencies: [$exitCode, $events, $packages],
   name: 'isDone',
 );

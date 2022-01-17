@@ -66,6 +66,25 @@ class SuiteKey {
   int get hashCode => Object.hash(runtimeType, suiteID);
 }
 
+/// A value scoped to a package
+@immutable
+class Packaged<Value> {
+  const Packaged(this.packagePath, this.value);
+
+  final Value value;
+  final String packagePath;
+
+  @override
+  bool operator ==(Object other) =>
+      other is Packaged<Value> &&
+      other.runtimeType == runtimeType &&
+      other.packagePath == packagePath &&
+      other.value == value;
+
+  @override
+  int get hashCode => Object.hash(runtimeType, value, packagePath);
+}
+
 extension TestExt on Test {
   // when "url" is null, it means that this is not a user-defined test
   // and is instead a setup/tearOff/.., so it doesn't count
@@ -103,9 +122,9 @@ extension SuiteExt on Suite {
 }
 
 extension TestListExt on List<Test> {
-  List<Test> sortedByStatus(Ref ref) {
+  List<Test> sortedByStatus(AutoDisposeRef ref, String packagePath) {
     return sortedBy<num>((test) {
-      return ref.watch($testStatus(test.key)).map(
+      return ref.watch($testStatus(Packaged(packagePath, test.key))).map(
             skip: (_) => 0,
             pass: (_) => 1,
             pending: (_) => 2,

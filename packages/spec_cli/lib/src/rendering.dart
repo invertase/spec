@@ -14,8 +14,8 @@ import 'suites.dart';
 import 'tests.dart';
 import 'vt100.dart';
 
-final $suiteOutputLabel =
-    Provider.family<AsyncValue<String>, SuiteKey>((ref, suiteKey) {
+final $suiteOutputLabel = Provider.autoDispose
+    .family<AsyncValue<String>, Packaged<SuiteKey>>((ref, suiteKey) {
   return merge((unwrap) {
     final suite = unwrap(ref.watch($suite(suiteKey)));
     final workingDir = ref.watch($workingDirectory);
@@ -96,20 +96,20 @@ final $spinner = Provider.autoDispose<String>((ref) {
   return charForOffset(offset);
 });
 
-final $testMessages =
-    Provider.autoDispose.family<List<String>, TestKey>((ref, testKey) {
-  final events = ref.watch($events).events;
+final $testMessages = Provider.autoDispose
+    .family<List<String>, Packaged<TestKey>>((ref, testKey) {
+  final events = ref.watch($events(testKey.packagePath)).events;
 
   return events
       .whereType<TestEventMessage>()
       // TODO can we have the groupID/suiteID too?
-      .where((e) => e.testID == testKey.testID)
+      .where((e) => e.testID == testKey.value.testID)
       .map((e) => e.message)
       .toList();
 }, dependencies: [$events]);
 
 final $testLabel =
-    Provider.autoDispose.family<String?, TestKey>((ref, testKey) {
+    Provider.autoDispose.family<String?, Packaged<TestKey>>((ref, testKey) {
   return merge<String?>((unwrap) {
     final test = unwrap(ref.watch($test(testKey)));
     final name = unwrap(ref.watch($testName(testKey)));
@@ -137,8 +137,8 @@ final $testLabel =
 }, dependencies: [$test, $testStatus, $spinner, $testName, $isEarlyAbort]);
 
 final $testError =
-    Provider.autoDispose.family<String?, TestKey>((ref, testKey) {
-  if (!ref.watch($isDone)) return null;
+    Provider.autoDispose.family<String?, Packaged<TestKey>>((ref, testKey) {
+  if (!ref.watch($isDone(testKey.packagePath))) return null;
 
   final status = ref.watch($testStatus(testKey));
 
@@ -151,8 +151,9 @@ ${stack.trim()}''';
   );
 }, dependencies: [$test, $testStatus, $spinner, $testName, $isDone]);
 
-final AutoDisposeProviderFamily<AsyncValue<String?>, GroupKey> $groupOutput =
-    Provider.autoDispose.family<AsyncValue<String?>, GroupKey>((ref, groupKey) {
+final AutoDisposeProviderFamily<AsyncValue<String?>, Packaged<GroupKey>>
+    $groupOutput = Provider.autoDispose
+        .family<AsyncValue<String?>, Packaged<GroupKey>>((ref, groupKey) {
   return merge((unwrap) {
     final groupDepth = unwrap(ref.watch($groupDepth(groupKey)));
     final label = unwrap(ref.watch($groupName(groupKey)));
@@ -160,14 +161,15 @@ final AutoDisposeProviderFamily<AsyncValue<String?>, GroupKey> $groupOutput =
     final childrenGroups = ref.watch($childrenGroupsForGroup(groupKey));
 
     final testContent = tests
-        .sortedByStatus(ref)
+        .sortedByStatus(ref, groupKey.packagePath)
         .map((test) {
+          final testKey = Packaged(groupKey.packagePath, test.key);
           return _renderTest(
-            status: ref.watch($testStatus(test.key)),
-            hasExitCode: ref.watch($isDone),
-            messages: ref.watch($testMessages(test.key)),
-            error: ref.watch($testError(test.key)),
-            label: ref.watch($testLabel(test.key)),
+            status: ref.watch($testStatus(testKey)),
+            hasExitCode: ref.watch($isDone(groupKey.packagePath)),
+            messages: ref.watch($testMessages(testKey)),
+            error: ref.watch($testError(testKey)),
+            label: ref.watch($testLabel(testKey)),
             depth: groupDepth + 1,
           );
         })
@@ -175,7 +177,12 @@ final AutoDisposeProviderFamily<AsyncValue<String?>, GroupKey> $groupOutput =
         .join('\n');
 
     final childrenGroupsContent = childrenGroups
-        .map((group) => ref.watch($groupOutput(group.key)).asData?.value)
+        .map(
+          (group) => ref
+              .watch($groupOutput(Packaged(groupKey.packagePath, group.key)))
+              .asData
+              ?.value,
+        )
         .whereNotNull()
         .join('\n');
 
@@ -221,8 +228,8 @@ String? _renderTest({
   ].join('\n');
 }
 
-final $suiteOutput =
-    Provider.autoDispose.family<AsyncValue<String>, SuiteKey>((ref, suiteKey) {
+final $suiteOutput = Provider.autoDispose
+    .family<AsyncValue<String>, Packaged<SuiteKey>>((ref, suiteKey) {
   return merge((unwrap) {
     bool showContent;
     switch (ref.watch($suiteStatus(suiteKey))) {
@@ -238,14 +245,15 @@ final $suiteOutput =
     final rootTestsOutput = showContent
         ? ref
             .watch($rootTestsForSuite(suiteKey))
-            .sortedByStatus(ref)
+            .sortedByStatus(ref, suiteKey.packagePath)
             .map((test) {
+              final testKey = Packaged(suiteKey.packagePath, test.key);
               return _renderTest(
-                status: ref.watch($testStatus(test.key)),
-                hasExitCode: ref.watch($isDone),
-                messages: ref.watch($testMessages(test.key)),
-                error: ref.watch($testError(test.key)),
-                label: ref.watch($testLabel(test.key)),
+                status: ref.watch($testStatus(testKey)),
+                hasExitCode: ref.watch($isDone(suiteKey.packagePath)),
+                messages: ref.watch($testMessages(testKey)),
+                error: ref.watch($testError(testKey)),
+                label: ref.watch($testLabel(testKey)),
                 depth: 0,
               );
             })
@@ -256,7 +264,13 @@ final $suiteOutput =
     final rootGroupsOutput = showContent
         ? ref
             .watch($rootGroupsForSuite(suiteKey))
-            .map((group) => ref.watch($groupOutput(group.key)).asData?.value)
+            .map(
+              (group) => ref
+                  .watch(
+                      $groupOutput(Packaged(suiteKey.packagePath, group.key)))
+                  .asData
+                  ?.value,
+            )
             .whereNotNull()
             .join('\n')
         : null;
@@ -369,7 +383,7 @@ final $output = Provider.autoDispose<AsyncValue<String>>((ref) {
 
     final isDone = ref.watch($isDone);
     final suites =
-        ref.watch($suites).sorted((a, b) => a.path!.compareTo(b.path!));
+        ref.watch($suites).sorted((a, b) => a.testPath!.compareTo(b.testPath!));
 
     final passingSuites = suites
         .where(
