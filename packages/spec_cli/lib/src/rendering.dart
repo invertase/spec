@@ -404,7 +404,6 @@ final $output = Provider.autoDispose<AsyncValue<String>>((ref) {
         if (ref.watch($showWatchUsage))
           '''
 ${'Watch Usage:'.bold}
- › Press a to run all tests.
  › Press f to run only failed tests.
  › Press t to filter by a test name regex pattern.
  › Press q to quit watch mode.

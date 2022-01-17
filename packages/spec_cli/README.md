@@ -10,7 +10,7 @@
 
 ---
 
-`Spec` is a command line built on top of the official `dart test`/`flutter test`
+`Spec` is a command-line built on top of the official `dart test`/`flutter test`
 to add new features such as:
 
 - an improved interface inspired from [Jest](https://jestjs.io/)
@@ -19,8 +19,56 @@ to add new features such as:
 - supporting both Dart and Flutter projects using the same command
 - support for running tests of multiple packages at the same time by using [Melos](https://github.com/invertase/melos) (coming soon)
 
-
 ![Spec gif example](https://raw.githubusercontent.com/invertase/spec/main/packages/spec_cli/resources/render.gif?token=GHSAT0AAAAAABKV7FKJSI3CGFTUJBJ6IQWEYPOYADA)
+
+## Installation
+
+To install `spec`, run:
+
+```sh
+dart pub global activate spec_cli
+```
+
+You should now be able to run:
+
+```dart
+spec --help
+```
+
+## Usage
+
+To run tests in a Dart/Flutter project, simply run:
+
+```sh
+spec
+```
+
+You can optionally filter tests by name using `--name`:
+
+```sh
+spec --name "My test"
+```
+
+Alternatively, you can execute specific tests by specifying their path:
+
+```sh
+spec test/my_test.dart
+```
+
+## Watch mode
+
+By specifying `--watch`, spec will enter in watch mode and will listen to file
+changes.  
+In this mode, Spec will re-run the tests whenever a file change in the project
+is detected.
+
+While in watch mode, it is possible to perform extraneous operations during tests:
+
+- By pressing "enter", this will manually stop/restart the tests
+- By pressing `f`, Spec will filter tests to execute only failing tests, skipping
+  tests that were passing in the previous run.
+- When typing `t`, it is possible to update the `--name` filter flag without
+  having to restart Spec.
 
 ---
 
