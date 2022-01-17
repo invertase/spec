@@ -17,8 +17,9 @@ Both functions return a `Stream` of events representing the [Dart Test protocol]
 As such, it is possible to write code like:
 
 ```dart
-dartTest
-    .whereType<TestEventTestStart>()
+dartTest()
+    .where((e) => e is TestEventTestStart)
+    .cast<TestEventTestStart>()
     .forEach((start) => print(start.test.name));
 ```
 
