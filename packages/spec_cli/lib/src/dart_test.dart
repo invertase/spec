@@ -71,7 +71,7 @@ class TestEventsNotifier extends StateNotifier<TestEventsState> {
 
       final package = packages.first;
 
-      final eventsStream = package.isFlutter
+      final eventStream = package.isFlutter
           ? flutterTest(
               tests: tests,
               arguments: arguments,
@@ -83,13 +83,16 @@ class TestEventsNotifier extends StateNotifier<TestEventsState> {
               workdingDirectory: ref.watch($workingDirectory).path,
             );
 
-      _eventsSub = eventsStream.listen((events) {
-        state = TestEventsState(isInterrupted: false, events: events);
+      _eventsSub = eventStream.listen((event) {
+        state = TestEventsState(
+          isInterrupted: false,
+          events: [...state.events, event],
+        );
       });
     });
   }
 
-  StreamSubscription<List<TestEvent>>? _eventsSub;
+  StreamSubscription? _eventsSub;
 
   /// Stops the test process
   void stop() {

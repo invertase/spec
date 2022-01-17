@@ -3243,9 +3243,9 @@ class _$TestTearOff {
       int? line,
       int? column,
       String? url,
-      int? root_line,
-      int? root_column,
-      String? root_url,
+      int? rootLine,
+      int? rootColumn,
+      String? rootUrl,
       required Metadata metadata}) {
     return _Test(
       id: id,
@@ -3255,9 +3255,9 @@ class _$TestTearOff {
       line: line,
       column: column,
       url: url,
-      root_line: root_line,
-      root_column: root_column,
-      root_url: root_url,
+      rootLine: rootLine,
+      rootColumn: rootColumn,
+      rootUrl: rootUrl,
       metadata: metadata,
     );
   }
@@ -3298,20 +3298,20 @@ mixin _$Test {
   /// originated.
   ///
   /// Will only be present if `root_url` is different from `url`.
-  int? get root_line => throw _privateConstructorUsedError;
+  int? get rootLine => throw _privateConstructorUsedError;
 
   /// The (1-based) line on in the original test suite from which the test
   /// originated.
   ///
   /// Will only be present if `root_url` is different from `url`.
-  int? get root_column => throw _privateConstructorUsedError;
+  int? get rootColumn => throw _privateConstructorUsedError;
 
   /// The URL for the original test suite in which the test was defined.
   ///
   /// Will only be present if different from `url`.
-  String? get root_url => throw _privateConstructorUsedError;
+  String? get rootUrl => throw _privateConstructorUsedError;
 
-  /// This field is deprecated and should not be used.
+  /// Metadatas about a test
   Metadata get metadata => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -3331,9 +3331,9 @@ abstract class $TestCopyWith<$Res> {
       int? line,
       int? column,
       String? url,
-      int? root_line,
-      int? root_column,
-      String? root_url,
+      int? rootLine,
+      int? rootColumn,
+      String? rootUrl,
       Metadata metadata});
 
   $MetadataCopyWith<$Res> get metadata;
@@ -3356,9 +3356,9 @@ class _$TestCopyWithImpl<$Res> implements $TestCopyWith<$Res> {
     Object? line = freezed,
     Object? column = freezed,
     Object? url = freezed,
-    Object? root_line = freezed,
-    Object? root_column = freezed,
-    Object? root_url = freezed,
+    Object? rootLine = freezed,
+    Object? rootColumn = freezed,
+    Object? rootUrl = freezed,
     Object? metadata = freezed,
   }) {
     return _then(_value.copyWith(
@@ -3390,17 +3390,17 @@ class _$TestCopyWithImpl<$Res> implements $TestCopyWith<$Res> {
           ? _value.url
           : url // ignore: cast_nullable_to_non_nullable
               as String?,
-      root_line: root_line == freezed
-          ? _value.root_line
-          : root_line // ignore: cast_nullable_to_non_nullable
+      rootLine: rootLine == freezed
+          ? _value.rootLine
+          : rootLine // ignore: cast_nullable_to_non_nullable
               as int?,
-      root_column: root_column == freezed
-          ? _value.root_column
-          : root_column // ignore: cast_nullable_to_non_nullable
+      rootColumn: rootColumn == freezed
+          ? _value.rootColumn
+          : rootColumn // ignore: cast_nullable_to_non_nullable
               as int?,
-      root_url: root_url == freezed
-          ? _value.root_url
-          : root_url // ignore: cast_nullable_to_non_nullable
+      rootUrl: rootUrl == freezed
+          ? _value.rootUrl
+          : rootUrl // ignore: cast_nullable_to_non_nullable
               as String?,
       metadata: metadata == freezed
           ? _value.metadata
@@ -3430,9 +3430,9 @@ abstract class _$TestCopyWith<$Res> implements $TestCopyWith<$Res> {
       int? line,
       int? column,
       String? url,
-      int? root_line,
-      int? root_column,
-      String? root_url,
+      int? rootLine,
+      int? rootColumn,
+      String? rootUrl,
       Metadata metadata});
 
   @override
@@ -3457,9 +3457,9 @@ class __$TestCopyWithImpl<$Res> extends _$TestCopyWithImpl<$Res>
     Object? line = freezed,
     Object? column = freezed,
     Object? url = freezed,
-    Object? root_line = freezed,
-    Object? root_column = freezed,
-    Object? root_url = freezed,
+    Object? rootLine = freezed,
+    Object? rootColumn = freezed,
+    Object? rootUrl = freezed,
     Object? metadata = freezed,
   }) {
     return _then(_Test(
@@ -3491,17 +3491,17 @@ class __$TestCopyWithImpl<$Res> extends _$TestCopyWithImpl<$Res>
           ? _value.url
           : url // ignore: cast_nullable_to_non_nullable
               as String?,
-      root_line: root_line == freezed
-          ? _value.root_line
-          : root_line // ignore: cast_nullable_to_non_nullable
+      rootLine: rootLine == freezed
+          ? _value.rootLine
+          : rootLine // ignore: cast_nullable_to_non_nullable
               as int?,
-      root_column: root_column == freezed
-          ? _value.root_column
-          : root_column // ignore: cast_nullable_to_non_nullable
+      rootColumn: rootColumn == freezed
+          ? _value.rootColumn
+          : rootColumn // ignore: cast_nullable_to_non_nullable
               as int?,
-      root_url: root_url == freezed
-          ? _value.root_url
-          : root_url // ignore: cast_nullable_to_non_nullable
+      rootUrl: rootUrl == freezed
+          ? _value.rootUrl
+          : rootUrl // ignore: cast_nullable_to_non_nullable
               as String?,
       metadata: metadata == freezed
           ? _value.metadata
@@ -3512,7 +3512,8 @@ class __$TestCopyWithImpl<$Res> extends _$TestCopyWithImpl<$Res>
 }
 
 /// @nodoc
-@JsonSerializable()
+
+@JsonSerializable(fieldRename: FieldRename.snake)
 class _$_Test implements _Test {
   _$_Test(
       {required this.id,
@@ -3522,9 +3523,9 @@ class _$_Test implements _Test {
       this.line,
       this.column,
       this.url,
-      this.root_line,
-      this.root_column,
-      this.root_url,
+      this.rootLine,
+      this.rootColumn,
+      this.rootUrl,
       required this.metadata});
 
   factory _$_Test.fromJson(Map<String, dynamic> json) => _$$_TestFromJson(json);
@@ -3564,28 +3565,28 @@ class _$_Test implements _Test {
   /// originated.
   ///
   /// Will only be present if `root_url` is different from `url`.
-  final int? root_line;
+  final int? rootLine;
   @override
 
   /// The (1-based) line on in the original test suite from which the test
   /// originated.
   ///
   /// Will only be present if `root_url` is different from `url`.
-  final int? root_column;
+  final int? rootColumn;
   @override
 
   /// The URL for the original test suite in which the test was defined.
   ///
   /// Will only be present if different from `url`.
-  final String? root_url;
+  final String? rootUrl;
   @override
 
-  /// This field is deprecated and should not be used.
+  /// Metadatas about a test
   final Metadata metadata;
 
   @override
   String toString() {
-    return 'Test(id: $id, name: $name, suiteID: $suiteID, groupIDs: $groupIDs, line: $line, column: $column, url: $url, root_line: $root_line, root_column: $root_column, root_url: $root_url, metadata: $metadata)';
+    return 'Test(id: $id, name: $name, suiteID: $suiteID, groupIDs: $groupIDs, line: $line, column: $column, url: $url, rootLine: $rootLine, rootColumn: $rootColumn, rootUrl: $rootUrl, metadata: $metadata)';
   }
 
   @override
@@ -3600,10 +3601,10 @@ class _$_Test implements _Test {
             const DeepCollectionEquality().equals(other.line, line) &&
             const DeepCollectionEquality().equals(other.column, column) &&
             const DeepCollectionEquality().equals(other.url, url) &&
-            const DeepCollectionEquality().equals(other.root_line, root_line) &&
+            const DeepCollectionEquality().equals(other.rootLine, rootLine) &&
             const DeepCollectionEquality()
-                .equals(other.root_column, root_column) &&
-            const DeepCollectionEquality().equals(other.root_url, root_url) &&
+                .equals(other.rootColumn, rootColumn) &&
+            const DeepCollectionEquality().equals(other.rootUrl, rootUrl) &&
             const DeepCollectionEquality().equals(other.metadata, metadata));
   }
 
@@ -3617,9 +3618,9 @@ class _$_Test implements _Test {
       const DeepCollectionEquality().hash(line),
       const DeepCollectionEquality().hash(column),
       const DeepCollectionEquality().hash(url),
-      const DeepCollectionEquality().hash(root_line),
-      const DeepCollectionEquality().hash(root_column),
-      const DeepCollectionEquality().hash(root_url),
+      const DeepCollectionEquality().hash(rootLine),
+      const DeepCollectionEquality().hash(rootColumn),
+      const DeepCollectionEquality().hash(rootUrl),
       const DeepCollectionEquality().hash(metadata));
 
   @JsonKey(ignore: true)
@@ -3642,9 +3643,9 @@ abstract class _Test implements Test {
       int? line,
       int? column,
       String? url,
-      int? root_line,
-      int? root_column,
-      String? root_url,
+      int? rootLine,
+      int? rootColumn,
+      String? rootUrl,
       required Metadata metadata}) = _$_Test;
 
   factory _Test.fromJson(Map<String, dynamic> json) = _$_Test.fromJson;
@@ -3684,23 +3685,23 @@ abstract class _Test implements Test {
   /// originated.
   ///
   /// Will only be present if `root_url` is different from `url`.
-  int? get root_line;
+  int? get rootLine;
   @override
 
   /// The (1-based) line on in the original test suite from which the test
   /// originated.
   ///
   /// Will only be present if `root_url` is different from `url`.
-  int? get root_column;
+  int? get rootColumn;
   @override
 
   /// The URL for the original test suite in which the test was defined.
   ///
   /// Will only be present if different from `url`.
-  String? get root_url;
+  String? get rootUrl;
   @override
 
-  /// This field is deprecated and should not be used.
+  /// Metadatas about a test
   Metadata get metadata;
   @override
   @JsonKey(ignore: true)
@@ -4322,6 +4323,7 @@ const $Metadata = _$MetadataTearOff();
 
 /// @nodoc
 mixin _$Metadata {
+  /// Whether the test was skipped
   bool get skip =>
       throw _privateConstructorUsedError; // The reason the tests was skipped, or `null` if it wasn't skipped.
   String? get skipReason => throw _privateConstructorUsedError;
@@ -4409,6 +4411,8 @@ class _$_Metadata implements _Metadata {
       _$$_MetadataFromJson(json);
 
   @override
+
+  /// Whether the test was skipped
   final bool skip;
   @override // The reason the tests was skipped, or `null` if it wasn't skipped.
   final String? skipReason;
@@ -4451,6 +4455,8 @@ abstract class _Metadata implements Metadata {
   factory _Metadata.fromJson(Map<String, dynamic> json) = _$_Metadata.fromJson;
 
   @override
+
+  /// Whether the test was skipped
   bool get skip;
   @override // The reason the tests was skipped, or `null` if it wasn't skipped.
   String? get skipReason;

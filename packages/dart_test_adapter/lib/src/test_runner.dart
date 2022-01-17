@@ -5,7 +5,7 @@ import 'dart:io';
 import 'test_protocol.dart';
 
 /// Executes `flutter test` and decode the output
-Stream<List<TestEvent>> flutterTest({
+Stream<TestEvent> flutterTest({
   Map<String, String>? environment,
   List<String>? arguments,
   List<String>? tests,
@@ -29,7 +29,7 @@ Stream<List<TestEvent>> flutterTest({
 }
 
 /// Executes `dart test` and decode the output
-Stream<List<TestEvent>> dartTest({
+Stream<TestEvent> dartTest({
   Map<String, String>? environment,
   List<String>? arguments,
   List<String>? tests,
@@ -53,10 +53,10 @@ Stream<List<TestEvent>> dartTest({
   );
 }
 
-Stream<List<TestEvent>> _parseTestJsonOutput(
+Stream<TestEvent> _parseTestJsonOutput(
   Future<Process> Function() processCb,
 ) {
-  final controller = StreamController<List<TestEvent>>();
+  final controller = StreamController<TestEvent>();
   late StreamSubscription eventSub;
   late Future<Process> processFuture;
 
@@ -88,13 +88,8 @@ Stream<List<TestEvent>> _parseTestJsonOutput(
         .cast<Map<Object?, Object?>>()
         .map((json) => TestEvent.fromJson(Map.from(json)));
 
-    var allEvents = const <TestEvent>[];
-
     eventSub = events.listen(
-      (event) {
-        allEvents = [...allEvents, event];
-        controller.add(allEvents);
-      },
+      controller.add,
       onError: controller.addError,
     );
   };
