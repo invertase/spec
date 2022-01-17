@@ -6,6 +6,7 @@ import 'package:path/path.dart';
 import 'package:pubspec/pubspec.dart';
 import 'package:riverpod/riverpod.dart';
 
+import 'dart_test_utils.dart';
 import 'io.dart';
 
 part 'dart_test.freezed.dart';
@@ -18,10 +19,11 @@ final $filePathFilters = StateProvider<List<String>>((ref) => []);
 final $isWatchMode = StateProvider<bool>((ref) => false);
 final $isRunningOnlyFailingTests = StateProvider<bool>((ref) => false);
 
-final $events = StateNotifierProvider.autoDispose
-    .family<TestEventsNotifier, TestEventsState, String>(
-  (ref, packagePath) => TestEventsNotifier(ref, packagePath),
+final $events =
+    StateNotifierProvider.autoDispose<TestEventsNotifier, TestEventsState>(
+  (ref) => TestEventsNotifier(ref),
   dependencies: [
+    $packages,
     $testNameFilters,
     $filePathFilters,
     $failedTestLocationToExecute,
@@ -33,18 +35,13 @@ final $events = StateNotifierProvider.autoDispose
 class TestEventsState with _$TestEventsState {
   const factory TestEventsState({
     required bool isInterrupted,
-    required List<TestEvent> events,
+    required List<Packaged<TestEvent>> events,
   }) = _TestEventsState;
 }
 
 class TestEventsNotifier extends StateNotifier<TestEventsState> {
-  TestEventsNotifier(AutoDisposeRef ref, String packagePath)
-      : super(
-          const TestEventsState(
-            isInterrupted: false,
-            events: [],
-          ),
-        ) {
+  TestEventsNotifier(AutoDisposeRef ref)
+      : super(const TestEventsState(isInterrupted: false, events: [])) {
     final failedTestsLocation = ref.watch($isRunningOnlyFailingTests)
         ? (ref.watch($failedTestLocationToExecute) ?? [])
         : <FailedTestLocation>[];
@@ -63,24 +60,44 @@ class TestEventsNotifier extends StateNotifier<TestEventsState> {
         '--name=${ref.watch($testNameFilters)!.pattern}',
     ];
 
+    final controller = StreamController<List<Packaged<TestEvent>>>();
+    ref.onDispose(controller.close);
+    final packagesSubscriptions = <StreamSubscription>[];
+
+    controller.onCancel = () {
+      for (final sub in packagesSubscriptions) {
+        sub.cancel();
+      }
+    };
+
     Future(() async {
-      final package = await ref.watch($package(packagePath).future);
+      final packages = await ref.watch($packages.future);
 
-      final eventsStream = package.isFlutter
-          ? flutterTest(
-              tests: tests,
-              arguments: arguments,
-              workdingDirectory: package.path,
-            )
-          : dartTest(
-              tests: tests,
-              arguments: arguments,
-              workdingDirectory: package.path,
+      for (final package in packages) {
+        final packageStream = package.isFlutter
+            ? flutterTest(
+                tests: tests,
+                arguments: arguments,
+                workdingDirectory: package.path,
+              )
+            : dartTest(
+                tests: tests,
+                arguments: arguments,
+                workdingDirectory: package.path,
+              );
+
+        packagesSubscriptions.add(
+          packageStream.listen((event) {
+            state = TestEventsState(
+              isInterrupted: false,
+              events: [
+                ...state.events,
+                Packaged(package.path, event),
+              ],
             );
-
-      _eventsSub = eventsStream.listen((events) {
-        state = TestEventsState(isInterrupted: false, events: events);
-      });
+          }),
+        );
+      }
     });
   }
 

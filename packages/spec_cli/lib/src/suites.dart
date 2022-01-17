@@ -12,20 +12,21 @@ import 'tests.dart';
 final $suiteCount =
     Provider.autoDispose.family<AsyncValue<int>, String>((ref, packagePath) {
   return ref
-      .watch($events(packagePath))
+      .watch($events)
       .events
+      .where((e) => e.packagePath == packagePath)
+      .map((e) => e.value)
       .whereType<TestEventAllSuites>()
       .map((e) => e.count)
       .firstDataOrLoading;
 }, dependencies: [$events]);
 
-final $suites =
-    Provider.family.autoDispose<List<Suite>, String>((ref, packagePath) {
-  final events = ref.watch($events(packagePath)).events;
+final $suites = Provider.autoDispose<List<Packaged<Suite>>>((ref) {
+  final events = ref.watch($events).events;
 
   return events
-      .whereType<TestEventSuite>()
-      .map((event) => event.suite)
+      .where((e) => e.value is TestEventSuite)
+      .map((e) => e.next((value) => value.cast<TestEventSuite>()!.suite))
       .toList();
 }, dependencies: [$events]);
 
@@ -44,8 +45,10 @@ final $hasAllSuites =
 final $suite = Provider.autoDispose
     .family<AsyncValue<Suite>, Packaged<SuiteKey>>((ref, suiteKey) {
   return ref
-      .watch($events(suiteKey.packagePath))
+      .watch($events)
       .events
+      .where((e) => e.packagePath == suiteKey.packagePath)
+      .map((e) => e.value)
       .whereType<TestEventSuite>()
       .where((e) => e.suite.key == suiteKey.value)
       .map((event) => event.suite)
@@ -112,10 +115,11 @@ final $exitCode = Provider.autoDispose<AsyncValue<int>>(
       data: (packages) {
         final packageCode = packages.map<AsyncValue<int>>((package) {
           final doneEvent = ref
-                  .watch($events(package.path))
-                  .events
-                  .firstWhereOrNull((event) => event is TestEventDone)
-              as TestEventDone?;
+              .watch($events)
+              .events
+              .where((event) => event.packagePath == package.path)
+              .firstWhereOrNull((event) => event.value is TestEventDone)
+              ?.value as TestEventDone?;
           if (doneEvent != null) {
             // Something probably went wrong as we likely should've been able to quit
             // before obtaining the true "done" event, so we'll safely quit.
@@ -180,7 +184,7 @@ final $isDone = Provider.autoDispose<bool>(
               error: (_) => false,
               loading: (_) => false,
             ) ||
-        packages.value!.any((p) => ref.watch($events(p.path)).isInterrupted);
+        packages.value!.any((p) => ref.watch($events).isInterrupted);
   },
   dependencies: [$exitCode, $events, $packages],
   name: 'isDone',

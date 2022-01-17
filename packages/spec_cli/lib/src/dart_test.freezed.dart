@@ -19,7 +19,8 @@ class _$TestEventsStateTearOff {
   const _$TestEventsStateTearOff();
 
   _TestEventsState call(
-      {required bool isInterrupted, required List<TestEvent> events}) {
+      {required bool isInterrupted,
+      required List<Packaged<TestEvent>> events}) {
     return _TestEventsState(
       isInterrupted: isInterrupted,
       events: events,
@@ -33,7 +34,7 @@ const $TestEventsState = _$TestEventsStateTearOff();
 /// @nodoc
 mixin _$TestEventsState {
   bool get isInterrupted => throw _privateConstructorUsedError;
-  List<TestEvent> get events => throw _privateConstructorUsedError;
+  List<Packaged<TestEvent>> get events => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
   $TestEventsStateCopyWith<TestEventsState> get copyWith =>
@@ -45,7 +46,7 @@ abstract class $TestEventsStateCopyWith<$Res> {
   factory $TestEventsStateCopyWith(
           TestEventsState value, $Res Function(TestEventsState) then) =
       _$TestEventsStateCopyWithImpl<$Res>;
-  $Res call({bool isInterrupted, List<TestEvent> events});
+  $Res call({bool isInterrupted, List<Packaged<TestEvent>> events});
 }
 
 /// @nodoc
@@ -70,7 +71,7 @@ class _$TestEventsStateCopyWithImpl<$Res>
       events: events == freezed
           ? _value.events
           : events // ignore: cast_nullable_to_non_nullable
-              as List<TestEvent>,
+              as List<Packaged<TestEvent>>,
     ));
   }
 }
@@ -82,7 +83,7 @@ abstract class _$TestEventsStateCopyWith<$Res>
           _TestEventsState value, $Res Function(_TestEventsState) then) =
       __$TestEventsStateCopyWithImpl<$Res>;
   @override
-  $Res call({bool isInterrupted, List<TestEvent> events});
+  $Res call({bool isInterrupted, List<Packaged<TestEvent>> events});
 }
 
 /// @nodoc
@@ -109,7 +110,7 @@ class __$TestEventsStateCopyWithImpl<$Res>
       events: events == freezed
           ? _value.events
           : events // ignore: cast_nullable_to_non_nullable
-              as List<TestEvent>,
+              as List<Packaged<TestEvent>>,
     ));
   }
 }
@@ -122,7 +123,7 @@ class _$_TestEventsState implements _TestEventsState {
   @override
   final bool isInterrupted;
   @override
-  final List<TestEvent> events;
+  final List<Packaged<TestEvent>> events;
 
   @override
   String toString() {
@@ -154,12 +155,12 @@ class _$_TestEventsState implements _TestEventsState {
 abstract class _TestEventsState implements TestEventsState {
   const factory _TestEventsState(
       {required bool isInterrupted,
-      required List<TestEvent> events}) = _$_TestEventsState;
+      required List<Packaged<TestEvent>> events}) = _$_TestEventsState;
 
   @override
   bool get isInterrupted;
   @override
-  List<TestEvent> get events;
+  List<Packaged<TestEvent>> get events;
   @override
   @JsonKey(ignore: true)
   _$TestEventsStateCopyWith<_TestEventsState> get copyWith =>

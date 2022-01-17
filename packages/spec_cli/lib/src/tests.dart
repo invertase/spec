@@ -79,8 +79,10 @@ final $testsForSuite = Provider.autoDispose
     .family<Map<Packaged<TestKey>, Test>, Packaged<SuiteKey>>((ref, suiteKey) {
   return Map.fromEntries(
     ref
-        .watch($events(suiteKey.packagePath))
+        .watch($events)
         .events
+        .where((e) => e.packagePath == suiteKey.packagePath)
+        .map((e) => e.value)
         .whereType<TestEventTestStart>()
         .where((event) => event.test.suiteKey == suiteKey.value)
         .where((event) => !event.test.isHidden)
@@ -92,8 +94,10 @@ final $testsForSuite = Provider.autoDispose
 final $test = Provider.autoDispose.family<AsyncValue<Test>, Packaged<TestKey>>(
     (ref, testKey) {
   return ref
-      .watch($events(testKey.packagePath))
+      .watch($events)
       .events
+      .where((e) => e.packagePath == testKey.packagePath)
+      .map((e) => e.value)
       .whereType<TestEventTestStart>()
       .where((event) => event.test.key == testKey.value)
       .map((e) => e.test)
@@ -103,8 +107,10 @@ final $test = Provider.autoDispose.family<AsyncValue<Test>, Packaged<TestKey>>(
 final $allTests =
     Provider.autoDispose.family<List<Test>, String>((ref, packagePath) {
   return ref
-      .watch($events(packagePath))
+      .watch($events)
       .events
+      .where((e) => e.packagePath == packagePath)
+      .map((e) => e.value)
       .whereType<TestEventTestStart>()
       .map((e) => e.test)
       .toList();
@@ -134,7 +140,13 @@ final $testStatus =
     return TestStatus.skip(skipReason: test.metadata.skipReason);
   }
 
-  final events = ref.watch($events(testKey.packagePath)).events;
+  final events = ref
+      .watch($events)
+      .events
+      .where((e) => e.packagePath == testKey.packagePath)
+      .map((e) => e.value)
+      .toList();
+
   final error = events
       .whereType<TestEventTestError>()
       // TODO can we have the groupID/suiteID too?

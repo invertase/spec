@@ -74,6 +74,9 @@ class Packaged<Value> {
   final Value value;
   final String packagePath;
 
+  Packaged<R> next<R>(R Function(Value value) cb) =>
+      Packaged(packagePath, cb(value));
+
   @override
   bool operator ==(Object other) =>
       other is Packaged<Value> &&
@@ -83,6 +86,10 @@ class Packaged<Value> {
 
   @override
   int get hashCode => Object.hash(runtimeType, value, packagePath);
+}
+
+extension ObjectX<T> on T {
+  R? cast<R>() => this is R ? this as R : null;
 }
 
 extension TestExt on Test {

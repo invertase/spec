@@ -9,8 +9,10 @@ import 'provider_utils.dart';
 final $group = Provider.family
     .autoDispose<AsyncValue<Group>, Packaged<GroupKey>>((ref, groupKey) {
   return ref
-      .watch($events(groupKey.packagePath))
+      .watch($events)
       .events
+      .where((e) => e.packagePath == groupKey.packagePath)
+      .map((e) => e.value)
       .whereType<TestEventGroup>()
       .where((e) => e.group.key == groupKey.value)
       .map((e) => e.group)
@@ -63,8 +65,10 @@ final $groupName = Provider.autoDispose
 final $scaffoldGroup = Provider.family
     .autoDispose<AsyncValue<Group>, Packaged<SuiteKey>>((ref, suiteKey) {
   return ref
-      .watch($events(suiteKey.packagePath))
+      .watch($events)
       .events
+      .where((e) => e.packagePath == suiteKey.packagePath)
+      .map((e) => e.value)
       .whereType<TestEventGroup>()
       .where(
         (e) => e.group.parentID == null && e.group.suiteKey == suiteKey.value,
@@ -85,8 +89,10 @@ final $rootGroupsForSuite = Provider.family
     loading: () => [],
     data: (scaffoldGroup) {
       return ref
-          .watch($events(suiteKey.packagePath))
+          .watch($events)
           .events
+          .where((e) => e.packagePath == suiteKey.packagePath)
+          .map((e) => e.value)
           .whereType<TestEventGroup>()
           .where((e) => e.group.parentKey == scaffoldGroup.key)
           .map((e) => e.group)
@@ -98,8 +104,10 @@ final $rootGroupsForSuite = Provider.family
 final $childrenGroupsForGroup = Provider.family
     .autoDispose<List<Group>, Packaged<GroupKey>>((ref, groupKey) {
   return ref
-      .watch($events(groupKey.packagePath))
+      .watch($events)
       .events
+      .where((e) => e.packagePath == groupKey.packagePath)
+      .map((e) => e.value)
       .whereType<TestEventGroup>()
       .where((e) => e.group.parentKey == groupKey.value)
       .map((e) => e.group)

@@ -282,14 +282,11 @@ void _handleWatchKeyPress(List<int> keyCodes, DartRef ref) {
         // stop the watch mode
         // Aborting/resuming tests
 
-        final packages = ref.read($packages).value!;
-        final areTestsRunning = packages.any((p) =>
-            !ref.read($events(p.path)).isInterrupted && !ref.read($isDone));
+        final areTestsRunning =
+            !ref.read($events).isInterrupted && !ref.read($isDone);
 
         if (areTestsRunning) {
-          for (final package in packages) {
-            ref.read($events(package.path).notifier).stop();
-          }
+          ref.read($events.notifier).stop();
         } else {
           resartTests(ref);
         }
@@ -306,8 +303,5 @@ void resartTests(DartRef ref) {
   ref.read($startTime.notifier).state = DateTime.now();
   ref.read($failedTestLocationToExecute.notifier).state =
       ref.read(_$lastFailedTests);
-  final packages = ref.read($packages).value!;
-  for (final package in packages) {
-    ref.refresh($events(package.path));
-  }
+  ref.refresh($events);
 }
