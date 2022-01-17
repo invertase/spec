@@ -8,7 +8,18 @@
 
 <a href="https://github.com/invertase/spec/blob/main/LICENSE">License</a>
 
-----
+---
+
+`Spec` is a command line built on top of the official `dart test`/`flutter test`
+to add new features such as:
+
+- an improved interface inspired from [Jest](https://jestjs.io/)
+- a `--watch` flag, for re-executing test whenever the sources changes
+- during watch mode, offer a way to re-execute only failing tests
+- supporting both Dart and Flutter projects using the same command
+- support for running tests of multiple packages at the same time by using [Melos](https://github.com/invertase/melos) (coming soon)
+
+---
 
 <p align="center">
   <a href="https://invertase.io/?utm_source=readme&utm_medium=footer&utm_campaign=spec">
