@@ -1,16 +1,21 @@
-## Dart Test Adapter
+<p align="center">
+  <h1>Dart test adapter</h1>
+  <span>A package for executing `dart test`/`flutter test` using plain Dart code</span>
+</p>
 
-`dart_test_adapter` is a package designed to allow executing
-`dart test`/`flutter test` using plain Dart code.
+<a href="https://github.com/invertase/melos"><img src="https://img.shields.io/badge/maintained%20with-melos-f700ff.svg?style=flat-square" alt="Melos" /></a>
+<a href="https://docs.page"><img src="https://img.shields.io/badge/powered%20by-docs.page-34C4AC.svg?style=flat-square" alt="docs.page" /></a>
 
-It exposes two functions:
+<a href="https://github.com/invertase/spec/blob/main/LICENSE">License</a>
+
+`dart_test_adapter` revolves two functions:
 
 ```dart
 dartTest();
 flutterTest();
 ```
 
-which respectively execute `dart test` or `flutter test`.
+These functions respectively execute `dart test` or `flutter test`.
 
 Both functions return a `Stream` of events representing the [Dart Test protocol](https://github.com/dart-lang/test/blob/master/pkgs/test/doc/json_reporter.md).
 
@@ -24,3 +29,14 @@ dartTest()
 ```
 
 This code will run the tests of a project and print their names as they start.
+
+---
+
+<p align="center">
+  <a href="https://invertase.io/?utm_source=readme&utm_medium=footer&utm_campaign=spec">
+    <img width="75px" src="https://static.invertase.io/assets/invertase/invertase-rounded-avatar.png">
+  </a>
+  <p align="center">
+    Built and maintained by <a href="https://invertase.io/?utm_source=readme&utm_medium=footer&utm_campaign=spec">Invertase</a>.
+  </p>
+</p>
