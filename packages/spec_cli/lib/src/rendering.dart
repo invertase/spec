@@ -98,7 +98,11 @@ final $spinner = Provider.autoDispose<String>((ref) {
 
 final $testMessages = Provider.autoDispose
     .family<List<String>, Packaged<TestKey>>((ref, testKey) {
-  final events = ref.watch($events(testKey.packagePath)).events;
+  final events = ref
+      .watch($events)
+      .events
+      .where((e) => e.packagePath == testKey.packagePath)
+      .map((e) => e.value);
 
   return events
       .whereType<TestEventMessage>()
@@ -138,7 +142,7 @@ final $testLabel =
 
 final $testError =
     Provider.autoDispose.family<String?, Packaged<TestKey>>((ref, testKey) {
-  if (!ref.watch($isDone(testKey.packagePath))) return null;
+  if (!ref.watch($isDone)) return null;
 
   final status = ref.watch($testStatus(testKey));
 
@@ -166,7 +170,7 @@ final AutoDisposeProviderFamily<AsyncValue<String?>, Packaged<GroupKey>>
           final testKey = Packaged(groupKey.packagePath, test.key);
           return _renderTest(
             status: ref.watch($testStatus(testKey)),
-            hasExitCode: ref.watch($isDone(groupKey.packagePath)),
+            hasExitCode: ref.watch($isDone),
             messages: ref.watch($testMessages(testKey)),
             error: ref.watch($testError(testKey)),
             label: ref.watch($testLabel(testKey)),
@@ -250,7 +254,7 @@ final $suiteOutput = Provider.autoDispose
               final testKey = Packaged(suiteKey.packagePath, test.key);
               return _renderTest(
                 status: ref.watch($testStatus(testKey)),
-                hasExitCode: ref.watch($isDone(suiteKey.packagePath)),
+                hasExitCode: ref.watch($isDone),
                 messages: ref.watch($testMessages(testKey)),
                 error: ref.watch($testError(testKey)),
                 label: ref.watch($testLabel(testKey)),
