@@ -14,6 +14,8 @@ void main() {
       );
     });
 
+    test('exludes invisible characters', () {}, skip: true);
+
     test('supports empty lines', () {
       expect(
         computeOutputHeight('''

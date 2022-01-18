@@ -1,4 +1,3 @@
-import 'package:collection/collection.dart';
 import 'package:dart_test_adapter/dart_test_adapter.dart';
 import 'package:riverpod/riverpod.dart';
 
@@ -126,8 +125,33 @@ final $exitCode = Provider.autoDispose<AsyncValue<int>>(
       return const AsyncLoading();
     }
 
-    final suites = ref.watch($suites);
+    final packages = ref.watch($packages);
+    if (packages.isLoading) return const AsyncLoading();
 
+    /// Whether the done event was emitted for all packages
+    final allPackagesDone = packages.value!.every(
+      (package) => ref
+          .watch($events)
+          .events
+          .where((event) => event.packagePath == package.path)
+          .any((event) => event.value is TestEventDone),
+    );
+
+    if (allPackagesDone) {
+      // Something probably went wrong as we likely should've been able to quit
+      // before obtaining the true "done" event, so we'll safely quit.
+
+      final hasFailingDoneEvent = ref
+          .watch($events)
+          .events
+          .map((e) => e.value)
+          .whereType<TestEventDone>()
+          .any((done) => done.success == false);
+
+      return hasFailingDoneEvent ? const AsyncData(-1) : const AsyncData(0);
+    }
+
+    final suites = ref.watch($suites);
     final hasPendingSuite = suites.any(
       (suite) => ref.watch($suiteStatus(suite.key)) == SuiteStatus.pending,
     );
@@ -138,42 +162,8 @@ final $exitCode = Provider.autoDispose<AsyncValue<int>>(
     );
     if (hasErroredSuite) return const AsyncData(-1);
 
-    final packages = ref.watch($packages);
-    return packages.when(
-      loading: () => const AsyncLoading(),
-      error: (err, stack) => AsyncError(err, stackTrace: stack),
-      data: (packages) {
-        final packageCode = packages.map<AsyncValue<int>>((package) {
-          final doneEvent = ref
-              .watch($events)
-              .events
-              .where((event) => event.packagePath == package.path)
-              .firstWhereOrNull((event) => event.value is TestEventDone)
-              ?.value as TestEventDone?;
-          if (doneEvent != null) {
-            // Something probably went wrong as we likely should've been able to quit
-            // before obtaining the true "done" event, so we'll safely quit.
-            return doneEvent.success ?? true
-                ? const AsyncData(0)
-                : const AsyncData(-1);
-          }
-
-          // All suites are completed and passing
-          return const AsyncData(0);
-        }).toList();
-
-        if (packageCode.any((code) => code.isLoading)) {
-          return const AsyncLoading();
-        }
-        final error =
-            packageCode.firstWhereOrNull((element) => element.isError);
-        if (error != null) return error;
-
-        final firstFailing =
-            packageCode.firstWhereOrNull((element) => element.value != 0);
-        return AsyncData(firstFailing?.value ?? 0);
-      },
-    );
+    // All suites are completed and passing
+    return const AsyncData(0);
   },
   dependencies: [
     $suites,
