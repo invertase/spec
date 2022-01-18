@@ -211,6 +211,8 @@ Future<int> spec({
         });
         return await completer.future;
       } else {
+        // making sure the exitCode provider isn't disposed while the future is pending
+        ref.listen($exitCode.future, (previous, current) {});
         // Outside of watch mode, quite as soon we know what the exit code should be
         return await ref.read($exitCode.future);
       }

@@ -19,11 +19,11 @@ final $filePathFilters = StateProvider<List<String>>((ref) => []);
 final $isWatchMode = StateProvider<bool>((ref) => false);
 final $isRunningOnlyFailingTests = StateProvider<bool>((ref) => false);
 
-final $events =
-    StateNotifierProvider.autoDispose<TestEventsNotifier, TestEventsState>(
+final $events = StateNotifierProvider<TestEventsNotifier, TestEventsState>(
   (ref) => TestEventsNotifier(ref),
   dependencies: [
     $packages,
+    $packages.future,
     $testNameFilters,
     $filePathFilters,
     $failedTestLocationToExecute,
@@ -40,7 +40,7 @@ class TestEventsState with _$TestEventsState {
 }
 
 class TestEventsNotifier extends StateNotifier<TestEventsState> {
-  TestEventsNotifier(AutoDisposeRef ref)
+  TestEventsNotifier(Ref ref)
       : super(const TestEventsState(isInterrupted: false, events: [])) {
     final failedTestsLocation = ref.watch($isRunningOnlyFailingTests)
         ? (ref.watch($failedTestLocationToExecute) ?? [])
@@ -64,11 +64,13 @@ class TestEventsNotifier extends StateNotifier<TestEventsState> {
     ref.onDispose(controller.close);
     final packagesSubscriptions = <StreamSubscription>[];
 
-    controller.onCancel = () {
-      for (final sub in packagesSubscriptions) {
-        sub.cancel();
-      }
-    };
+    ref.onDispose(
+      controller.onCancel = () {
+        for (final sub in packagesSubscriptions) {
+          sub.cancel();
+        }
+      },
+    );
 
     Future(() async {
       final packages = await ref.watch($packages.future);

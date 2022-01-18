@@ -24,9 +24,9 @@ final AutoDisposeProviderFamily<AsyncValue<int>, Packaged<GroupKey>>
         .family<AsyncValue<int>, Packaged<GroupKey>>((ref, groupKey) {
   return merge((unwrap) {
     final group = unwrap(ref.watch($group(groupKey)));
-    final parentGroupKey = group.parentID == null
-        ? null
-        : Packaged(groupKey.packagePath, group.parentKey!);
+    final parentGroupKey = group.parentID != null
+        ? Packaged(groupKey.packagePath, group.parentKey!)
+        : null;
 
     final parent = parentGroupKey != null
         ? unwrap(ref.watch($group(parentGroupKey)))
@@ -45,11 +45,11 @@ final $groupName = Provider.autoDispose
   return merge((unwrap) {
     final group = unwrap(ref.watch($group(groupKey)));
     final parentGroupKey = group.parentID != null
-        ? null
-        : Packaged(groupKey.packagePath, group.parentKey!);
-    final parentGroup = parentGroupKey == null
-        ? null
-        : unwrap(ref.watch($group(parentGroupKey)));
+        ? Packaged(groupKey.packagePath, group.parentKey!)
+        : null;
+    final parentGroup = parentGroupKey != null
+        ? unwrap(ref.watch($group(parentGroupKey)))
+        : null;
 
     if (parentGroup == null || parentGroup.parentID == null) {
       return group.name;

@@ -11,24 +11,28 @@ import 'provider_utils.dart';
 import 'tests.dart';
 
 /// The number of suites, all packages included
-final $suiteCount = Provider.autoDispose<AsyncValue<int>>((ref) {
-  return merge((unwrap) {
-    final packages = unwrap(ref.watch($packages));
-    final events = ref.watch($events).events;
+final $suiteCount = Provider.autoDispose<AsyncValue<int>>(
+  (ref) {
+    return merge((unwrap) {
+      final packages = unwrap(ref.watch($packages));
+      final events = ref.watch($events).events;
 
-    return packages.fold(0, (acc, package) {
-      final allSuite = unwrap(
-        events
-            .where((e) => e.packagePath == package.path)
-            .map((e) => e.value)
-            .whereType<TestEventAllSuites>()
-            .firstDataOrLoading,
-      );
+      return packages.fold(0, (acc, package) {
+        final allSuite = unwrap(
+          events
+              .where((e) => e.packagePath == package.path)
+              .map((e) => e.value)
+              .whereType<TestEventAllSuites>()
+              .firstDataOrLoading,
+        );
 
-      return acc + allSuite.count;
+        return acc + allSuite.count;
+      });
     });
-  });
-}, dependencies: [$events, $packages]);
+  },
+  dependencies: [$events, $packages],
+  name: 'suiteCount',
+);
 
 final $suites = Provider.autoDispose<List<Packaged<Suite>>>((ref) {
   final events = ref.watch($events).events;
@@ -173,11 +177,13 @@ final $exitCode = Provider.autoDispose<AsyncValue<int>>(
   },
   dependencies: [
     $suites,
+    $packages,
     $suiteStatus,
     $isEarlyAbort,
     $hasAllSuites,
     $events,
   ],
+  name: 'exitCode',
 );
 
 final $isDone = Provider.autoDispose<bool>(

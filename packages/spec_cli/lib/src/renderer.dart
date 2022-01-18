@@ -74,7 +74,6 @@ class BacktrackingRenderer implements Renderer {
       stdout.write(VT100.clearScreenFromCursorDown);
     }
     // TODO update renderer to use ansi to only output the diff of the previous vs new frame
-    if (_lastFrame == null) stdout.write('first render');
     stdout.write(output);
 
     _lastFrame = output;
