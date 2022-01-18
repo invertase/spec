@@ -101,7 +101,7 @@ class TestEventsNotifier extends StateNotifier<TestEventsState> {
     });
   }
 
-  StreamSubscription<List<TestEvent>>? _eventsSub;
+  StreamSubscription? _eventsSub;
 
   /// Stops the test process
   void stop() {

@@ -3,7 +3,9 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'test_protocol.g.dart';
 part 'test_protocol.freezed.dart';
 
+/// Indicates the result of a test
 enum TestDoneStatus {
+  /// if the test had no errors.
   success,
 
   /// if the test had a TestFailure but no other errors.
@@ -157,14 +159,31 @@ class TestEvent with _$TestEvent {
   /// When an event that doesn't match any other type was received.
   factory TestEvent.unknown({required int time}) = TestEventUnknown;
 
+  /// Deserialize a [TestEvent] from a JSON Object
   factory TestEvent.fromJson(Map<String, Object?> json) =>
       _$TestEventFromJson(json);
 
+  /// The time when this event was received.
+  @override
   int get time;
 }
 
+/// {@template dart_test_adapter.test}
+/// A single test case. The test's ID is unique in the context of this test run.
+/// It's used elsewhere in the protocol to refer to this test without including
+/// its full representation.
+///
+/// Most tests will have at least one group ID, representing the implicit root group.
+/// However, some may not; these should be treated as having no group metadata.
+///
+/// The line, column, and url fields indicate the location the test() function
+/// was called to create this test. They're treated as a unit: they'll either
+/// all be null or they'll all be non-null. The URL is always absolute,
+/// and may be a package: URL.
+/// {@endtemplate}
 @freezed
 class Test with _$Test {
+  /// {@macro dart_test_adapter.test}
   factory Test({
     /// An opaque ID for the test.
     required int id,
@@ -192,28 +211,41 @@ class Test with _$Test {
     /// originated.
     ///
     /// Will only be present if `root_url` is different from `url`.
-    int? root_line,
+    @JsonKey(name: 'root_line') int? rootLine,
 
     /// The (1-based) line on in the original test suite from which the test
     /// originated.
     ///
     /// Will only be present if `root_url` is different from `url`.
-    int? root_column,
+    @JsonKey(name: 'root_column') int? rootColumn,
 
     /// The URL for the original test suite in which the test was defined.
     ///
     /// Will only be present if different from `url`.
-    String? root_url,
+    @JsonKey(name: 'root_url') String? rootUrl,
 
-    /// This field is deprecated and should not be used.
+    /// Metadatas about a test
     required Metadata metadata,
   }) = _Test;
 
+  /// Deserialize a [Test] from a JSON Object
   factory Test.fromJson(Map<String, Object?> json) => _$TestFromJson(json);
 }
 
+/// {@template dart_test_adapter.suite}
+/// A test suite corresponding to a loaded test file.
+/// The suite's ID is unique in the context of this test run.
+/// It's used elsewhere in the protocol to refer to this suite without including
+/// its full representation.
+///
+/// A suite's platform is one of the platforms that can be passed to the
+/// `--platform` option, or null if there is no platform (for example if the
+/// file doesn't exist at all). Its path is either absolute or relative to the
+/// root of the current package.
+/// {@endtemplate}
 @freezed
 class Suite with _$Suite {
+  /// {@macro dart_test_adapter.suite}
   factory Suite({
     /// An opaque ID for the group.
     required int id,
@@ -225,11 +257,26 @@ class Suite with _$Suite {
     String? path,
   }) = _Suite;
 
+  /// Deserialize a [Suite] from a JSON Object
   factory Suite.fromJson(Map<String, Object?> json) => _$SuiteFromJson(json);
 }
 
+/// {@macro dart_test_adapter.group}
+/// A group containing test cases. The group's ID is unique in the context of
+/// this test run. It's used elsewhere in the protocol to refer to this group
+/// without including its full representation.
+///
+/// The implicit group at the root of each test suite has null name and
+/// parentID attributes.
+///
+/// The line, column, and url fields indicate the location the group() function
+/// was called to create this group. They're treated as a unit: they'll either
+/// all be null or they'll all be non-null. The URL is always absolute, and may
+/// be a package: URL.
+/// {@endtemplate}
 @freezed
 class Group with _$Group {
+  /// {@macro dart_test_adapter.suite}
   factory Group({
     /// An opaque ID for the group.
     required int id,
@@ -259,18 +306,23 @@ class Group with _$Group {
     required Metadata metadata,
   }) = _Group;
 
+  /// Deserialize a [Group] from a JSON Object
   factory Group.fromJson(Map<String, Object?> json) => _$GroupFromJson(json);
 }
 
+/// Metadatas about a test
 @freezed
 class Metadata with _$Metadata {
+  /// Metadatas about a test
   factory Metadata({
+    /// Whether the test was skipped
     required bool skip,
 
     // The reason the tests was skipped, or `null` if it wasn't skipped.
     String? skipReason,
   }) = _Metadata;
 
+  /// Deserialize a [Metadata] from a JSON Object
   factory Metadata.fromJson(Map<String, Object?> json) =>
       _$MetadataFromJson(json);
 }
