@@ -92,6 +92,13 @@ extension ObjectX<T> on T {
   R? cast<R>() => this is R ? this as R : null;
 }
 
+extension PackagedTestExt on Packaged<Test> {
+  Packaged<TestKey> get key => next((t) => t.key);
+  Packaged<GroupKey>? get groupKey =>
+      value.groupKey == null ? null : next((t) => t.groupKey!);
+  Packaged<SuiteKey> get suiteKey => next((t) => t.suiteKey);
+}
+
 extension TestExt on Test {
   // when "url" is null, it means that this is not a user-defined test
   // and is instead a setup/tearOff/.., so it doesn't count
@@ -110,6 +117,12 @@ extension TestExt on Test {
   SuiteKey get suiteKey => SuiteKey(suiteID: suiteID);
 }
 
+extension PackagedGroupExt on Packaged<Group> {
+  Packaged<GroupKey> get key => next((s) => s.key);
+  Packaged<GroupKey>? get parentKey =>
+      value.parentKey == null ? null : next((g) => g.parentKey!);
+}
+
 extension GroupExt on Group {
   GroupKey get key => GroupKey(
         groupID: id,
@@ -120,6 +133,10 @@ extension GroupExt on Group {
       parentID == null ? null : GroupKey(groupID: parentID!, suiteID: suiteID);
 
   SuiteKey get suiteKey => SuiteKey(suiteID: suiteID);
+}
+
+extension PackagedSuiteExt on Packaged<Suite> {
+  Packaged<SuiteKey> get key => next((s) => s.key);
 }
 
 extension SuiteExt on Suite {

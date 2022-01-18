@@ -104,26 +104,18 @@ final $test = Provider.autoDispose.family<AsyncValue<Test>, Packaged<TestKey>>(
       .firstDataOrLoading;
 }, dependencies: [$events]);
 
-final $allTests =
-    Provider.autoDispose.family<List<Test>, String>((ref, packagePath) {
-  return ref
-      .watch($events)
-      .events
-      .where((e) => e.packagePath == packagePath)
-      .map((e) => e.value)
-      .whereType<TestEventTestStart>()
-      .map((e) => e.test)
-      .toList();
+final $allTests = Provider.autoDispose<List<Packaged<Test>>>((ref) {
+  return ref.watch($events).events.expand<Packaged<Test>>((e) {
+    final value = e.value;
+    if (value is! TestEventTestStart) return const [];
+    return [Packaged(e.packagePath, value.test)];
+  }).toList();
 }, dependencies: [$events]);
 
-final $allFailedTests =
-    Provider.autoDispose.family<List<Test>, String>((ref, packagePath) {
+final $allFailedTests = Provider.autoDispose<List<Packaged<Test>>>((ref) {
   return ref
-      .watch($allTests(packagePath))
-      .where(
-        (test) =>
-            ref.watch($testStatus(Packaged(packagePath, test.key))).failing,
-      )
+      .watch($allTests)
+      .where((test) => ref.watch($testStatus(test.key)).failing)
       .toList();
 }, dependencies: [$allTests, $testStatus]);
 
@@ -183,17 +175,17 @@ final $currentlyFailedTestsLocation =
 
     return packages
         .expand((package) {
-          final failedTests = ref.watch($allFailedTests(package.path));
+          final failedTests = ref.watch($allFailedTests);
 
           return failedTests.map((test) {
             final suite = unwrap(
-              ref.watch($suite(Packaged(package.path, test.suiteKey))),
+              ref.watch($suite(test.suiteKey)),
             );
 
             return FailedTestLocation(
               packagePath: package.path,
               testPath: suite.path!,
-              name: test.name,
+              name: test.value.name,
             );
           });
         })

@@ -312,7 +312,8 @@ final $summary = Provider.autoDispose<String?>((ref) {
       .where((e) => ref.watch($suiteStatus(e.key)) == SuiteStatus.pass)
       .length;
 
-  final tests = ref.watch($allTests).where((test) => !test.isHidden).toList();
+  final tests =
+      ref.watch($allTests).where((test) => !test.value.isHidden).toList();
   final failingTestsCount =
       tests.where((e) => ref.watch($testStatus(e.key)).failing).length;
   final passingTestsCount =
@@ -351,14 +352,14 @@ ${'Time:'.bold}        $timeDescription''';
   $startTime,
 ]);
 
-final $showWatchUsage = StateProvider<bool>((ref) {
+final $showWatchUsage = StateProvider.autoDispose<bool>((ref) {
   // collapse watch usage when the tests are restarted
   ref.watch($events.notifier);
 
   return false;
 }, dependencies: [$events.notifier]);
 
-final $isEditingTestNameFilter = StateProvider<bool>((ref) {
+final $isEditingTestNameFilter = StateProvider.autoDispose<bool>((ref) {
   // collapse watch usage when the tests are restarted
   ref.watch($events.notifier);
 
@@ -386,8 +387,9 @@ final $output = Provider.autoDispose<AsyncValue<String>>((ref) {
     }
 
     final isDone = ref.watch($isDone);
-    final suites =
-        ref.watch($suites).sorted((a, b) => a.testPath!.compareTo(b.testPath!));
+    final suites = ref
+        .watch($suites)
+        .sorted((a, b) => a.value.path!.compareTo(b.value.path!));
 
     final passingSuites = suites
         .where(

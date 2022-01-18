@@ -7,19 +7,28 @@ import 'dart_test.dart';
 import 'dart_test_utils.dart';
 import 'groups.dart';
 import 'io.dart';
+import 'provider_utils.dart';
 import 'tests.dart';
 
-final $suiteCount =
-    Provider.autoDispose.family<AsyncValue<int>, String>((ref, packagePath) {
-  return ref
-      .watch($events)
-      .events
-      .where((e) => e.packagePath == packagePath)
-      .map((e) => e.value)
-      .whereType<TestEventAllSuites>()
-      .map((e) => e.count)
-      .firstDataOrLoading;
-}, dependencies: [$events]);
+/// The number of suites, all packages included
+final $suiteCount = Provider.autoDispose<AsyncValue<int>>((ref) {
+  return merge((unwrap) {
+    final packages = unwrap(ref.watch($packages));
+    final events = ref.watch($events).events;
+
+    return packages.fold(0, (acc, package) {
+      final allSuite = unwrap(
+        events
+            .where((e) => e.packagePath == package.path)
+            .map((e) => e.value)
+            .whereType<TestEventAllSuites>()
+            .firstDataOrLoading,
+      );
+
+      return acc + allSuite.count;
+    });
+  });
+}, dependencies: [$events, $packages]);
 
 final $suites = Provider.autoDispose<List<Packaged<Suite>>>((ref) {
   final events = ref.watch($events).events;
@@ -30,17 +39,19 @@ final $suites = Provider.autoDispose<List<Packaged<Suite>>>((ref) {
       .toList();
 }, dependencies: [$events]);
 
-final $hasAllSuites =
-    Provider.family.autoDispose<bool, String>((ref, packagePath) {
-  return ref.watch($suiteCount(packagePath)).when(
-        error: (err, stack) => false,
-        loading: () => false,
-        data: (suiteCount) {
-          final suites = ref.watch($suites(packagePath));
-          return suites.length == suiteCount;
-        },
-      );
-}, dependencies: [$suites, $suiteCount]);
+final $hasAllSuites = Provider.autoDispose<bool>(
+  (ref) {
+    return ref.watch($suiteCount).when(
+          error: (err, stack) => false,
+          loading: () => false,
+          data: (suiteCount) {
+            final suites = ref.watch($suites);
+            return suites.length == suiteCount;
+          },
+        );
+  },
+  dependencies: [$suites, $suiteCount, $packages],
+);
 
 final $suite = Provider.autoDispose
     .family<AsyncValue<Suite>, Packaged<SuiteKey>>((ref, suiteKey) {
@@ -107,8 +118,23 @@ final $exitCode = Provider.autoDispose<AsyncValue<int>>(
     // didn't have the time to complete, we consider the command as failing
     if (ref.watch($isEarlyAbort)) return const AsyncData(-1);
 
-    final packages = ref.watch($packages);
+    if (!ref.watch($hasAllSuites)) {
+      return const AsyncLoading();
+    }
 
+    final suites = ref.watch($suites);
+
+    final hasPendingSuite = suites.any(
+      (suite) => ref.watch($suiteStatus(suite.key)) == SuiteStatus.pending,
+    );
+    if (hasPendingSuite) return const AsyncLoading();
+
+    final hasErroredSuite = suites.any(
+      (suite) => ref.watch($suiteStatus(suite.key)) == SuiteStatus.fail,
+    );
+    if (hasErroredSuite) return const AsyncData(-1);
+
+    final packages = ref.watch($packages);
     return packages.when(
       loading: () => const AsyncLoading(),
       error: (err, stack) => AsyncError(err, stackTrace: stack),
@@ -127,26 +153,6 @@ final $exitCode = Provider.autoDispose<AsyncValue<int>>(
                 ? const AsyncData(0)
                 : const AsyncData(-1);
           }
-
-          if (!ref.watch($hasAllSuites(package.path))) {
-            return const AsyncLoading();
-          }
-
-          final suites = ref.watch($suites(package.path));
-
-          final hasPendingSuite = suites.any(
-            (suite) =>
-                ref.watch($suiteStatus(Packaged(package.path, suite.key))) ==
-                SuiteStatus.pending,
-          );
-          if (hasPendingSuite) return const AsyncLoading();
-
-          final hasErroredSuite = suites.any(
-            (suite) =>
-                ref.watch($suiteStatus(Packaged(package.path, suite.key))) ==
-                SuiteStatus.fail,
-          );
-          if (hasErroredSuite) return const AsyncData(-1);
 
           // All suites are completed and passing
           return const AsyncData(0);
