@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:cli_util/cli_logging.dart';
 
+import 'ansi.dart';
 import 'vt100.dart';
 
 Renderer? rendererOverride;
@@ -36,7 +37,7 @@ class FullScreenRenderer implements Renderer {
 }
 
 int computeOutputHeight(String output, {required int terminalWidth}) {
-  return output.split('\n').fold(0, (acc, line) {
+  return output.withoutAnsi.split('\n').fold(0, (acc, line) {
     return acc + max(1, (line.length / terminalWidth).ceil());
   });
 }

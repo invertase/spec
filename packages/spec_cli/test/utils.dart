@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:riverpod/riverpod.dart';
+import 'package:spec_cli/src/ansi.dart';
 import 'package:spec_cli/src/command_runner.dart';
 import 'package:spec_cli/src/container.dart';
 import 'package:spec_cli/src/renderer.dart';
@@ -77,10 +78,10 @@ class TestRenderer extends Renderer {
 
   @override
   void renderFrame(String output) {
-    final normalizedOutput = output.replaceAll(ansiRegex, '').replaceFirst(
-          RegExp(r'Time:.+$', multiLine: true),
-          'Time:        00:00:00',
-        );
+    final normalizedOutput = output.withoutAnsi.replaceFirst(
+      RegExp(r'Time:.+$', multiLine: true),
+      'Time:        00:00:00',
+    );
 
     frames.add('$normalizedOutput\n');
   }
@@ -258,14 +259,6 @@ class _FramesMatch extends Matcher {
   }
 }
 
-// Cloned from https://github.com/chalk/ansi-regex/blob/main/index.js
-final ansiRegex = RegExp(
-  [
-    r'[\u001B\u009B][[\]()#;?]*(?:(?:(?:(?:;[-a-zA-Z\d\\/#&.:=?%@~_]+)*|[a-zA-Z\d]+(?:;[-a-zA-Z\d\/#&.:=?%@~_]*)*)?\u0007)',
-    r'(?:(?:\d{1,4}(?:;\d{0,4})*)?[\dA-PR-TZcf-nq-uy=><~]))'
-  ].join('|'),
-);
-
 /// Returns a matcher which matches if the match argument is a string and
 /// is equal to [value] after removing ansi codes
 Matcher equalsIgnoringAnsi(String value) => _IsEqualIgnoringAnsi(value);
@@ -275,13 +268,11 @@ class _IsEqualIgnoringAnsi extends Matcher {
 
   static final Object _mismatchedValueKey = Object();
 
-  static String _removeAnsi(String s) => s.replaceAll(ansiRegex, '');
-
   final String _value;
 
   @override
   bool matches(Object? object, Map<Object?, Object?> matchState) {
-    final description = _removeAnsi(object! as String);
+    final description = (object! as String).withoutAnsi;
     if (_value != description) {
       matchState[_mismatchedValueKey] = description;
       return false;

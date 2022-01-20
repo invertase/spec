@@ -1,4 +1,5 @@
 import 'package:spec_cli/src/renderer.dart';
+import 'package:spec_cli/src/vt100.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -14,7 +15,14 @@ void main() {
       );
     });
 
-    test('exludes invisible characters', () {}, skip: true);
+    test('exludes invisible characters', () {
+      expect(
+        computeOutputHeight('''
+12345${VT100.clearScreen}
+world''', terminalWidth: 5),
+        2,
+      );
+    });
 
     test('supports empty lines', () {
       expect(
