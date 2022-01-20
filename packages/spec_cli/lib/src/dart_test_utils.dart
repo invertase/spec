@@ -101,8 +101,14 @@ extension PackagedTestExt on Packaged<Test> {
 
 extension TestExt on Test {
   // when "url" is null, it means that this is not a user-defined test
-  // and is instead a setup/tearOff/.., so it doesn't count
-  bool get isHidden => url == null;
+  // and is instead the "loading" phase.
+  // Setups/Tearsdowns are also hidden
+  bool get isHidden =>
+      url == null ||
+      name.endsWith('(setUpAll)') ||
+      name.endsWith('(tearDownAll)') ||
+      name.endsWith('(setUp)') ||
+      name.endsWith('(tearDown)');
 
   TestKey get key => TestKey(
         testID: id,

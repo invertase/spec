@@ -86,7 +86,7 @@ final $suiteStatus = Provider.family
     $scaffoldGroup(suiteKey).select(
       (rootGroup) =>
           rootGroup.asData != null &&
-          visibleTests.length == rootGroup.asData!.value.testCount,
+          visibleTests.length >= rootGroup.asData!.value.testCount,
     ),
   );
   if (!hasAllVisibleIds) {
