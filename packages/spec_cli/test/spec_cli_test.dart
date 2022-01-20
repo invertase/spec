@@ -37,6 +37,13 @@ void main() {
     testScope('handle test failure after test done', (ref) async {},
         skip: true);
 
+    testScope('handle test failure after test done', (ref) async {},
+        skip: true);
+
+    testScope('support flutter projects within melos workspaces', (ref) async {
+      // DON'T add a "lib/main.dart"
+    }, skip: true);
+
     testScope('handles setups/teardowns', (ref) async {
       final exitCode = await runTest({
         'my_test.dart': '''

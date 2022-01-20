@@ -132,7 +132,7 @@ final $packages = FutureProvider<List<_Package>>((ref) async {
     );
 
     return melosWorkspace.filteredPackages.values
-        .map((e) => _Package(isFlutter: e.isFlutterApp, path: e.path))
+        .map((e) => _Package(isFlutter: e.isFlutterPackage, path: e.path))
         .toList();
   } on MelosException {
     // TODO handle missing pubspec.yaml
