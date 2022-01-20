@@ -203,6 +203,9 @@ Future<int> spec({
         fireImmediately: true,
       );
 
+// TODO handle empty "$packages" which could happen if no pubspec.yaml is present
+// or no test folder is found
+
       if (options.watch) {
         // In watch mode, don't quite until sigint/sigterm is sent
         final completer = Completer<int>();
@@ -213,6 +216,7 @@ Future<int> spec({
       } else {
         // making sure the exitCode provider isn't disposed while the future is pending
         ref.listen($exitCode.future, (previous, current) {});
+
         // Outside of watch mode, quite as soon we know what the exit code should be
         return await ref.read($exitCode.future);
       }

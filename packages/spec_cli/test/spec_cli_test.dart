@@ -37,6 +37,60 @@ void main() {
     testScope('handle test failure after test done', (ref) async {},
         skip: true);
 
+    testScope('handles setups/teardowns', (ref) async {
+      final exitCode = await runTest({
+        'my_test.dart': '''
+import 'package:test/test.dart';
+void main() {
+  setUpAll(() => Future.delayed(Duration(milliseconds: 10)));
+  tearDownAll(() => Future.delayed(Duration(milliseconds: 10)));
+
+  setUp(() => Future.delayed(Duration(milliseconds: 10)));
+  tearDown(() => Future.delayed(Duration(milliseconds: 10)));
+
+  test('hello world', () => Future.delayed(Duration(milliseconds: 10)));
+  group('foo', () {
+    setUp(() => Future.delayed(Duration(milliseconds: 10)));
+    tearDown(() => Future.delayed(Duration(milliseconds: 10)));
+
+    test('hello world', () => Future.delayed(Duration(milliseconds: 10)));
+  });
+}
+''',
+        'another_test.dart': '''
+import 'package:test/test.dart';
+void main() {
+  test('slow', () => Future.delayed(Duration(seconds: 1)));
+}
+''',
+      });
+
+      expect(
+        testRenderer!.frames,
+        framesMatch(
+          '''
+ RUNS  test/my_test.dart
+---
+ RUNS  test/another_test.dart
+ RUNS  test/my_test.dart
+---
+ PASS  test/my_test.dart
+
+ RUNS  test/another_test.dart
+---
+ PASS  test/another_test.dart
+ PASS  test/my_test.dart
+
+Test Suites: 2 passed, 2 total
+Tests:       3 passed, 3 total
+Time:        00:00:00
+''',
+        ),
+      );
+
+      expect(exitCode, 0);
+    });
+
     testScope('can filter tests by name', (ref) async {
       final exitCode = await runTest(
         {

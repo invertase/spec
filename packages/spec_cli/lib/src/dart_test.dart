@@ -1,7 +1,9 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:dart_test_adapter/dart_test_adapter.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:melos/melos.dart';
 import 'package:path/path.dart';
 import 'package:pubspec/pubspec.dart';
 import 'package:riverpod/riverpod.dart';
@@ -121,13 +123,35 @@ class TestEventsNotifier extends StateNotifier<TestEventsState> {
 
 final $packages = FutureProvider<List<_Package>>((ref) async {
   final workingDir = ref.watch($workingDirectory);
-  final pubspec = await PubSpec.load(workingDir);
-  return [
-    _Package(
-      isFlutter: pubspec.allDependencies.containsKey('flutter'),
-      path: normalize(workingDir.absolute.path),
-    ),
-  ];
+  try {
+    final melosWorkspace = await MelosWorkspace.fromConfig(
+      await MelosWorkspaceConfig.fromDirectory(workingDir),
+      filter: PackageFilter(
+        dirExists: ['test'],
+      ),
+    );
+
+    return melosWorkspace.filteredPackages.values
+        .map((e) => _Package(isFlutter: e.isFlutterApp, path: e.path))
+        .toList();
+  } on MelosException {
+    // TODO handle missing pubspec.yaml
+
+    late final hasPubspec =
+        File(join(workingDir.path, 'pubspec.yaml')).existsSync();
+    late final hasTestFolder =
+        Directory(join(workingDir.path, 'test')).existsSync();
+
+    return [
+      if (hasPubspec && hasTestFolder)
+        _Package(
+          isFlutter: await PubSpec.load(workingDir).then(
+            (pubspec) => pubspec.allDependencies.containsKey('flutter'),
+          ),
+          path: normalize(workingDir.absolute.path),
+        ),
+    ];
+  }
 }, dependencies: [$workingDirectory]);
 
 final $package =

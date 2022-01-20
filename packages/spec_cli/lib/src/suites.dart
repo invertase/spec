@@ -44,14 +44,11 @@ final $suites = Provider.autoDispose<List<Packaged<Suite>>>((ref) {
 
 final $hasAllSuites = Provider.autoDispose<bool>(
   (ref) {
-    return ref.watch($suiteCount).when(
-          error: (err, stack) => false,
-          loading: () => false,
-          data: (suiteCount) {
-            final suites = ref.watch($suites);
-            return suites.length == suiteCount;
-          },
-        );
+    final suiteCount = ref.watch($suiteCount).value;
+    if (suiteCount == null) return false;
+
+    final suites = ref.watch($suites);
+    return suites.length == suiteCount;
   },
   dependencies: [$suites, $suiteCount, $packages],
 );

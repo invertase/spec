@@ -24,10 +24,8 @@ final $suiteOutputLabel = Provider.autoDispose
     if (suite.path != null) {
       // Converting relative suite paths to absolute, such that later calls to
       // [relative] correctly understand what the suite path is based on.
-      final absoluteSuitePath = isRelative(suite.path!)
-          // TODO should be based on the package path not the workspace path
-          ? join(workingDir.path, suite.path)
-          : suite.path!;
+      final absoluteSuitePath =
+          join(workingDir.path, suiteKey.packagePath, suite.path);
 
       relativeSuitePath = relative(absoluteSuitePath, from: workingDir.path);
     }
