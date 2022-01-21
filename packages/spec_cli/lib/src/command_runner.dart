@@ -203,6 +203,9 @@ Future<int> spec({
         fireImmediately: true,
       );
 
+// TODO handle empty "$packages" which could happen if no pubspec.yaml is present
+// or no test folder is found
+
       if (options.watch) {
         // In watch mode, don't quite until sigint/sigterm is sent
         final completer = Completer<int>();
@@ -211,6 +214,9 @@ Future<int> spec({
         });
         return await completer.future;
       } else {
+        // making sure the exitCode provider isn't disposed while the future is pending
+        ref.listen($exitCode.future, (previous, current) {});
+
         // Outside of watch mode, quite as soon we know what the exit code should be
         return await ref.read($exitCode.future);
       }
@@ -282,7 +288,10 @@ void _handleWatchKeyPress(List<int> keyCodes, DartRef ref) {
         // stop the watch mode
         // Aborting/resuming tests
 
-        if (!ref.read($events).isInterrupted && !ref.read($isDone)) {
+        final areTestsRunning =
+            !ref.read($events).isInterrupted && !ref.read($isDone);
+
+        if (areTestsRunning) {
           ref.read($events.notifier).stop();
         } else {
           resartTests(ref);

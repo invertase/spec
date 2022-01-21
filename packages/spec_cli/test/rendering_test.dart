@@ -1,4 +1,5 @@
 import 'package:spec_cli/src/renderer.dart';
+import 'package:spec_cli/src/vt100.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -11,6 +12,15 @@ void main() {
 3
 4''', terminalWidth: 80),
         4,
+      );
+    });
+
+    test('exludes invisible characters', () {
+      expect(
+        computeOutputHeight('''
+12345${VT100.clearScreen}
+world''', terminalWidth: 5),
+        2,
       );
     });
 

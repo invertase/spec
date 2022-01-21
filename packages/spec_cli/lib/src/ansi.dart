@@ -1,6 +1,6 @@
 import 'package:ansi_styles/ansi_styles.dart';
 
-extension Ansi on String {
+extension AnsiExt on String {
   String get reset => AnsiStyles.reset(this);
   String get bold => AnsiStyles.bold(this);
   String get dim => AnsiStyles.dim(this);
@@ -46,4 +46,14 @@ extension Ansi on String {
   String get bgGrey => AnsiStyles.bgGrey(this);
   String get gray => AnsiStyles.gray(this);
   String get bgGray => AnsiStyles.bgGray(this);
+
+  String get withoutAnsi => replaceAll(_ansiRegex, '');
 }
+
+// Cloned from https://github.com/chalk/ansi-regex/blob/main/index.js
+final _ansiRegex = RegExp(
+  [
+    r'[\u001B\u009B][[\]()#;?]*(?:(?:(?:(?:;[-a-zA-Z\d\\/#&.:=?%@~_]+)*|[a-zA-Z\d]+(?:;[-a-zA-Z\d\/#&.:=?%@~_]*)*)?\u0007)',
+    r'(?:(?:\d{1,4}(?:;\d{0,4})*)?[\dA-PR-TZcf-nq-uy=><~]))'
+  ].join('|'),
+);

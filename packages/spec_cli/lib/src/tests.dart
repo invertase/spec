@@ -29,8 +29,8 @@ class TestStatus with _$TestStatus {
   bool get pending => this is _TestStatusPending;
 }
 
-final $rootTestsForSuite =
-    Provider.autoDispose.family<List<Test>, SuiteKey>((ref, suiteKey) {
+final $rootTestsForSuite = Provider.autoDispose
+    .family<List<Test>, Packaged<SuiteKey>>((ref, suiteKey) {
   final testsForSuite = ref.watch($testsForSuite(suiteKey));
 
   return testsForSuite.values
@@ -40,12 +40,14 @@ final $rootTestsForSuite =
       .toList();
 }, dependencies: [$testsForSuite]);
 
-final $testName =
-    Provider.autoDispose.family<AsyncValue<String>, TestKey>((ref, testKey) {
+final $testName = Provider.autoDispose
+    .family<AsyncValue<String>, Packaged<TestKey>>((ref, testKey) {
   return merge((unwrap) {
     final test = unwrap(ref.watch($test(testKey)));
     final parentGroup = test.groupKey != null
-        ? unwrap(ref.watch($group(test.groupKey!)))
+        ? unwrap(
+            ref.watch($group(Packaged(testKey.packagePath, test.groupKey!))),
+          )
         : null;
 
     // Tests without groups or tests where their group is the [$scaffoldGroup]
@@ -61,57 +63,64 @@ final $testName =
 }, dependencies: [$test]);
 
 final $testsForGroup = Provider.autoDispose
-    .family<AsyncValue<List<Test>>, GroupKey>((ref, groupKey) {
+    .family<AsyncValue<List<Test>>, Packaged<GroupKey>>((ref, groupKey) {
   return merge((unwrap) {
     final group = unwrap(ref.watch($group(groupKey)));
-    final testsForSuite = ref.watch($testsForSuite(group.suiteKey));
+    final testsForSuite = ref
+        .watch($testsForSuite(Packaged(groupKey.packagePath, group.suiteKey)));
 
     return testsForSuite.values
-        .where((test) => test.groupKey == groupKey)
+        .where((test) => test.groupKey == groupKey.value)
         .toList();
   });
 }, dependencies: [$testsForSuite]);
 
-final $testsForSuite =
-    Provider.family<Map<TestKey, Test>, SuiteKey>((ref, suiteKey) {
+final $testsForSuite = Provider.autoDispose
+    .family<Map<Packaged<TestKey>, Test>, Packaged<SuiteKey>>((ref, suiteKey) {
   return Map.fromEntries(
     ref
         .watch($events)
         .events
+        .where((e) => e.packagePath == suiteKey.packagePath)
+        .map((e) => e.value)
         .whereType<TestEventTestStart>()
-        .where((event) => event.test.suiteKey == suiteKey)
+        .where((event) => event.test.suiteKey == suiteKey.value)
         .where((event) => !event.test.isHidden)
-        .map((e) => MapEntry(e.test.key, e.test)),
+        .map((e) =>
+            MapEntry(Packaged(suiteKey.packagePath, e.test.key), e.test)),
   );
 }, dependencies: [$events]);
 
-final $test = Provider.family<AsyncValue<Test>, TestKey>((ref, testKey) {
+final $test = Provider.autoDispose.family<AsyncValue<Test>, Packaged<TestKey>>(
+    (ref, testKey) {
   return ref
       .watch($events)
       .events
+      .where((e) => e.packagePath == testKey.packagePath)
+      .map((e) => e.value)
       .whereType<TestEventTestStart>()
-      .where((event) => event.test.key == testKey)
+      .where((event) => event.test.key == testKey.value)
       .map((e) => e.test)
       .firstDataOrLoading;
 }, dependencies: [$events]);
 
-final $allTests = Provider<List<Test>>((ref) {
-  return ref
-      .watch($events)
-      .events
-      .whereType<TestEventTestStart>()
-      .map((e) => e.test)
-      .toList();
+final $allTests = Provider.autoDispose<List<Packaged<Test>>>((ref) {
+  return ref.watch($events).events.expand<Packaged<Test>>((e) {
+    final value = e.value;
+    if (value is! TestEventTestStart) return const [];
+    return [Packaged(e.packagePath, value.test)];
+  }).toList();
 }, dependencies: [$events]);
 
-final $allFailedTests = Provider<List<Test>>((ref) {
+final $allFailedTests = Provider.autoDispose<List<Packaged<Test>>>((ref) {
   return ref
       .watch($allTests)
       .where((test) => ref.watch($testStatus(test.key)).failing)
       .toList();
 }, dependencies: [$allTests, $testStatus]);
 
-final $testStatus = Provider.family<TestStatus, TestKey>((ref, testKey) {
+final $testStatus =
+    Provider.autoDispose.family<TestStatus, Packaged<TestKey>>((ref, testKey) {
   final test = ref.watch($test(testKey)).value;
   if (test == null) return const TestStatus.pending();
 
@@ -123,11 +132,17 @@ final $testStatus = Provider.family<TestStatus, TestKey>((ref, testKey) {
     return TestStatus.skip(skipReason: test.metadata.skipReason);
   }
 
-  final events = ref.watch($events).events;
+  final events = ref
+      .watch($events)
+      .events
+      .where((e) => e.packagePath == testKey.packagePath)
+      .map((e) => e.value)
+      .toList();
+
   final error = events
       .whereType<TestEventTestError>()
       // TODO can we have the groupID/suiteID too?
-      .where((e) => e.testID == testKey.testID)
+      .where((e) => e.testID == testKey.value.testID)
       .firstOrNull;
   if (error != null) {
     return TestStatus.fail(
@@ -139,7 +154,7 @@ final $testStatus = Provider.family<TestStatus, TestKey>((ref, testKey) {
   final done = events
       .whereType<TestEventTestDone>()
       // TODO can we have the groupID/suiteID too?
-      .where((e) => e.testID == testKey.testID)
+      .where((e) => e.testID == testKey.value.testID)
       .firstOrNull;
 
   if (done != null) {
@@ -154,20 +169,25 @@ final $testStatus = Provider.family<TestStatus, TestKey>((ref, testKey) {
 }, dependencies: [$events]);
 
 final $currentlyFailedTestsLocation =
-    Provider<AsyncValue<List<FailedTestLocation>>>((ref) {
+    Provider.autoDispose<AsyncValue<List<FailedTestLocation>>>((ref) {
   return merge((unwrap) {
-    final failedTests = ref.watch($allFailedTests);
+    final packages = unwrap(ref.watch($packages));
 
-    return failedTests
-        .map((test) {
-          final suite = unwrap(
-            ref.watch($suite(test.suiteKey)),
-          );
+    return packages
+        .expand((package) {
+          final failedTests = ref.watch($allFailedTests);
 
-          return FailedTestLocation(
-            path: suite.path!,
-            name: test.name,
-          );
+          return failedTests.map((test) {
+            final suite = unwrap(
+              ref.watch($suite(test.suiteKey)),
+            );
+
+            return FailedTestLocation(
+              packagePath: package.path,
+              testPath: suite.path!,
+              name: test.value.name,
+            );
+          });
         })
         // TODO remove once https://github.com/dart-lang/test/issues/1663 is fixed
         // Due to some issue with `dart test`, it's possible that `dart test` will
@@ -175,4 +195,4 @@ final $currentlyFailedTestsLocation =
         .toSet()
         .toList();
   });
-}, dependencies: [$allFailedTests, $suite]);
+}, dependencies: [$allFailedTests, $suite, $packages]);

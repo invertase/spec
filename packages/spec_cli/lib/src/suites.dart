@@ -1,4 +1,3 @@
-import 'package:collection/collection.dart';
 import 'package:dart_test_adapter/dart_test_adapter.dart';
 import 'package:riverpod/riverpod.dart';
 
@@ -7,43 +6,62 @@ import 'dart_test.dart';
 import 'dart_test_utils.dart';
 import 'groups.dart';
 import 'io.dart';
+import 'provider_utils.dart';
 import 'tests.dart';
 
-final $suiteCount = Provider<AsyncValue<int>>((ref) {
-  return ref
-      .watch($events)
-      .events
-      .whereType<TestEventAllSuites>()
-      .map((e) => e.count)
-      .firstDataOrLoading;
-}, dependencies: [$events]);
+/// The number of suites, all packages included
+final $suiteCount = Provider.autoDispose<AsyncValue<int>>(
+  (ref) {
+    return merge((unwrap) {
+      final packages = unwrap(ref.watch($packages));
+      final events = ref.watch($events).events;
 
-final $suites = Provider<List<Suite>>((ref) {
+      return packages.fold(0, (acc, package) {
+        final allSuite = unwrap(
+          events
+              .where((e) => e.packagePath == package.path)
+              .map((e) => e.value)
+              .whereType<TestEventAllSuites>()
+              .firstDataOrLoading,
+        );
+
+        return acc + allSuite.count;
+      });
+    });
+  },
+  dependencies: [$events, $packages],
+  name: 'suiteCount',
+);
+
+final $suites = Provider.autoDispose<List<Packaged<Suite>>>((ref) {
   final events = ref.watch($events).events;
 
   return events
-      .whereType<TestEventSuite>()
-      .map((event) => event.suite)
+      .where((e) => e.value is TestEventSuite)
+      .map((e) => e.next((value) => value.cast<TestEventSuite>()!.suite))
       .toList();
 }, dependencies: [$events]);
 
-final $hasAllSuites = Provider<bool>((ref) {
-  return ref.watch($suiteCount).when(
-        error: (err, stack) => false,
-        loading: () => false,
-        data: (suiteCount) {
-          final suites = ref.watch($suites);
-          return suites.length == suiteCount;
-        },
-      );
-}, dependencies: [$suites, $suiteCount]);
+final $hasAllSuites = Provider.autoDispose<bool>(
+  (ref) {
+    final suiteCount = ref.watch($suiteCount).value;
+    if (suiteCount == null) return false;
 
-final $suite = Provider.family<AsyncValue<Suite>, SuiteKey>((ref, suiteKey) {
+    final suites = ref.watch($suites);
+    return suites.length == suiteCount;
+  },
+  dependencies: [$suites, $suiteCount, $packages],
+);
+
+final $suite = Provider.autoDispose
+    .family<AsyncValue<Suite>, Packaged<SuiteKey>>((ref, suiteKey) {
   return ref
       .watch($events)
       .events
+      .where((e) => e.packagePath == suiteKey.packagePath)
+      .map((e) => e.value)
       .whereType<TestEventSuite>()
-      .where((e) => e.suite.key == suiteKey)
+      .where((e) => e.suite.key == suiteKey.value)
       .map((event) => event.suite)
       .firstDataOrLoading;
 }, dependencies: [$events]);
@@ -54,7 +72,8 @@ enum SuiteStatus {
   pending,
 }
 
-final $suiteStatus = Provider.family<SuiteStatus, SuiteKey>((ref, suiteKey) {
+final $suiteStatus = Provider.family
+    .autoDispose<SuiteStatus, Packaged<SuiteKey>>((ref, suiteKey) {
   final tests = ref.watch($testsForSuite(suiteKey));
   final visibleTests = tests.values.where((test) => !test.isHidden).toList();
 
@@ -64,7 +83,7 @@ final $suiteStatus = Provider.family<SuiteStatus, SuiteKey>((ref, suiteKey) {
     $scaffoldGroup(suiteKey).select(
       (rootGroup) =>
           rootGroup.asData != null &&
-          visibleTests.length == rootGroup.asData!.value.testCount,
+          visibleTests.length >= rootGroup.asData!.value.testCount,
     ),
   );
   if (!hasAllVisibleIds) {
@@ -92,31 +111,47 @@ final $suiteStatus = Provider.family<SuiteStatus, SuiteKey>((ref, suiteKey) {
   $testStatus,
 ]);
 
-final $exitCode = Provider<AsyncValue<int>>(
+final $exitCode = Provider.autoDispose<AsyncValue<int>>(
   (ref) {
     // The exit code will be preemptively obtained when a signal is sent.
     // No matter whether all tests executed are passing or not, since the command
     // didn't have the time to complete, we consider the command as failing
     if (ref.watch($isEarlyAbort)) return const AsyncData(-1);
 
-    final doneEvent = ref
-        .watch($events)
-        .events
-        .firstWhereOrNull((event) => event is TestEventDone) as TestEventDone?;
-    if (doneEvent != null) {
-      // Something probably went wrong as we likely should've been able to quit
-      // before obtaining the true "done" event, so we'll safely quit.
-      return doneEvent.success ?? true
-          ? const AsyncData(0)
-          : const AsyncData(-1);
+    if (!ref.watch($hasAllSuites)) {
+      return const AsyncLoading();
     }
 
-    if (!ref.watch($hasAllSuites)) return const AsyncLoading();
+    final packages = ref.watch($packages);
+    if (packages.isLoading) return const AsyncLoading();
+
+    /// Whether the done event was emitted for all packages
+    final allPackagesDone = packages.value!.every(
+      (package) => ref
+          .watch($events)
+          .events
+          .where((event) => event.packagePath == package.path)
+          .any((event) => event.value is TestEventDone),
+    );
+
+    if (allPackagesDone) {
+      // Something probably went wrong as we likely should've been able to quit
+      // before obtaining the true "done" event, so we'll safely quit.
+
+      final hasFailingDoneEvent = ref
+          .watch($events)
+          .events
+          .map((e) => e.value)
+          .whereType<TestEventDone>()
+          .any((done) => done.success == false);
+
+      return hasFailingDoneEvent ? const AsyncData(-1) : const AsyncData(0);
+    }
 
     final suites = ref.watch($suites);
-
     final hasPendingSuite = suites.any(
-        (suite) => ref.watch($suiteStatus(suite.key)) == SuiteStatus.pending);
+      (suite) => ref.watch($suiteStatus(suite.key)) == SuiteStatus.pending,
+    );
     if (hasPendingSuite) return const AsyncLoading();
 
     final hasErroredSuite = suites.any(
@@ -129,22 +164,27 @@ final $exitCode = Provider<AsyncValue<int>>(
   },
   dependencies: [
     $suites,
+    $packages,
     $suiteStatus,
     $isEarlyAbort,
     $hasAllSuites,
     $events,
   ],
+  name: 'exitCode',
 );
 
-final $isDone = Provider<bool>(
+final $isDone = Provider.autoDispose<bool>(
   (ref) {
+    final packages = ref.watch($packages);
+    if (packages.isLoading) return false;
+
     return ref.watch($exitCode).map(
               data: (d) => d.isRefreshing == false,
               error: (_) => false,
               loading: (_) => false,
             ) ||
-        ref.watch($events).isInterrupted;
+        packages.value!.any((p) => ref.watch($events).isInterrupted);
   },
-  dependencies: [$exitCode, $events],
+  dependencies: [$exitCode, $events, $packages],
   name: 'isDone',
 );

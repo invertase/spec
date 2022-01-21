@@ -6,39 +6,50 @@ import 'dart_test.dart';
 import 'dart_test_utils.dart';
 import 'provider_utils.dart';
 
-final $group = Provider.family<AsyncValue<Group>, GroupKey>((ref, groupKey) {
+final $group = Provider.family
+    .autoDispose<AsyncValue<Group>, Packaged<GroupKey>>((ref, groupKey) {
   return ref
       .watch($events)
       .events
+      .where((e) => e.packagePath == groupKey.packagePath)
+      .map((e) => e.value)
       .whereType<TestEventGroup>()
-      .where((e) => e.group.key == groupKey)
+      .where((e) => e.group.key == groupKey.value)
       .map((e) => e.group)
       .firstDataOrLoading;
 }, dependencies: [$events]);
 
-final AutoDisposeProviderFamily<AsyncValue<int>, GroupKey> $groupDepth =
-    Provider.autoDispose.family<AsyncValue<int>, GroupKey>((ref, groupKey) {
+final AutoDisposeProviderFamily<AsyncValue<int>, Packaged<GroupKey>>
+    $groupDepth = Provider.autoDispose
+        .family<AsyncValue<int>, Packaged<GroupKey>>((ref, groupKey) {
   return merge((unwrap) {
     final group = unwrap(ref.watch($group(groupKey)));
-    final parent = group.parentID != null
-        ? unwrap(ref.watch($group(group.parentKey!)))
+    final parentGroupKey = group.parentID != null
+        ? Packaged(groupKey.packagePath, group.parentKey!)
+        : null;
+
+    final parent = parentGroupKey != null
+        ? unwrap(ref.watch($group(parentGroupKey)))
         : null;
 
     if (parent == null || parent.parentID == null) {
       return 0;
     }
 
-    return unwrap(ref.watch($groupDepth(group.parentKey!))) + 1;
+    return unwrap(ref.watch($groupDepth(parentGroupKey!))) + 1;
   });
 }, dependencies: [$group]);
 
-final $groupName =
-    Provider.autoDispose.family<AsyncValue<String>, GroupKey>((ref, groupKey) {
+final $groupName = Provider.autoDispose
+    .family<AsyncValue<String>, Packaged<GroupKey>>((ref, groupKey) {
   return merge((unwrap) {
     final group = unwrap(ref.watch($group(groupKey)));
-    final parentGroup = group.parentKey == null
-        ? null
-        : unwrap(ref.watch($group(group.parentKey!)));
+    final parentGroupKey = group.parentID != null
+        ? Packaged(groupKey.packagePath, group.parentKey!)
+        : null;
+    final parentGroup = parentGroupKey != null
+        ? unwrap(ref.watch($group(parentGroupKey)))
+        : null;
 
     if (parentGroup == null || parentGroup.parentID == null) {
       return group.name;
@@ -51,22 +62,24 @@ final $groupName =
 }, dependencies: [$group]);
 
 /// The virtual top-most group added by the test package.
-final $scaffoldGroup =
-    Provider.family<AsyncValue<Group>, SuiteKey>((ref, suiteKey) {
+final $scaffoldGroup = Provider.family
+    .autoDispose<AsyncValue<Group>, Packaged<SuiteKey>>((ref, suiteKey) {
   return ref
       .watch($events)
       .events
+      .where((e) => e.packagePath == suiteKey.packagePath)
+      .map((e) => e.value)
       .whereType<TestEventGroup>()
       .where(
-        (e) => e.group.parentID == null && e.group.suiteKey == suiteKey,
+        (e) => e.group.parentID == null && e.group.suiteKey == suiteKey.value,
       )
       .map((e) => e.group)
       .firstDataOrLoading;
 }, dependencies: [$events]);
 
 /// User-defined groups at the root of a suite (excluding [$scaffoldGroup])
-final $rootGroupsForSuite =
-    Provider.family<List<Group>, SuiteKey>((ref, suiteKey) {
+final $rootGroupsForSuite = Provider.family
+    .autoDispose<List<Group>, Packaged<SuiteKey>>((ref, suiteKey) {
   final scaffoldGroup = ref.watch($scaffoldGroup(suiteKey));
   return scaffoldGroup.when(
     error: (err, stack) {
@@ -78,6 +91,8 @@ final $rootGroupsForSuite =
       return ref
           .watch($events)
           .events
+          .where((e) => e.packagePath == suiteKey.packagePath)
+          .map((e) => e.value)
           .whereType<TestEventGroup>()
           .where((e) => e.group.parentKey == scaffoldGroup.key)
           .map((e) => e.group)
@@ -86,13 +101,15 @@ final $rootGroupsForSuite =
   );
 }, dependencies: [$scaffoldGroup, $events]);
 
-final $childrenGroupsForGroup =
-    Provider.family<List<Group>, GroupKey>((ref, groupKey) {
+final $childrenGroupsForGroup = Provider.family
+    .autoDispose<List<Group>, Packaged<GroupKey>>((ref, groupKey) {
   return ref
       .watch($events)
       .events
+      .where((e) => e.packagePath == groupKey.packagePath)
+      .map((e) => e.value)
       .whereType<TestEventGroup>()
-      .where((e) => e.group.parentKey == groupKey)
+      .where((e) => e.group.parentKey == groupKey.value)
       .map((e) => e.group)
       .toList();
 }, dependencies: [$events]);
