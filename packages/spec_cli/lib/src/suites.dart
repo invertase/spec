@@ -42,6 +42,43 @@ final $suites = Provider.autoDispose<List<Packaged<Suite>>>((ref) {
       .toList();
 }, dependencies: [$events]);
 
+final $completedSuiteKeysInCompletionOrder =
+    Provider.autoDispose<List<Packaged<SuiteKey>>>(
+  (ref) {
+    final sortedSuiteKeys = <Packaged<SuiteKey>>{};
+
+    for (final event in ref.watch($events).events.reversed) {
+      event.value.map(
+        suite: (e) => sortedSuiteKeys.add(event.next((_) => e.suite.key)),
+        testDone: (e) {
+          final test = ref
+              .watch($allTests)
+              // TODO is there a way to filter groupID/suiteID?
+              .firstWhere(
+                (test) =>
+                    test.packagePath == event.packagePath &&
+                    test.value.id == e.testID,
+              );
+
+          sortedSuiteKeys.add(test.next((value) => value.suiteKey));
+        },
+        start: (_) {},
+        done: (_) {},
+        allSuites: (_) {},
+        group: (_) {},
+        testStart: (_) {},
+        print: (_) {},
+        error: (_) {},
+        debug: (_) {},
+        unknown: (_) {},
+      );
+    }
+
+    return sortedSuiteKeys.toList().reversed.toList();
+  },
+  dependencies: [$events, $allTests],
+);
+
 final $hasAllSuites = Provider.autoDispose<bool>(
   (ref) {
     final suiteCount = ref.watch($suiteCount).value;

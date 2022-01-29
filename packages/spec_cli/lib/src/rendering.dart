@@ -140,7 +140,7 @@ final $testLabel =
 
 final $testError =
     Provider.autoDispose.family<String?, Packaged<TestKey>>((ref, testKey) {
-  if (!ref.watch($isDone)) return null;
+  // if (!ref.watch($isDone)) return null;
 
   final status = ref.watch($testStatus(testKey));
 
@@ -223,9 +223,9 @@ String? _renderTest({
 
   return [
     if (label != null) label.multilinePadLeft(depth * 2 + 2),
-    if (status.pending || (status.failing && hasExitCode))
+    if (status.pending || (status.failing))
       ...messages, // messages are voluntarily not indented
-    if (paddedError != null && hasExitCode)
+    if (paddedError != null)
       if (messages.isNotEmpty) '\n$paddedError' else paddedError,
   ].join('\n');
 }
@@ -338,6 +338,7 @@ final $summary = Provider.autoDispose<String?>((ref) {
   final timeDescription = prettyDuration(elapsedTime);
 
   return '''
+
 ${'Test Suites:'.bold} $suitesDescription
 ${'Tests:'.bold}       $testsDescription
 ${'Time:'.bold}        $timeDescription''';
@@ -385,42 +386,42 @@ final $output = Provider.autoDispose<AsyncValue<String>>((ref) {
     }
 
     final isDone = ref.watch($isDone);
-    final suites = ref
-        .watch($suites)
-        .sorted((a, b) => a.value.path!.compareTo(b.value.path!));
 
-    final passingSuites = suites
-        .where(
-            (suite) => ref.watch($suiteStatus(suite.key)) == SuiteStatus.pass)
-        .map((suite) => unwrap(ref.watch($suiteOutput(suite.key))))
-        .join('\n');
-    final failingSuites = suites
-        .where(
-            (suite) => ref.watch($suiteStatus(suite.key)) == SuiteStatus.fail)
-        .map((suite) => unwrap(ref.watch($suiteOutput(suite.key))))
-        .join('\n');
-    final loadingSuites = suites
+    final suitesOuput = ref
+        .watch($completedSuiteKeysInCompletionOrder)
+        .where((suiteKey) =>
+            ref.watch($suiteStatus(suiteKey)) != SuiteStatus.pending)
+        .map((suiteKey) => unwrap(ref.watch($suiteOutput(suiteKey))));
+
+    final loadingSuites = ref
+        .watch($suites)
         .where((suite) =>
             ref.watch($suiteStatus(suite.key)) == SuiteStatus.pending)
+        .toList();
+    final loadingSuitesOutput = loadingSuites
+        .take(3)
         .map((suite) => unwrap(ref.watch($suiteOutput(suite.key))))
-        .join('\n');
+        .sortedBy((element) => element);
 
     final summary = ref.watch($summary);
 
-    // During the summary, only show passing suites if there are not failures
-    final shouldShowPassingSuites = !isDone || failingSuites.isEmpty;
-
     final result = [
-      if (shouldShowPassingSuites && passingSuites.isNotEmpty) passingSuites,
-      if (!isDone && loadingSuites.isNotEmpty) loadingSuites,
-      if (failingSuites.isNotEmpty) failingSuites,
+      ...suitesOuput,
+      // Because of the lack of https://github.com/dart-lang/test/issues/1652
+      // we have to rely on "isDone" for edge-cases where suites have no tests
+      if (!isDone) ...[
+        ...loadingSuitesOutput,
+        if (loadingSuites.length > 3) 'And ${loadingSuites.length - 3} more.',
+      ],
       if (summary != null) summary,
-      if (ref.watch($events).isInterrupted) 'Test run was interrupted.'.red,
+      if (ref.watch($events).isInterrupted || ref.watch($isEarlyAbort))
+        'Test run was interrupted.'.red,
       if (summary != null &&
           ref.watch($isWatchMode) &&
           !ref.watch($isEarlyAbort))
         if (ref.watch($showWatchUsage))
           '''
+
 ${'Watch Usage:'.bold}
  › Press f to run only failed tests.
  › Press t to filter by a test name regex pattern.
@@ -428,8 +429,8 @@ ${'Watch Usage:'.bold}
  › Press Enter to trigger a test run.
 '''
         else
-          '${'Watch Usage:'.bold} Press w to show more.',
-    ].join('\n\n');
+          '\n${'Watch Usage:'.bold} Press w to show more.',
+    ].join('\n');
 
     if (result.isNotEmpty) return VT100.hideCursor + result;
     return '';
@@ -440,8 +441,9 @@ ${'Watch Usage:'.bold}
   $events,
   $isEarlyAbort,
   $showWatchUsage,
-  $suites,
+  $completedSuiteKeysInCompletionOrder,
   $isDone,
+  $suites,
   $suiteOutput,
   $suiteStatus,
   $summary,

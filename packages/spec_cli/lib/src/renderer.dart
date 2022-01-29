@@ -1,7 +1,10 @@
+// ignore_for_file: prefer_const_constructors_in_immutables
+
 import 'dart:io';
 import 'dart:math';
 
 import 'package:cli_util/cli_logging.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
 import 'ansi.dart';
 import 'vt100.dart';
@@ -37,9 +40,81 @@ class FullScreenRenderer implements Renderer {
 }
 
 int computeOutputHeight(String output, {required int terminalWidth}) {
+  if (output.isEmpty) return 0;
   return output.withoutAnsi.split('\n').fold(0, (acc, line) {
     return acc + max(1, (line.length / terminalWidth).ceil());
   });
+}
+
+Diff contentAfterFirstLineDiff({
+  required String previous,
+  required String next,
+}) {
+  var firstDiffIndex = 0;
+  for (;
+      firstDiffIndex < previous.length &&
+          firstDiffIndex < next.length &&
+          previous[firstDiffIndex] == next[firstDiffIndex];
+      firstDiffIndex++) {}
+
+  if (firstDiffIndex < previous.length) {
+    var lineStartIndexAtFirstDiff = firstDiffIndex - 1;
+    for (;
+        lineStartIndexAtFirstDiff > 0 &&
+            previous[lineStartIndexAtFirstDiff] != '\n';
+        lineStartIndexAtFirstDiff--) {}
+
+    if (lineStartIndexAtFirstDiff >= 0 &&
+        previous[lineStartIndexAtFirstDiff] == '\n') {
+      if (lineStartIndexAtFirstDiff + 1 < previous.length) {
+        lineStartIndexAtFirstDiff++;
+      }
+    }
+
+    return Diff(
+      previous: previous.substring(lineStartIndexAtFirstDiff),
+      next: next.substring(lineStartIndexAtFirstDiff),
+    );
+  }
+
+  // No diff
+  return Diff(
+    previous: '',
+    next: next.substring(previous.length),
+  );
+}
+
+@immutable
+class Diff {
+  Diff({required this.previous, required this.next});
+
+  final String previous;
+  final String next;
+
+  @override
+  int get hashCode => Object.hash(runtimeType, previous, next);
+
+  @override
+  bool operator ==(Object other) {
+    return other.runtimeType == runtimeType &&
+        other is Diff &&
+        other.previous == previous &&
+        other.next == next;
+  }
+
+  @override
+  String toString() {
+    return '''
+Diff(
+  previous: ${"'''"}
+$previous
+${"'''"},
+  next: ${"'''"}
+$next
+${"'''"},
+)
+''';
+  }
 }
 
 /// A [Renderer] that, when a new frame is drawn, will clear previously rendered
@@ -52,31 +127,32 @@ class BacktrackingRenderer implements Renderer {
         );
 
   String? _lastFrame;
-  // For some reasons, going from first frame to second frame clears one more line
-  // than needed. This workaround fixes it.
-  var _didAddOneLine = false;
 
   @override
   void renderFrame(String output) {
-    // TODO fix update incorrectly overriding terminal prompt
+    String? toRender;
     if (_lastFrame != null) {
+      final diff = contentAfterFirstLineDiff(
+        previous: _lastFrame!,
+        next: output,
+      );
       final lastOutputHeight = computeOutputHeight(
-        _lastFrame!,
+        diff.previous,
         terminalWidth: stdout.terminalColumns,
       );
+      toRender = diff.next;
 
-      final inc = _didAddOneLine ? 1 : 2;
-      _didAddOneLine = true;
-
-      stdout.write(
-        VT100.moveCursorUp(lastOutputHeight - inc) +
-            VT100.moveCursorToColumn(0),
-      );
-      stdout.write(VT100.clearScreenFromCursorDown);
+      if (lastOutputHeight > 0) {
+        if (lastOutputHeight > 1) {
+          stdout.write(VT100.moveCursorUp(lastOutputHeight - 1));
+        }
+        stdout
+          ..write(VT100.moveCursorToColumn(0))
+          ..write(VT100.clearScreenFromCursorDown);
+      }
     }
-    // TODO update renderer to use ansi to only output the diff of the previous vs new frame
-    stdout.write(output);
 
+    stdout.write(toRender ?? output);
     _lastFrame = output;
   }
 }

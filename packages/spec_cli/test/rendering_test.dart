@@ -1,3 +1,4 @@
+import 'package:spec_cli/src/ansi.dart';
 import 'package:spec_cli/src/renderer.dart';
 import 'package:spec_cli/src/vt100.dart';
 import 'package:test/test.dart';
@@ -34,6 +35,8 @@ world''', terminalWidth: 5),
 5''', terminalWidth: 80),
         5,
       );
+
+      expect(computeOutputHeight('', terminalWidth: 5), 0);
     });
 
     test('handles line overflow', () {
@@ -50,5 +53,103 @@ world''', terminalWidth: 5),
         4,
       );
     });
+  });
+
+  test('contentAfterFirstLineDiff', () {
+    expect(
+      contentAfterFirstLineDiff(
+        previous: 'abc\ndef\ng',
+        next: 'abc\ndei\ng',
+      ),
+      Diff(
+        previous: 'def\ng',
+        next: 'dei\ng',
+      ),
+    );
+
+    expect(
+      contentAfterFirstLineDiff(
+        previous: 'a',
+        next: '''
+a
+b
+c''',
+      ),
+      isA<Diff>()
+          .having((e) => e.previous, 'previous', '')
+          .having((e) => e.next, 'next', '''
+
+b
+c'''),
+      reason: 'Since `previous` had no newline at its end '
+          'but `next` added one, it is preserved',
+    );
+
+    expect(
+      contentAfterFirstLineDiff(
+        previous: '',
+        next: '\n',
+      ),
+      Diff(
+        previous: '',
+        next: '\n',
+      ),
+    );
+
+    expect(
+      contentAfterFirstLineDiff(
+        previous: '''
+ ${'PASS'.bgGreen.black.bold} test/foo.dart
+
+ ${'RUNS'.bgYellow.black.bold} test/bar.dart
+''',
+        next: '''
+ ${'PASS'.bgGreen.black.bold} test/foo.dart
+ ${'PASS'.bgGreen.black.bold} test/bar.dart
+''',
+      ),
+      Diff(
+        previous: '''
+
+ ${'RUNS'.bgYellow.black.bold} test/bar.dart
+''',
+        next: '''
+ ${'PASS'.bgGreen.black.bold} test/bar.dart
+''',
+      ),
+    );
+
+    expect(
+      contentAfterFirstLineDiff(
+        previous: '\n',
+        next: '\n',
+      ),
+      Diff(
+        previous: '',
+        next: '',
+      ),
+    );
+
+    expect(
+      contentAfterFirstLineDiff(
+        previous: '\n',
+        next: '\n\n',
+      ),
+      Diff(
+        previous: '',
+        next: '\n',
+      ),
+    );
+
+    expect(
+      contentAfterFirstLineDiff(
+        previous: '\n\n',
+        next: '\n',
+      ),
+      Diff(
+        previous: '\n',
+        next: '',
+      ),
+    );
   });
 }

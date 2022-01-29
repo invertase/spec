@@ -62,20 +62,18 @@ class TestEventsNotifier extends StateNotifier<TestEventsState> {
         '--name=${ref.watch($testNameFilters)!.pattern}',
     ];
 
-    final controller = StreamController<List<Packaged<TestEvent>>>();
-    ref.onDispose(controller.close);
-    final packagesSubscriptions = <StreamSubscription>[];
-
-    ref.onDispose(
-      controller.onCancel = () {
-        for (final sub in packagesSubscriptions) {
-          sub.cancel();
-        }
-      },
-    );
-
     Future(() async {
       final packages = await ref.watch($packages.future);
+
+      final packagesSubscriptions = <StreamSubscription>[];
+      ref.onDispose(
+        _closeSubs = () {
+          for (final sub in packagesSubscriptions) {
+            sub.cancel();
+          }
+          packagesSubscriptions.clear();
+        },
+      );
 
       for (final package in packages) {
         final packageStream = package.isFlutter
@@ -105,19 +103,13 @@ class TestEventsNotifier extends StateNotifier<TestEventsState> {
     });
   }
 
-  StreamSubscription? _eventsSub;
+  void Function()? _closeSubs;
 
   /// Stops the test process
   void stop() {
     // Cancelling the stream subscription will ultimately kill the process
-    _eventsSub!.cancel();
+    _closeSubs?.call();
     state = state.copyWith(isInterrupted: true);
-  }
-
-  @override
-  void dispose() {
-    _eventsSub?.cancel();
-    super.dispose();
   }
 }
 

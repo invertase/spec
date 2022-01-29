@@ -131,6 +131,41 @@ Future<int> spec({
   String? workingDirectory,
   SpecOptions options = const SpecOptions(),
 }) {
+//   return Future(() async {
+//     final renderer = BacktrackingRenderer();
+
+//     renderer.renderFrame('''
+// hello world
+// 123
+// foo
+// ''');
+//     renderer.renderFrame('''
+// hello world
+// 153
+// foo
+// ''');
+//     renderer.renderFrame('''
+// hello world
+// 153
+// bar
+// ''');
+//     renderer.renderFrame('''
+// hello world
+// 153
+// bar
+
+// ''');
+//     renderer.renderFrame('''
+// hello world
+// 153
+// bar
+// baz
+// ''');
+
+//     return 0;
+//   });
+// }
+
   return runScoped((ref) async {
     try {
       if (stdin.hasTerminal) {
@@ -184,8 +219,7 @@ Future<int> spec({
         });
       }
 
-      final renderer = rendererOverride ??
-          (options.watch ? FullScreenRenderer() : BacktrackingRenderer());
+      final renderer = rendererOverride ?? BacktrackingRenderer();
 
       ref.listen<AsyncValue<String>>(
         $output,

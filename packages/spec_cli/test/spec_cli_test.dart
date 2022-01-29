@@ -82,11 +82,10 @@ void main() {
  RUNS  test/my_test.dart
 ---
  PASS  test/my_test.dart
-
  RUNS  test/another_test.dart
 ---
- PASS  test/another_test.dart
  PASS  test/my_test.dart
+ PASS  test/another_test.dart
 
 Test Suites: 2 passed, 2 total
 Tests:       3 passed, 3 total
@@ -160,7 +159,8 @@ Time:        00:00:00
           'my_test.dart': '''
 import 'package:test/test.dart';
 void main() {
-  test('hello world', () {});
+  // force my_test to end after another_test to make the order reliable
+  test('hello world', () => Future.delayed(Duration(milliseconds: 10)));
 }
 ''',
           'another_test.dart': '''
@@ -680,13 +680,7 @@ void main() {
   ... pending
 ---
  PASS  test/passing_test.dart
-
  RUNS  test/pending_test.dart
----
- PASS  test/passing_test.dart
-
- RUNS  test/pending_test.dart
-  ... pending
 ---
  PASS  test/passing_test.dart
  PASS  test/pending_test.dart
@@ -849,7 +843,7 @@ void main() {
         'passing_test.dart': '''
 import 'package:test/test.dart';
 void main() {
-  test('passing', () => Future.delayed(Duration(milliseconds: 100)));
+  test('passing', () => Future.delayed(Duration(milliseconds: 10)));
 }
 ''',
       });
@@ -862,35 +856,23 @@ void main() {
  RUNS  test/failing_test.dart
  RUNS  test/passing_test.dart
 ---
- RUNS  test/failing_test.dart
-  ... failing
- RUNS  test/passing_test.dart
----
- RUNS  test/failing_test.dart
-  ... failing
- RUNS  test/passing_test.dart
-  ... passing
----
- RUNS  test/passing_test.dart
-
  FAIL  test/failing_test.dart
   ✕ failing
----
+    Bad state: fail
+    test/failing_test.dart 3:25  main.<fn>
  RUNS  test/passing_test.dart
-  ... passing
-
- FAIL  test/failing_test.dart
-  ✕ failing
----
- PASS  test/passing_test.dart
-
- FAIL  test/failing_test.dart
-  ✕ failing
 ---
  FAIL  test/failing_test.dart
   ✕ failing
     Bad state: fail
     test/failing_test.dart 3:25  main.<fn>
+ PASS  test/passing_test.dart
+---
+ FAIL  test/failing_test.dart
+  ✕ failing
+    Bad state: fail
+    test/failing_test.dart 3:25  main.<fn>
+ PASS  test/passing_test.dart
 
 Test Suites: 1 failed, 1 passed, 2 total
 Tests:       1 failed, 1 passed, 2 total
@@ -918,27 +900,28 @@ void main() {
   group('group', () {
     test('failing', () => throw StateError('fail'));
   });
-  test('passing', () {});
+  test('passing', () => Future.delayed(Duration(milliseconds: 50)));
 }
 ''',
         'passing_test.dart': '''
 import 'package:test/test.dart';
 void main() {
-  test('passing', () {});
+  test('passing', () => Future.delayed(Duration(milliseconds: 100)));
 }
 ''',
       });
 
       expect(testRenderer!.frames.last, '''
+ FAIL  test/failing_test.dart
+  ✕ failing
+    Bad state: fail
+    test/failing_test.dart 3:25  main.<fn>
  FAIL  test/failing_group_test.dart
   group
     ✕ failing
       Bad state: fail
       test/failing_group_test.dart 4:27  main.<fn>.<fn>
- FAIL  test/failing_test.dart
-  ✕ failing
-    Bad state: fail
-    test/failing_test.dart 3:25  main.<fn>
+ PASS  test/passing_test.dart
 
 Test Suites: 2 failed, 1 passed, 3 total
 Tests:       2 failed, 3 passed, 5 total

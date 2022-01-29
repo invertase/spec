@@ -46,9 +46,6 @@ void main() {
           '''
  RUNS  test/my_test.dart
 ---
- RUNS  test/my_test.dart
-  ... Counter defaults to 0
----
  PASS  test/my_test.dart
 ---
  PASS  test/my_test.dart
