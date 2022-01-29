@@ -11,16 +11,21 @@ part 'num_expect.dart';
 part 'stream_expect.dart';
 part 'string_expect.dart';
 
+/// Perform expectations in a type safe way
 Expectation<Actual> expect<Actual>(Actual value) {
   return Expectation._(value);
 }
 
+/// Internals for [expect]
+/// Internals for [expect]
 abstract class ExpectationBase<Actual, Return, Param> {
+  /// Internals for [expect]
   ExpectationBase(
     this.actual, {
     dart_test.Matcher Function(dart_test.Matcher)? matcherBuilder,
   }) : _matcherBuilder = matcherBuilder ?? ((matcher) => matcher);
 
+  /// The value that is tested
   final Actual actual;
 
   final dart_test.Matcher Function(dart_test.Matcher) _matcherBuilder;
@@ -45,33 +50,47 @@ abstract class ExpectationBase<Actual, Return, Param> {
         matcherBuilder: (matcher) => dart_test.isNot(_matcherBuilder(matcher)),
       );
 
-  /// Compares [actual] with [expected] using [identical].
+  /// Returns a matches that matches if the value is the same instance
+  /// as [expected], using [identical].
   Return toBe(Param expected) {
     return runMatcher(
       createMatcher(dart_test.same(expected)),
     );
   }
 
-  /// Compares [actual] with [expected] using the operator `==`.
-  Return toEqual(Param expected) {
+  /// Returns a matcher that matches if the value is structurally equal to
+  /// [expected].
+  ///
+  /// For [Iterable]s and [Map]s, this will recursively match the elements. To
+  /// handle cyclic structures a recursion depth [limit] can be provided. The
+  /// default limit is 100. [Set]s will be compared order-independently.
+  Return toEqual(Param expected, [int limit = 100]) {
     return runMatcher(
-      createMatcher(dart_test.equals(expected)),
+      createMatcher(dart_test.equals(expected, limit)),
     );
   }
 
+  /// A matcher that matches any null value.
   Return isNull() {
     return runMatcher(
       createMatcher(dart_test.isNull),
     );
   }
 
-  Return toMatch(Pattern pattern) {
+  /// Returns a matcher that matches if the match argument is a string and
+  /// matches the regular expression given by [re].
+  ///
+  /// [re] can be a [RegExp] instance or a [String]; in the latter case it will be
+  /// used to create a RegExp instance.
+  Return toMatch(Pattern re) {
+    // TODO move to Pattern matcher
     return runMatcher(
-      createMatcher(dart_test.matches(pattern)),
+      createMatcher(dart_test.matches(re)),
     );
   }
 }
 
+/// A base class holding matchers
 @sealed
 class Expectation<Actual> extends ExpectationBase<Actual, void, Actual> {
   Expectation._(
@@ -88,7 +107,9 @@ class Expectation<Actual> extends ExpectationBase<Actual, void, Actual> {
   ExpectationBase<Actual, void, Actual> _copyWith({
     dart_test.Matcher Function(dart_test.Matcher)? matcherBuilder,
   }) {
-    // TODO: implement _copyWith
-    throw UnimplementedError();
+    return Expectation._(
+      actual,
+      matcherBuilder: matcherBuilder ?? _matcherBuilder,
+    );
   }
 }

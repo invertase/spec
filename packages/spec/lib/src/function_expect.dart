@@ -1,11 +1,18 @@
 part of 'expect.dart';
 
+/// Matchers for [Functions()]
 extension FunctionExpectationMapper<FnReturn>
     on Expectation<FnReturn Function()> {
-  /// Reverse the expectation
+  /// Performs expectations on the value thrown by this function
   FunctionExpectation<FnReturn> get throws =>
       _ThrowsFunctionExpectation(actual);
 
+  /// A matcher that matches a function call against no exception.
+  ///
+  /// The function will be called once. Any exceptions will be silently swallowed.
+  /// The value passed to expect() should be a reference to the function.
+  /// Note that the function cannot take arguments; to handle this
+  /// a wrapper will have to be created.
   void returnsNormally() {
     return runMatcher(
       createMatcher(dart_test.returnsNormally),
@@ -13,6 +20,7 @@ extension FunctionExpectationMapper<FnReturn>
   }
 }
 
+/// A class holding matchers for [Function()]
 class FunctionExpectation<FnReturn>
     extends ExpectationBase<FnReturn Function(), void, FnReturn> {
   FunctionExpectation._(

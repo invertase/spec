@@ -1,12 +1,18 @@
 part of 'expect.dart';
 
+/// Matchers for futures
 extension FutureExpectationMapper<Actual> on Expectation<Future<Actual>> {
-  /// Reverse the expectation
+  /// Perform expectations on the value emitted by the future
   FutureExpectation<Actual> get completion => _ResolveFutureExpectation(actual);
 
-  /// Reverse the expectation
+  /// Perform expectations on the error thrown by the future
   FutureExpectation<Actual> get throws => _RejectFutureExpectation(actual);
 
+  /// Matches a [Future] that does not complete.
+  ///
+  /// Note that this creates an asynchronous expectation. The call to
+  /// `expect()` that includes this will return immediately and execution will
+  /// continue.
   void doesNotComplete() {
     return runMatcher(
       createMatcher(dart_test.doesNotComplete),
@@ -14,6 +20,7 @@ extension FutureExpectationMapper<Actual> on Expectation<Future<Actual>> {
   }
 }
 
+/// A class holding matchers for Futures
 class FutureExpectation<Actual>
     extends ExpectationBase<Future<Actual>, Future<void>, Actual> {
   FutureExpectation._(

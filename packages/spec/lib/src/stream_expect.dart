@@ -1,19 +1,24 @@
 part of 'expect.dart';
 
+/// Matchers for [Stream]s
 extension StreamExpectationExt<Actual> on Expectation<Stream<Actual>> {
+  /// Perform expectations on the next value emitted by the stream
   StreamExpectation<Actual> get emits {
     return _EmitsStreamExpectation(actual);
   }
 
+  /// Perform expectations on the next error emitted by the stream
   StreamExpectation<Actual> get emitsError {
     return _EmitsErrorStreamExpectation(actual);
   }
 
+  /// Expects that the stream emits a done event
   Future<void> emitsDone() {
     return dart_test.expectLater(actual, dart_test.emitsDone);
   }
 }
 
+/// A class exposing custom expectations for streams
 class StreamExpectation<Actual>
     extends ExpectationBase<Stream<Actual>, Future<void>, Actual> {
   StreamExpectation._(
