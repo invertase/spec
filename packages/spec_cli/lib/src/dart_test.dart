@@ -24,8 +24,8 @@ final $isRunningOnlyFailingTests = StateProvider<bool>((ref) => false);
 final $events = StateNotifierProvider<TestEventsNotifier, TestEventsState>(
   (ref) => TestEventsNotifier(ref),
   dependencies: [
-    $packages,
-    $packages.future,
+    $filteredPackages,
+    $filteredPackages.future,
     $testNameFilters,
     $filePathFilters,
     $failedTestLocationToExecute,
@@ -63,7 +63,7 @@ class TestEventsNotifier extends StateNotifier<TestEventsState> {
     ];
 
     Future(() async {
-      final packages = await ref.watch($packages.future);
+      final packages = await ref.watch($filteredPackages.future);
 
       final packagesSubscriptions = <StreamSubscription>[];
       ref.onDispose(
@@ -113,7 +113,7 @@ class TestEventsNotifier extends StateNotifier<TestEventsState> {
   }
 }
 
-final $packages = FutureProvider<List<_Package>>((ref) async {
+final $allPackages = FutureProvider<List<_Package>>((ref) async {
   final workingDir = ref.watch($workingDirectory);
   try {
     final melosWorkspace = await MelosWorkspace.fromConfig(
@@ -127,8 +127,6 @@ final $packages = FutureProvider<List<_Package>>((ref) async {
         .map((e) => _Package(isFlutter: e.isFlutterPackage, path: e.path))
         .toList();
   } on MelosException {
-    // TODO handle missing pubspec.yaml
-
     late final hasPubspec =
         File(join(workingDir.path, 'pubspec.yaml')).existsSync();
     late final hasTestFolder =
@@ -146,11 +144,28 @@ final $packages = FutureProvider<List<_Package>>((ref) async {
   }
 }, dependencies: [$workingDirectory]);
 
+final $filteredPackages = FutureProvider<List<_Package>>(
+  (ref) async {
+    final all = await ref.watch($allPackages.future);
+    final filters = ref.watch($filePathFilters);
+
+    final result = all.where((package) {
+      return filters.isEmpty ||
+          filters.any((element) {
+            return isWithin(package.path, element);
+          });
+    }).toList();
+
+    return result;
+  },
+  dependencies: [$allPackages, $filePathFilters],
+);
+
 final $package =
     FutureProvider.family.autoDispose<_Package, String>((ref, path) async {
-  final packages = await ref.watch($packages.future);
+  final packages = await ref.watch($allPackages.future);
   return packages.firstWhere((element) => element.path == path);
-}, dependencies: [$workingDirectory, $packages]);
+}, dependencies: [$workingDirectory, $allPackages]);
 
 class _Package {
   _Package({required this.isFlutter, required this.path});

@@ -13,7 +13,7 @@ import 'tests.dart';
 final $suiteCount = Provider.autoDispose<AsyncValue<int>>(
   (ref) {
     return merge((unwrap) {
-      final packages = unwrap(ref.watch($packages));
+      final packages = unwrap(ref.watch($filteredPackages));
       final events = ref.watch($events).events;
 
       return packages.fold(0, (acc, package) {
@@ -29,7 +29,7 @@ final $suiteCount = Provider.autoDispose<AsyncValue<int>>(
       });
     });
   },
-  dependencies: [$events, $packages],
+  dependencies: [$events, $filteredPackages],
   name: 'suiteCount',
 );
 
@@ -87,7 +87,7 @@ final $hasAllSuites = Provider.autoDispose<bool>(
     final suites = ref.watch($suites);
     return suites.length == suiteCount;
   },
-  dependencies: [$suites, $suiteCount, $packages],
+  dependencies: [$suites, $suiteCount, $filteredPackages],
 );
 
 final $suite = Provider.autoDispose
@@ -159,7 +159,7 @@ final $exitCode = Provider.autoDispose<AsyncValue<int>>(
       return const AsyncLoading();
     }
 
-    final packages = ref.watch($packages);
+    final packages = ref.watch($filteredPackages);
     if (packages.isLoading) return const AsyncLoading();
 
     /// Whether the done event was emitted for all packages
@@ -201,7 +201,7 @@ final $exitCode = Provider.autoDispose<AsyncValue<int>>(
   },
   dependencies: [
     $suites,
-    $packages,
+    $filteredPackages,
     $suiteStatus,
     $isEarlyAbort,
     $hasAllSuites,
@@ -212,7 +212,7 @@ final $exitCode = Provider.autoDispose<AsyncValue<int>>(
 
 final $isDone = Provider.autoDispose<bool>(
   (ref) {
-    final packages = ref.watch($packages);
+    final packages = ref.watch($filteredPackages);
     if (packages.isLoading) return false;
 
     return ref.watch($exitCode).map(
@@ -222,6 +222,6 @@ final $isDone = Provider.autoDispose<bool>(
             ) ||
         packages.value!.any((p) => ref.watch($events).isInterrupted);
   },
-  dependencies: [$exitCode, $events, $packages],
+  dependencies: [$exitCode, $events, $filteredPackages],
   name: 'isDone',
 );

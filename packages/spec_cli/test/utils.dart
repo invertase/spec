@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:path/path.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:spec_cli/src/ansi.dart';
 import 'package:spec_cli/src/command_runner.dart';
@@ -307,7 +308,12 @@ class _IsEqualIgnoringAnsi extends Matcher {
   }
 }
 
-Future<Directory> createProject(List<PackageInfo> packages) async {
+Future<Directory> createProject(
+  List<PackageInfo> packages, {
+  bool? isMelosWorkspace,
+}) async {
+  isMelosWorkspace ??= packages.length > 1;
+
   final workingDir = Directory(
     Directory.systemTemp
         .createTempSync('dart_test_')
@@ -332,8 +338,13 @@ Future<Directory> createProject(List<PackageInfo> packages) async {
     }
   });
 
-  await Future.wait<void>(
-    packages.map((package) async {
+  await Future.wait<void>([
+    File(join(workingDir.path, 'melos.yaml')).writeAsString('''
+name: melos_tmp_project
+packages:
+  - packages/**
+'''),
+    ...packages.map((package) async {
       final packagePath = '${workingDir.path}/packages/${package.name}';
 
       await Future.wait(
@@ -356,7 +367,7 @@ Future<Directory> createProject(List<PackageInfo> packages) async {
         workingDirectory: packagePath,
       );
     }),
-  );
+  ]);
 
   return workingDir;
 }

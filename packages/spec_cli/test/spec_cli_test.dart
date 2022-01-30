@@ -1,4 +1,5 @@
 import 'package:spec_cli/src/command_runner.dart';
+import 'package:spec_cli/src/renderer.dart';
 import 'package:spec_cli/src/rendering.dart';
 import 'package:test/test.dart';
 
@@ -39,6 +40,12 @@ void main() {
 
     testScope('handle test failure after test done', (ref) async {},
         skip: true);
+
+    testScope(
+      'on file path filter, if path not found, commands fails',
+      (ref) async {},
+      skip: true,
+    );
 
     testScope('support flutter projects within melos workspaces', (ref) async {
       // DON'T add a "lib/main.dart"
@@ -117,6 +124,53 @@ void main() {
 
 Test Suites: 1 passed, 1 total
 Tests:       2 passed, 2 total
+Time:        00:00:00
+''');
+
+      expect(exitCode, 0);
+    });
+
+    testScope('cross package file filter works', (ref) async {
+      final testRenderer = rendererOverride = TestRenderer();
+      addTearDown(() => rendererOverride = null);
+
+      final workingDir = await createProject([
+        PackageInfo(
+          name: 'a',
+          files: {
+            'test/my_test.dart': '''
+import 'package:test/test.dart';
+void main() {
+  test('hello world', () {});
+}
+''',
+          },
+        ),
+        PackageInfo(
+          name: 'b',
+          files: {
+            'test/another.dart': '''
+import 'package:test/test.dart';
+void main() {
+  test('hello world', () {});
+}
+''',
+          },
+        ),
+      ]);
+
+      final exitCode = await spec(
+        workingDirectory: workingDir.path,
+        options: SpecOptions.fromArgs(
+          ['${workingDir.path}/packages/a/test/my_test.dart'],
+        ),
+      );
+
+      expect(testRenderer.frames.last, '''
+ PASS  packages/a/test/my_test.dart
+
+Test Suites: 1 passed, 1 total
+Tests:       1 passed, 1 total
 Time:        00:00:00
 ''');
 

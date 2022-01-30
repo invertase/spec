@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:path/path.dart';
 import 'package:riverpod/riverpod.dart';
 
 import 'container.dart';
@@ -131,42 +132,21 @@ Future<int> spec({
   String? workingDirectory,
   SpecOptions options = const SpecOptions(),
 }) {
-//   return Future(() async {
-//     final renderer = BacktrackingRenderer();
-
-//     renderer.renderFrame('''
-// hello world
-// 123
-// foo
-// ''');
-//     renderer.renderFrame('''
-// hello world
-// 153
-// foo
-// ''');
-//     renderer.renderFrame('''
-// hello world
-// 153
-// bar
-// ''');
-//     renderer.renderFrame('''
-// hello world
-// 153
-// bar
-
-// ''');
-//     renderer.renderFrame('''
-// hello world
-// 153
-// bar
-// baz
-// ''');
-
-//     return 0;
-//   });
-// }
-
   return runScoped((ref) async {
+    final workingDirectory = ref.read($workingDirectory);
+    // initializing option providers from command line options.
+    ref.read($testNameFilters.notifier).state = options.testNameFilters.isEmpty
+        ? null
+        : RegExp(
+            '(?:${options.testNameFilters.map(RegExp.escape).join('|')})',
+          );
+    ref.read($filePathFilters.notifier).state = options.fileFilters
+        .map((e) => join(workingDirectory.path, e))
+        .map(normalize)
+        .toList();
+    ref.read($isWatchMode.notifier).state = options.watch;
+    ref.read($startTime.notifier).state = DateTime.now();
+
     try {
       if (stdin.hasTerminal) {
         // Stop your keystrokes being printed automatically.
@@ -177,17 +157,6 @@ Future<int> spec({
         // arrives, so in interactive mode this will be one key press at a time.
         stdin.lineMode = false;
       }
-
-      // initializing option providers from command line options.
-      ref.read($testNameFilters.notifier).state =
-          options.testNameFilters.isEmpty
-              ? null
-              : RegExp(
-                  '(?:${options.testNameFilters.map(RegExp.escape).join('|')})',
-                );
-      ref.read($filePathFilters.notifier).state = options.fileFilters;
-      ref.read($isWatchMode.notifier).state = options.watch;
-      ref.read($startTime.notifier).state = DateTime.now();
 
       if (options.watch) {
         stdout.write('${VT100.clearScreen}${VT100.moveCursorToTopLeft}');

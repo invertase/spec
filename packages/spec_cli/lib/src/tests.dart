@@ -171,7 +171,7 @@ final $testStatus =
 final $currentlyFailedTestsLocation =
     Provider.autoDispose<AsyncValue<List<FailedTestLocation>>>((ref) {
   return merge((unwrap) {
-    final packages = unwrap(ref.watch($packages));
+    final packages = unwrap(ref.watch($filteredPackages));
 
     return packages
         .expand((package) {
@@ -195,4 +195,4 @@ final $currentlyFailedTestsLocation =
         .toSet()
         .toList();
   });
-}, dependencies: [$allFailedTests, $suite, $packages]);
+}, dependencies: [$allFailedTests, $suite, $filteredPackages]);
