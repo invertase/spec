@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:collection/collection.dart';
 import 'package:dart_test_adapter/dart_test_adapter.dart';
 import 'package:duration/duration.dart';
@@ -409,7 +411,7 @@ final $output = Provider.autoDispose<AsyncValue<String>>((ref) {
       ...suitesOuput,
       // Because of the lack of https://github.com/dart-lang/test/issues/1652
       // we have to rely on "isDone" for edge-cases where suites have no tests
-      if (!isDone) ...[
+      if (!isDone && stdin.supportsAnsiEscapes) ...[
         ...loadingSuitesOutput,
         if (loadingSuites.length > 3) 'And ${loadingSuites.length - 3} more.',
       ],
