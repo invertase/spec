@@ -158,7 +158,7 @@ final $filteredPackages = FutureProvider<List<_Package>>(
 
     return result;
   },
-  dependencies: [$allPackages, $filePathFilters],
+  dependencies: [$allPackages.future, $filePathFilters],
 );
 
 final $package =
