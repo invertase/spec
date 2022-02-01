@@ -100,7 +100,7 @@ class Expectation<Actual> extends ExpectationBase<Actual, void, Actual> {
 
   @override
   void runMatcher(dart_test.Matcher match) {
-    runMatcher(createMatcher(match));
+    dart_test.expect(actual, createMatcher(match));
   }
 
   @override
