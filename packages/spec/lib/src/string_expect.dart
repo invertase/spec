@@ -6,9 +6,7 @@ extension StringExpectation<Return>
   /// Returns a matcher which matches if the match argument is a string and
   /// is equal to [value] when compared case-insensitively.
   Return equalsIgnoringCase(String value) {
-    return runMatcher(
-      createMatcher(dart_test.equalsIgnoringCase(value)),
-    );
+    return runMatcher(dart_test.equalsIgnoringCase(value));
   }
 
   /// Returns a matcher which matches if the match argument is a string and
@@ -29,17 +27,13 @@ extension StringExpectation<Return>
   ///     expect("helloworld", equalsIgnoringWhitespace("hello world"));
   ///     expect("he llo world", equalsIgnoringWhitespace("hello world"));
   Return equalsIgnoringWhitespace(String value) {
-    return runMatcher(
-      createMatcher(dart_test.equalsIgnoringWhitespace(value)),
-    );
+    return runMatcher(dart_test.equalsIgnoringWhitespace(value));
   }
 
   /// Returns a matcher that matches if the match argument is a string and
   /// starts with [prefixString].
   Return startsWith(String prefixString) {
-    return runMatcher(
-      createMatcher(dart_test.startsWith(prefixString)),
-    );
+    return runMatcher(dart_test.startsWith(prefixString));
   }
 
   /// Returns a matcher that matches if the match argument is a string and
@@ -48,8 +42,6 @@ extension StringExpectation<Return>
   /// For example, `stringContainsInOrder(["a", "e", "i", "o", "u"])` will match
   /// "abcdefghijklmnopqrstuvwxyz".
   Return stringContainsInOrder(List<String> substrings) {
-    return runMatcher(
-      createMatcher(dart_test.stringContainsInOrder(substrings)),
-    );
+    return runMatcher(dart_test.stringContainsInOrder(substrings));
   }
 }

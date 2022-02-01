@@ -14,9 +14,7 @@ extension FunctionExpectationMapper<FnReturn>
   /// Note that the function cannot take arguments; to handle this
   /// a wrapper will have to be created.
   void returnsNormally() {
-    return runMatcher(
-      createMatcher(dart_test.returnsNormally),
-    );
+    return runMatcher(dart_test.returnsNormally);
   }
 }
 

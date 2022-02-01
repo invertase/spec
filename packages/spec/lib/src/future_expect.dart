@@ -14,9 +14,7 @@ extension FutureExpectationMapper<Actual> on Expectation<Future<Actual>> {
   /// `expect()` that includes this will return immediately and execution will
   /// continue.
   void doesNotComplete() {
-    return runMatcher(
-      createMatcher(dart_test.doesNotComplete),
-    );
+    return runMatcher(dart_test.doesNotComplete);
   }
 }
 

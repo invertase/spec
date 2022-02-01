@@ -53,9 +53,7 @@ abstract class ExpectationBase<Actual, Return, Param> {
   /// Returns a matches that matches if the value is the same instance
   /// as [expected], using [identical].
   Return toBe(Param expected) {
-    return runMatcher(
-      createMatcher(dart_test.same(expected)),
-    );
+    return runMatcher(dart_test.same(expected));
   }
 
   /// Returns a matcher that matches if the value is structurally equal to
@@ -65,16 +63,12 @@ abstract class ExpectationBase<Actual, Return, Param> {
   /// handle cyclic structures a recursion depth [limit] can be provided. The
   /// default limit is 100. [Set]s will be compared order-independently.
   Return toEqual(Param expected, [int limit = 100]) {
-    return runMatcher(
-      createMatcher(dart_test.equals(expected, limit)),
-    );
+    return runMatcher(dart_test.equals(expected, limit));
   }
 
   /// A matcher that matches any null value.
   Return isNull() {
-    return runMatcher(
-      createMatcher(dart_test.isNull),
-    );
+    return runMatcher(dart_test.isNull);
   }
 
   /// Returns a matcher that matches if the match argument is a string and
@@ -84,9 +78,7 @@ abstract class ExpectationBase<Actual, Return, Param> {
   /// used to create a RegExp instance.
   Return toMatch(Pattern re) {
     // TODO move to Pattern matcher
-    return runMatcher(
-      createMatcher(dart_test.matches(re)),
-    );
+    return runMatcher(dart_test.matches(re));
   }
 }
 
