@@ -1,3 +1,5 @@
+// ignore_for_file: omit_local_variable_types, prefer_final_locals
+
 import 'package:spec/spec.dart';
 import 'package:test/test.dart' as t;
 

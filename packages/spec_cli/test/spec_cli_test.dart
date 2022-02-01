@@ -14,6 +14,8 @@ void main() {
         (ref) async {});
     testScope('pipe stderr of dart/flutter test', (ref) async {});
 
+    testScope('handles group(() async) errors', (ref) async {});
+
     testScope(
         'on sigint/sigterm, abort and show failures details', (ref) async {},
         skip: true);
