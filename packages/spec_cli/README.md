@@ -1,76 +1,47 @@
 <p align="center">
-  <h1>✅ Spec CLI</h1>
-  <span>A command line inspired from Jest for executing Dart/Flutter tests</span>
+  <h1>✅ Spec</h1>
+  <span>A streamlined testing framework for Dart & Flutter.</span>
 </p>
 
 <a href="https://github.com/invertase/melos"><img src="https://img.shields.io/badge/maintained%20with-melos-f700ff.svg?style=flat-square" alt="Melos" /></a>
 <a href="https://docs.page"><img src="https://img.shields.io/badge/powered%20by-docs.page-34C4AC.svg?style=flat-square" alt="docs.page" /></a>
 
-<a href="https://github.com/invertase/spec/blob/main/LICENSE">License</a>
+Spec builds on-top of existing Dart & Flutter testing tools to provide a streamlined & elegant testing environment. Spec provides both a CLI tool
+and Dart package.
 
----
+- [Documentation](https://docs.page/invertase/spec)
 
-`Spec` is a command-line built on top of the official `dart test`/`flutter test`
-to add new features such as:
+### CLI
 
-- an improved interface inspired from [Jest](https://jestjs.io/)
-- a `--watch` flag, for re-executing test whenever the sources changes
-- during watch mode, offer a way to re-execute only failing tests
-- supporting both Dart and Flutter projects using the same command
-- support for running tests of multiple packages at the same time by using [Melos](https://github.com/invertase/melos) (coming soon)
+The Spec CLI allows you to run the `spec` command from your CLI environment and run your tests:
 
-![Spec gif example](https://raw.githubusercontent.com/invertase/spec/main/packages/spec_cli/resources/render.gif)
+- Intuitive testing output interface, inspired by [Jest](https://jestjs.io/).
+- Interactive CLI; automatically re-run tests when source code changes & rerunning of only failed tests.
+- Run both Dart & Flutter tests in parallel with a single command.
+- Run tests from multiple packages at the same time using [Melos](https://github.com/invertase/melos).
 
-## Installation
+### Package
 
-To install `spec`, run:
-
-```sh
-dart pub global activate spec_cli
-```
-
-You should now be able to run:
+The `spec` package provides a different take on how to write tests. Designed with type-safety and IDE autocompletion in mind, spec alters the way you
+write your tests to be more declarative, less error prone and force good habits.
 
 ```dart
-spec --help
+test('dart test example', () async {
+  int value = 42;
+
+  // Without spec - not type safe
+  expect(value, equals(42));
+  await expectLater(Future.value(42), completion(equals(42)));
+
+  // With spec - type safe
+  expect(value).toEqual(42);
+  await expect(Future.value(42)).completion.toEqual(42);
+});
 ```
-
-## Usage
-
-To run tests in a Dart/Flutter project, simply run:
-
-```sh
-spec
-```
-
-You can optionally filter tests by name using `--name`:
-
-```sh
-spec --name "My test"
-```
-
-Alternatively, you can execute specific tests by specifying their path:
-
-```sh
-spec test/my_test.dart
-```
-
-## Watch mode
-
-By specifying `--watch`, spec will enter in watch mode and will listen to file
-changes.  
-In this mode, Spec will re-run the tests whenever a file change in the project
-is detected.
-
-While in watch mode, it is possible to perform extraneous operations during tests:
-
-- By pressing "enter", this will manually stop/restart the tests
-- By pressing `f`, Spec will filter tests to execute only failing tests, skipping
-  tests that were passing in the previous run.
-- When typing `t`, it is possible to update the `--name` filter flag without
-  having to restart Spec.
 
 ---
+
+[LICENSE](/LICENSE)
 
 <p align="center">
   <a href="https://invertase.io/?utm_source=readme&utm_medium=footer&utm_campaign=spec">
