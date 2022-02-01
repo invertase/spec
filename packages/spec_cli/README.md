@@ -17,7 +17,7 @@ to add new features such as:
 - a `--watch` flag, for re-executing test whenever the sources changes
 - during watch mode, offer a way to re-execute only failing tests
 - supporting both Dart and Flutter projects using the same command
-- support for running tests of multiple packages at the same time by using [Melos](https://github.com/invertase/melos) (coming soon)
+- support for running tests of multiple packages at the same time by using [Melos](https://github.com/invertase/melos)
 
 ![Spec gif example](https://raw.githubusercontent.com/invertase/spec/main/packages/spec_cli/resources/render.gif)
 
