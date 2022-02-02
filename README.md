@@ -6,6 +6,8 @@
 <a href="https://github.com/invertase/melos"><img src="https://img.shields.io/badge/maintained%20with-melos-f700ff.svg?style=flat-square" alt="Melos" /></a>
 <a href="https://docs.page"><img src="https://img.shields.io/badge/powered%20by-docs.page-34C4AC.svg?style=flat-square" alt="docs.page" /></a>
 
+## What is it?
+
 Spec builds on-top of existing Dart & Flutter testing tools to provide a streamlined & elegant testing environment. Spec provides both a CLI tool
 and Dart package.
 
@@ -26,20 +28,6 @@ The Spec CLI allows you to run the `spec` command from your CLI environment and 
 
 The `spec` package provides a different take on how to write tests. Designed with type-safety and IDE autocompletion in mind, spec alters the way you
 write your tests to be more declarative, less error prone and force good habits.
-
-```dart
-test('dart test example', () async {
-  int value = 42;
-
-  // Without spec - not type safe
-  expect(value, equals(42));
-  await expectLater(Future.value(42), completion(equals(42)));
-
-  // With spec - type safe
-  expect(value).toEqual(42);
-  await expect(Future.value(42)).completion.toEqual(42);
-});
-```
 
 ## Getting Started
 
