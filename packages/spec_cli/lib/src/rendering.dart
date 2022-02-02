@@ -16,8 +16,8 @@ import 'suites.dart';
 import 'tests.dart';
 import 'vt100.dart';
 
-final $suiteOutputLabel = Provider.autoDispose
-    .family<AsyncValue<String>, Packaged<SuiteKey>>((ref, suiteKey) {
+final $suitePath = Provider.autoDispose
+    .family<AsyncValue<String?>, Packaged<SuiteKey>>((ref, suiteKey) {
   return merge((unwrap) {
     final suite = unwrap(ref.watch($suite(suiteKey)));
     final workingDir = ref.watch($workingDirectory);
@@ -31,6 +31,34 @@ final $suiteOutputLabel = Provider.autoDispose
 
       relativeSuitePath = relative(absoluteSuitePath, from: workingDir.path);
     }
+
+    return relativeSuitePath;
+  });
+}, dependencies: [
+  $suite,
+  $workingDirectory,
+]);
+
+final $testPath = Provider.autoDispose
+    .family<AsyncValue<String?>, Packaged<TestKey>>((ref, testKey) {
+  return merge((unwrap) {
+    final suitePath = unwrap(ref.watch($suitePath(testKey.suiteKey)));
+    final test = unwrap(ref.watch($test(testKey)));
+
+    return [
+      suitePath,
+      '${test.rootLine ?? test.line}:${test.rootColumn ?? test.column}'
+    ].join(':');
+  });
+}, dependencies: [
+  $suite,
+  $workingDirectory,
+]);
+
+final $suiteOutputLabel = Provider.autoDispose
+    .family<AsyncValue<String>, Packaged<SuiteKey>>((ref, suiteKey) {
+  return merge((unwrap) {
+    final relativeSuitePath = unwrap(ref.watch($suitePath(suiteKey)));
 
     String statusLabel;
     switch (ref.watch($suiteStatus(suiteKey))) {
@@ -53,11 +81,10 @@ final $suiteOutputLabel = Provider.autoDispose
     ].join(' ');
   });
 }, dependencies: [
-  $suite,
   $scaffoldGroup,
   $suiteStatus,
   $isEarlyAbort,
-  $workingDirectory,
+  $suitePath,
 ]);
 
 final $spinner = Provider.autoDispose<String>((ref) {
@@ -298,10 +325,13 @@ final $suiteOutput = Provider.autoDispose
   $rootTestsForSuite,
 ], name: 'suiteOutput');
 
+final $timeTick = StreamProvider.autoDispose<void>((ref) {
+  return Stream.periodic(const Duration(seconds: 1));
+});
+
 final $summary = Provider.autoDispose<String?>((ref) {
-  // Don't show the summary until the very last render
-  final hasExitCode = ref.watch($isDone);
-  if (!hasExitCode) return null;
+  // Refresh timer every second
+  ref.watch($timeTick);
 
   final suites = ref.watch($suites);
   final failingSuitesCount = suites
@@ -350,6 +380,7 @@ ${'Time:'.bold}        $timeDescription''';
   $testStatus,
   $suiteStatus,
   $startTime,
+  $timeTick,
 ]);
 
 final $showWatchUsage = StateProvider.autoDispose<bool>((ref) {
@@ -380,6 +411,34 @@ Pattern Mode Usage
   dependencies: [$editingTestNameTextField],
 );
 
+final $errorsInOrder = Provider.autoDispose<String>((ref) {
+  final failingTests = ref.watch($allFailedTests);
+
+  return failingTests
+      .map(
+        (test) => _renderTest(
+          testStatus: ref.watch($testStatus(test.key)),
+          suiteStatus: ref.watch($suiteStatus(test.suiteKey)),
+          messages: ref.watch($testMessages(test.key)),
+          error: ref.watch($testError(test.key)),
+          depth: 0,
+          label: '${'● ${test.value.name}'.bold.red} '
+              '${ref.watch($testPath(test.key)).value}',
+        ),
+      )
+      .whereNotNull()
+      // Add \n before evert error
+      .expand((e) => ['', e])
+      .join('\n');
+}, dependencies: [
+  $allFailedTests,
+  $testStatus,
+  $suiteStatus,
+  $testMessages,
+  $testError,
+  $testPath,
+]);
+
 final $output = Provider.autoDispose<AsyncValue<String>>((ref) {
   return merge((unwrap) {
     if (ref.watch($isEditingTestNameFilter)) {
@@ -404,22 +463,22 @@ final $output = Provider.autoDispose<AsyncValue<String>>((ref) {
         .map((suite) => unwrap(ref.watch($suiteOutput(suite.key))))
         .sortedBy((element) => element);
 
-    final summary = ref.watch($summary);
-
     final result = [
       ...suitesOuput,
+
+      // In CI mode, show summary only after all tests are done
       // Because of the lack of https://github.com/dart-lang/test/issues/1652
       // we have to rely on "isDone" for edge-cases where suites have no tests
-      if (!isDone && stdin.supportsAnsiEscapes) ...[
+      if (isDone || stdin.supportsAnsiEscapes) ...[
+        if (ref.watch($errorsInOrder).isNotEmpty) ref.watch($errorsInOrder),
         ...loadingSuitesOutput,
         if (loadingSuites.length > 3) 'And ${loadingSuites.length - 3} more.',
+        ref.watch($summary)
       ],
-      if (summary != null) summary,
+
       if (ref.watch($events).isInterrupted || ref.watch($isEarlyAbort))
         'Test run was interrupted.'.red,
-      if (summary != null &&
-          ref.watch($isWatchMode) &&
-          !ref.watch($isEarlyAbort))
+      if (isDone && ref.watch($isWatchMode) && !ref.watch($isEarlyAbort))
         if (ref.watch($showWatchUsage))
           '''
 
@@ -437,6 +496,7 @@ ${'Watch Usage:'.bold}
     return '';
   });
 }, dependencies: [
+  $errorsInOrder,
   $editingTestNameOutput,
   $isEditingTestNameFilter,
   $events,

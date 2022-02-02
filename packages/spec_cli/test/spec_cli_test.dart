@@ -371,22 +371,6 @@ void main() {
           '''
  RUNS  test/my_test.dart
 ---
- RUNS  test/my_test.dart
-  ○ skipped
----
- RUNS  test/my_test.dart
-  ○ skipped
-  ... pass
----
- RUNS  test/my_test.dart
-  ○ skipped
-  ✓ pass
----
- RUNS  test/my_test.dart
-  ○ skipped
-  ✓ pass
-  ... fail
----
  FAIL  test/my_test.dart
   ✕ fail
     Bad state: fail
@@ -394,6 +378,10 @@ void main() {
 ---
  FAIL  test/my_test.dart
   ✕ fail
+    Bad state: fail
+    test/my_test.dart 6:22  main.<fn>
+
+  ● fail test/my_test.dart:6:3
     Bad state: fail
     test/my_test.dart 6:22  main.<fn>
 
@@ -457,6 +445,18 @@ void main() {
       ✕ test2-2
         Bad state: fail
         test/my_test.dart 21:29  main.<fn>.<fn>.<fn>
+
+  ● root mid-2 test-2 test/my_test.dart:11:7
+    Bad state: fail
+    test/my_test.dart 11:28  main.<fn>.<fn>.<fn>
+
+  ● root2 mid2-2 test2-2 test/my_test.dart:21:7
+    Bad state: fail
+    test/my_test.dart 21:29  main.<fn>.<fn>.<fn>
+
+  ● root failing test test/my_test.dart:26:3
+    Bad state: fail
+    test/my_test.dart 26:35  main.<fn>
 
 Test Suites: 1 failed, 1 total
 Tests:       3 failed, 5 passed, 8 total
@@ -646,56 +646,16 @@ void main() {
           '''
  RUNS  test/my_test.dart
 ---
- RUNS  test/my_test.dart
-  ... first
----
- RUNS  test/my_test.dart
-  ... first
-hello
-first
----
- RUNS  test/my_test.dart
-  ... first
+ FAIL  test/my_test.dart
+  ✕ first
 hello
 first
 another
----
- RUNS  test/my_test.dart
-  ✕ first
----
- RUNS  test/my_test.dart
-  ... second
-  ✕ first
----
- RUNS  test/my_test.dart
-  ... second
-hello
-second
-  ✕ first
----
- RUNS  test/my_test.dart
-  ✓ second
-  ✕ first
----
- RUNS  test/my_test.dart
-  ✓ second
-hello
-second
-  ... third
-  ✕ first
----
- RUNS  test/my_test.dart
-  ✓ second
-  ... third
-hello
-third
-  ✕ first
----
- FAIL  test/my_test.dart
-  ✕ first
----
- FAIL  test/my_test.dart
-  ✕ first
+
+    Bad state: first
+    test/my_test.dart 11:5  main.<fn>
+
+  ● first test/my_test.dart:7:3
 hello
 first
 another
@@ -739,30 +699,9 @@ void main() {
           '''
  RUNS  test/passing_test.dart
  RUNS  test/pending_test.dart
-''',
-          anyOf(
-            '''
- RUNS  test/passing_test.dart
- RUNS  test/pending_test.dart
-  ... pending
-''',
-            '''
- RUNS  test/passing_test.dart
-  ... passing
- RUNS  test/pending_test.dart
-''',
-          ),
-          '''
- RUNS  test/passing_test.dart
-  ... passing
- RUNS  test/pending_test.dart
-  ... pending
 ---
  PASS  test/passing_test.dart
  RUNS  test/pending_test.dart
----
- PASS  test/passing_test.dart
- PASS  test/pending_test.dart
 ---
  PASS  test/passing_test.dart
  PASS  test/pending_test.dart
@@ -872,30 +811,12 @@ void main() {
           '''
  RUNS  test/my_test.dart
 ---
- RUNS  test/my_test.dart
-  ... first
----
- RUNS  test/my_test.dart
-  ✕ first
----
- RUNS  test/my_test.dart
-  ... second
-  ✕ first
----
- RUNS  test/my_test.dart
-  ✓ second
-  ✕ first
----
- RUNS  test/my_test.dart
-  ✓ second
-  ... third
-  ✕ first
----
  FAIL  test/my_test.dart
   ✕ first
----
- FAIL  test/my_test.dart
-  ✕ first
+    Bad state: first
+    test/my_test.dart 9:5  main.<fn>
+
+  ● first test/my_test.dart:7:3
     Bad state: first
     test/my_test.dart 9:5  main.<fn>
 
@@ -951,6 +872,10 @@ void main() {
     test/failing_test.dart 3:25  main.<fn>
  PASS  test/passing_test.dart
 
+  ● failing failing test/failing_test.dart:3:3
+    Bad state: fail
+    test/failing_test.dart 3:25  main.<fn>
+
 Test Suites: 1 failed, 1 passed, 2 total
 Tests:       1 failed, 1 passed, 2 total
 Time:        00:00:00
@@ -999,6 +924,14 @@ void main() {
       Bad state: fail
       test/failing_group_test.dart 4:27  main.<fn>.<fn>
  PASS  test/passing_test.dart
+
+  ● group failing test/failing_group_test.dart:4:5
+    Bad state: fail
+    test/failing_group_test.dart 4:27  main.<fn>.<fn>
+
+  ● failing test/failing_test.dart:3:3
+    Bad state: fail
+    test/failing_test.dart 3:25  main.<fn>
 
 Test Suites: 2 failed, 1 passed, 3 total
 Tests:       2 failed, 3 passed, 5 total

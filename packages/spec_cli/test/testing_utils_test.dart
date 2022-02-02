@@ -44,9 +44,22 @@ void main() {
         renderer.frames,
         framesMatch(
           '''
- RUNS  test/my_test.dart
+
+Test Suites: 0 total
+Tests:       0 total
+Time:        00:00:00
 ---
- PASS  test/my_test.dart
+ RUNS  test/my_test.dart
+
+Test Suites: 1 total
+Tests:       0 total
+Time:        00:00:00
+---
+ RUNS  test/my_test.dart
+
+Test Suites: 1 total
+Tests:       1 total
+Time:        00:00:00
 ---
  PASS  test/my_test.dart
 
@@ -79,6 +92,13 @@ void main() {
         '''
  FAIL  test/my_test.dart
   ✕ fails
+    Expected: <1>
+      Actual: <0>
+
+    package:test_api       expect
+    test/my_test.dart 8:5  main.<fn>
+
+  ● fails test/my_test.dart:7:3
     Expected: <1>
       Actual: <0>
 
