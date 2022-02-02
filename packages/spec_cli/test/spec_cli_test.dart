@@ -32,7 +32,7 @@ void main() {
         testRenderer!.frames,
         framesMatch([
           ' RUNS  test/my_test.dart\n',
-          contains(
+          startsWith(
             '''
  FAIL  test/my_test.dart
     Failed to load "test/my_test.dart": Invalid argument(s): Groups may not be async.
@@ -545,7 +545,7 @@ Time:        00:00:00
           framesMatch(
             [
               ' RUNS  test/my_test.dart\n',
-              contains('''
+              startsWith('''
  FAIL  test/my_test.dart
     Failed to load "test/my_test.dart":
     test/my_test.dart:1:1: Error: Variables must be declared using the keywords 'const', 'final', 'var' or a type name.
