@@ -1,5 +1,7 @@
 name: spec_cli
 version: 0.1.0
+description: CLI for Spec - a streamlined testing framework for Dart & Flutter.
+homepage: "https://github.com/invertase/spec"
 
 environment:
   sdk: ">=2.13.0 <3.0.0"
@@ -19,14 +21,17 @@ dependencies:
   riverpod: ^2.0.0-dev.0
   test: ^1.17.8
 
-# TODO remove before publishing
-dependency_overrides:
-  dart_test_adapter:
-    path: ../dart_test_adapter
-
 dev_dependencies:
   build_runner: ^2.0.4
   freezed: ^1.1.1
+
+# TODO remove before publishing
+# TODO even though we use Melos build_runner doesn't have options not to do a pub check
+# TODO so always fails with:
+# TODO "The pubspec.yaml file has changed since the pubspec.lock file was generated, please run "dart pub get" again.""
+dependency_overrides:
+  dart_test_adapter:
+    path: ../dart_test_adapter
 
 executables:
   spec: main

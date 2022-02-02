@@ -1,5 +1,7 @@
 name: spec
 version: 0.1.0
+description: A streamlined testing framework for Dart & Flutter.
+homepage: "https://github.com/invertase/spec"
 
 environment:
   sdk: ">=2.13.0 <3.0.0"
