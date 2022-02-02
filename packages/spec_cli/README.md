@@ -16,9 +16,11 @@ and Dart package.
 The Spec CLI allows you to run the `spec` command from your CLI environment and run your tests:
 
 - Intuitive testing output interface, inspired by [Jest](https://jestjs.io/).
-- Interactive CLI; automatically re-run tests when source code changes & rerunning of only failed tests.
+- Interactive CLI (via `spec --watch`); automatically re-run tests when source code changes & rerunning of only failed tests.
 - Run both Dart & Flutter tests in parallel with a single command.
 - Run tests from multiple packages at the same time using [Melos](https://github.com/invertase/melos).
+
+![spec](https://user-images.githubusercontent.com/5347038/152222814-b036f9bf-59e9-4212-b130-7cb14d50d4cb.gif)
 
 ### Package
 
