@@ -14,7 +14,35 @@ void main() {
         (ref) async {});
     testScope('pipe stderr of dart/flutter test', (ref) async {});
 
-    testScope('handles group(() async) errors', (ref) async {});
+    testScope('handles async group errors', (ref) async {
+      final exitCode = await runTest({
+        'my_test.dart': '''
+import 'package:test/test.dart';
+
+void main() {
+  group('invalid', () async {
+    test('never reached', () {});
+  });
+  test('valid', () {});
+} 
+'''
+      });
+
+      expect(
+        testRenderer!.frames,
+        framesMatch([
+          ' RUNS  test/my_test.dart\n',
+          contains(
+            '''
+ FAIL  test/my_test.dart
+    Failed to load "test/my_test.dart": Invalid argument(s): Groups may not be async.
+''',
+          ),
+        ]),
+      );
+
+      expect(exitCode, -1);
+    });
 
     testScope(
         'on sigint/sigterm, abort and show failures details', (ref) async {},
@@ -519,7 +547,6 @@ Time:        00:00:00
               ' RUNS  test/my_test.dart\n',
               contains('''
  FAIL  test/my_test.dart
-
     Failed to load "test/my_test.dart":
     test/my_test.dart:1:1: Error: Variables must be declared using the keywords 'const', 'final', 'var' or a type name.
     Try adding the name of the type of the variable or the keyword 'var'.
@@ -533,7 +560,7 @@ Time:        00:00:00
           ));
 
       expect(exitCode, -1);
-    }, skip: 'blocked by https://github.com/dart-lang/test/issues/1652');
+    });
 
     testScope('render error logs made during tests', (ref) async {
       final exitCode = await runTest({

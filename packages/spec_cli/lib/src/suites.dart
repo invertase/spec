@@ -109,29 +109,45 @@ enum SuiteStatus {
   pending,
 }
 
+final $isPackageDone =
+    Provider.family.autoDispose<bool, String>((ref, packagePath) {
+  return ref
+      .watch($events)
+      .events
+      .where((e) => e.packagePath == packagePath)
+      .any((e) => e.value is TestEventDone);
+}, dependencies: [$events]);
+
 final $suiteStatus = Provider.family
     .autoDispose<SuiteStatus, Packaged<SuiteKey>>((ref, suiteKey) {
   final tests = ref.watch($testsForSuite(suiteKey));
   final visibleTests = tests.values.where((test) => !test.isHidden).toList();
 
-  /// We verify that "testIds" contains all ids that this suite is supposed
-  /// to have. In case we have yet to receive some test events.
-  final hasAllVisibleIds = ref.watch(
-    $scaffoldGroup(suiteKey).select(
-      (rootGroup) =>
-          rootGroup.asData != null &&
-          visibleTests.length >= rootGroup.asData!.value.testCount,
-    ),
-  );
-  if (!hasAllVisibleIds) {
-    // TODO update after https://github.com/dart-lang/test/issues/1652 is resolved
-    return SuiteStatus.pending;
-  }
+  // If we received the done event for a package, bypass loading checks.
+  // This allows us to handle compilation errors properly as in those cases
+  // we'd never be able to load the tests, so the suite would always be considered
+  // as loading.
+  final isDone = ref.watch($isPackageDone(suiteKey.packagePath));
+  if (!isDone) {
+    /// We verify that "testIds" contains all ids that this suite is supposed
+    /// to have. In case we have yet to receive some test events.
+    final hasAllVisibleIds = ref.watch(
+      $scaffoldGroup(suiteKey).select(
+        (rootGroup) =>
+            rootGroup.asData != null &&
+            visibleTests.length >= rootGroup.asData!.value.testCount,
+      ),
+    );
+    if (!hasAllVisibleIds) {
+      // TODO update after https://github.com/dart-lang/test/issues/1652 is resolved
+      return SuiteStatus.pending;
+    }
 
-  // any loading leads to RUNNING, even if there's an error/success
-  final hasLoading =
-      tests.keys.any((testKey) => ref.watch($testStatus(testKey)).pending);
-  if (hasLoading) return SuiteStatus.pending;
+    // any loading leads to RUNNING, even if there's an error/success
+    final hasLoading =
+        tests.keys.any((testKey) => ref.watch($testStatus(testKey)).pending);
+    if (hasLoading) return SuiteStatus.pending;
+  }
 
   final hasErroredTest = tests.keys
       .map((id) => ref.watch($testStatus(id)))
@@ -146,6 +162,7 @@ final $suiteStatus = Provider.family
   $testsForSuite,
   $scaffoldGroup,
   $testStatus,
+  $isPackageDone,
 ]);
 
 final $exitCode = Provider.autoDispose<AsyncValue<int>>(

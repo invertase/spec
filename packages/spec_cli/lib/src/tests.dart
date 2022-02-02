@@ -85,7 +85,6 @@ final $testsForSuite = Provider.autoDispose
         .map((e) => e.value)
         .whereType<TestEventTestStart>()
         .where((event) => event.test.suiteKey == suiteKey.value)
-        .where((event) => !event.test.isHidden)
         .map((e) =>
             MapEntry(Packaged(suiteKey.packagePath, e.test.key), e.test)),
   );
