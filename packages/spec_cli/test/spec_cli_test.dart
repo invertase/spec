@@ -360,8 +360,6 @@ void main() {
   ... fail
 ---
  FAIL  test/my_test.dart
-  ○ skipped
-  ✓ pass
   ✕ fail
     Bad state: fail
     test/my_test.dart 6:22  main.<fn>
@@ -667,8 +665,6 @@ third
   ✕ first
 ---
  FAIL  test/my_test.dart
-  ✓ second
-  ✓ third
   ✕ first
 ---
  FAIL  test/my_test.dart
@@ -869,8 +865,6 @@ void main() {
   ✕ first
 ---
  FAIL  test/my_test.dart
-  ✓ second
-  ✓ third
   ✕ first
 ---
  FAIL  test/my_test.dart

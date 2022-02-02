@@ -169,8 +169,8 @@ final AutoDisposeProviderFamily<AsyncValue<String?>, Packaged<GroupKey>>
         .map((test) {
           final testKey = Packaged(groupKey.packagePath, test.key);
           return _renderTest(
-            status: ref.watch($testStatus(testKey)),
-            hasExitCode: ref.watch($isDone),
+            suiteStatus: ref.watch($suiteStatus(testKey.suiteKey)),
+            testStatus: ref.watch($testStatus(testKey)),
             messages: ref.watch($testMessages(testKey)),
             error: ref.watch($testError(testKey)),
             label: ref.watch($testLabel(testKey)),
@@ -200,7 +200,6 @@ final AutoDisposeProviderFamily<AsyncValue<String?>, Packaged<GroupKey>>
   });
 }, dependencies: [
   $groupName,
-  $isDone,
   $groupDepth,
   $testsForGroup,
   $testError,
@@ -211,21 +210,22 @@ final AutoDisposeProviderFamily<AsyncValue<String?>, Packaged<GroupKey>>
 ]);
 
 String? _renderTest({
-  required bool hasExitCode,
-  required TestStatus status,
+  required TestStatus testStatus,
+  required SuiteStatus suiteStatus,
   required List<String> messages,
   required String? error,
   required String? label,
   required int depth,
 }) {
-  if (hasExitCode && !status.failing) return null;
+  if (suiteStatus == SuiteStatus.fail && !testStatus.failing) return null;
   if (messages.isEmpty && error == null && label == null) return null;
 
   final paddedError = error?.multilinePadLeft(depth * 2 + 4);
 
   return [
     if (label != null) label.multilinePadLeft(depth * 2 + 2),
-    if (status.pending || (status.failing))
+    // TODO preserve message vs error order (messages can show after an error)
+    if (testStatus.pending || (testStatus.failing))
       ...messages, // messages are voluntarily not indented
     if (paddedError != null)
       if (messages.isNotEmpty) '\n$paddedError' else paddedError,
@@ -253,8 +253,8 @@ final $suiteOutput = Provider.autoDispose
             .map((test) {
               final testKey = Packaged(suiteKey.packagePath, test.key);
               return _renderTest(
-                status: ref.watch($testStatus(testKey)),
-                hasExitCode: ref.watch($isDone),
+                suiteStatus: ref.watch($suiteStatus(suiteKey)),
+                testStatus: ref.watch($testStatus(testKey)),
                 messages: ref.watch($testMessages(testKey)),
                 error: ref.watch($testError(testKey)),
                 label: ref.watch($testLabel(testKey)),
@@ -294,7 +294,6 @@ final $suiteOutput = Provider.autoDispose
   $rootGroupsForSuite,
   $groupOutput,
   $testLabel,
-  $isDone,
   $suiteOutputLabel,
   $rootTestsForSuite,
 ], name: 'suiteOutput');

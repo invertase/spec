@@ -99,6 +99,10 @@ extension PackagedTestExt on Packaged<Test> {
   Packaged<SuiteKey> get suiteKey => next((t) => t.suiteKey);
 }
 
+extension PackagedTestKeyExt on Packaged<TestKey> {
+  Packaged<SuiteKey> get suiteKey => next((t) => SuiteKey(suiteID: t.suiteID));
+}
+
 extension TestExt on Test {
   // when "url" is null, it means that this is not a user-defined test
   // and is instead the "loading" phase.
