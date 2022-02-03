@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:dart_test_adapter/dart_test_adapter.dart';
 import 'package:riverpod/riverpod.dart';
 
@@ -49,19 +50,21 @@ final $completedSuiteKeysInCompletionOrder =
 
     for (final event in ref.watch($events).events.reversed) {
       event.value.map(
-        suite: (e) => sortedSuiteKeys.add(event.next((_) => e.suite.key)),
         testDone: (e) {
           final test = ref
               .watch($allTests)
               // TODO is there a way to filter groupID/suiteID?
-              .firstWhere(
+              .firstWhereOrNull(
                 (test) =>
                     test.packagePath == event.packagePath &&
                     test.value.id == e.testID,
               );
 
+          if (test == null) return;
+
           sortedSuiteKeys.add(test.next((value) => value.suiteKey));
         },
+        suite: (e) {},
         start: (_) {},
         done: (_) {},
         allSuites: (_) {},

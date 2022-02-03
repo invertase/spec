@@ -41,6 +41,12 @@ class _SpecCommandRunner extends CommandRunner<int> {
         help: 'Listens to changes in the project and '
             'run tests whenever something changed',
       )
+      ..addFlag(
+        'ci',
+        defaultsTo: null,
+        help: 'Changes the rendering to be more adaped to CI environments.'
+            ' Default to determining the environment automatically.',
+      )
       ..addMultiOption(
         'name',
         abbr: 'n',
@@ -53,7 +59,7 @@ class _SpecCommandRunner extends CommandRunner<int> {
       watch: result['watch'] as bool,
       fileFilters: result.rest,
       testNameFilters: result['name'] as List<String>,
-      coverage: result['coverage'] as bool,
+      ci: result['ci'] as bool?,
     );
   }
 
@@ -73,7 +79,7 @@ class SpecOptions {
     this.fileFilters = const [],
     this.testNameFilters = const [],
     this.watch = false,
-    this.coverage = false,
+    this.ci,
   });
 
   factory SpecOptions.fromArgs(List<String> args) {
@@ -88,13 +94,13 @@ class SpecOptions {
   final List<String> fileFilters;
   final List<String> testNameFilters;
   final bool watch;
-  final bool coverage;
+  final bool? ci;
 
   @override
   bool operator ==(Object other) =>
       other is SpecOptions &&
       other.runtimeType == runtimeType &&
-      other.coverage == coverage &&
+      other.ci == ci &&
       other.watch == watch &&
       const DeepCollectionEquality().equals(other.fileFilters, fileFilters) &&
       const DeepCollectionEquality()
@@ -103,7 +109,7 @@ class SpecOptions {
   @override
   int get hashCode => Object.hash(
         runtimeType,
-        coverage,
+        ci,
         watch,
         const DeepCollectionEquality().hash(fileFilters),
         const DeepCollectionEquality().hash(testNameFilters),
@@ -113,7 +119,7 @@ class SpecOptions {
   String toString() {
     return 'SpecOptions('
         'watch: $watch, '
-        'coverage: $coverage, '
+        'ci: $ci, '
         'fileFilters: $fileFilters, '
         'testNameFilters: $testNameFilters'
         ')';
@@ -225,6 +231,7 @@ Future<int> spec({
   }, overrides: [
     if (workingDirectory != null)
       $workingDirectory.overrideWithValue(Directory(workingDirectory)),
+    if (options.ci != null) $isCIMode.overrideWithValue(options.ci!),
   ]);
 }
 

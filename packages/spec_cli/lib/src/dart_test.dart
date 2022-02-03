@@ -20,6 +20,7 @@ final $testNameFilters = StateProvider<RegExp?>((ref) => null);
 final $filePathFilters = StateProvider<List<String>>((ref) => []);
 final $isWatchMode = StateProvider<bool>((ref) => false);
 final $isRunningOnlyFailingTests = StateProvider<bool>((ref) => false);
+final $isCIMode = Provider((ref) => !stdin.supportsAnsiEscapes);
 
 final $events = StateNotifierProvider<TestEventsNotifier, TestEventsState>(
   (ref) => TestEventsNotifier(ref),

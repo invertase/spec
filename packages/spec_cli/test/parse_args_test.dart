@@ -28,10 +28,19 @@ void main() {
       );
     });
 
-    test('can specify --coverage', () {
+    test('can specify --ci', () {
       expect(
-        SpecOptions.fromArgs(const ['--coverage']),
-        const SpecOptions(coverage: true),
+        SpecOptions.fromArgs(const ['--ci']),
+        const SpecOptions(ci: true),
+      );
+      expect(
+        SpecOptions.fromArgs(const []),
+        // ignore: avoid_redundant_argument_values
+        const SpecOptions(ci: null),
+      );
+      expect(
+        SpecOptions.fromArgs(const ['--no-ci']),
+        const SpecOptions(ci: false),
       );
     });
 

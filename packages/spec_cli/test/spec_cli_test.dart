@@ -29,16 +29,19 @@ void main() {
       });
 
       expect(
-        testRenderer!.frames,
-        framesMatch([
-          ' RUNS  test/my_test.dart\n',
-          startsWith(
-            '''
- FAIL  test/my_test.dart
+        testRenderer!.frames.last,
+        '''
+
+  ● loading test/my_test.dart test/my_test.dart
     Failed to load "test/my_test.dart": Invalid argument(s): Groups may not be async.
+    package:test_api                           Declarer.group
+    package:test_core/scaffolding.dart 219:13  group
+    test/my_test.dart 4:3                      main
+
+Test Suites: 0 total
+Tests:       0 total
+Time:        00:00:00
 ''',
-          ),
-        ]),
       );
 
       expect(exitCode, -1);
@@ -110,17 +113,8 @@ void main() {
       });
 
       expect(
-        testRenderer!.frames,
-        framesMatch(
-          '''
- RUNS  test/my_test.dart
----
- RUNS  test/another_test.dart
- RUNS  test/my_test.dart
----
- PASS  test/my_test.dart
- RUNS  test/another_test.dart
----
+        testRenderer!.frames.last,
+        '''
  PASS  test/my_test.dart
  PASS  test/another_test.dart
 
@@ -128,7 +122,6 @@ Test Suites: 2 passed, 2 total
 Tests:       3 passed, 3 total
 Time:        00:00:00
 ''',
-        ),
       );
 
       expect(exitCode, 0);
@@ -146,7 +139,7 @@ void main() {
 }
 ''',
         },
-        options: SpecOptions.fromArgs(const ['--name=hello']),
+        options: SpecOptions.fromArgs(const ['--name=hello', '--no-ci']),
       );
 
       expect(testRenderer!.frames.last, '''
@@ -192,7 +185,7 @@ void main() {
       final exitCode = await spec(
         workingDirectory: workingDir.path,
         options: SpecOptions.fromArgs(
-          ['${workingDir.path}/packages/a/test/my_test.dart'],
+          ['${workingDir.path}/packages/a/test/my_test.dart', '--no-ci'],
         ),
       );
 
@@ -223,13 +216,13 @@ void main() {
 }
 ''',
         },
-        options: SpecOptions.fromArgs(const ['--name=hello']),
+        options: SpecOptions.fromArgs(const ['--name=hello', '--no-ci']),
       );
 
       expect(testRenderer!.frames.last, '''
  PASS  test/my_test.dart
 
-Test Suites: 1 passed, 2 total
+Test Suites: 1 passed, 1 total
 Tests:       1 passed, 1 total
 Time:        00:00:00
 ''');
@@ -261,7 +254,7 @@ void main() {
 ''',
         },
         options: SpecOptions.fromArgs(
-          const ['test/my_test.dart', 'test/another_test.dart'],
+          const ['test/my_test.dart', 'test/another_test.dart', '--no-ci'],
         ),
       );
 
@@ -321,18 +314,8 @@ void main() {
       });
 
       expect(
-        testRenderer!.frames,
-        framesMatch(
-          '''
- RUNS  test/my_test.dart
----
- RUNS  test/my_test.dart
-  skipped group
----
- RUNS  test/my_test.dart
-  skipped group
-    ○ test
----
+        testRenderer!.frames.last,
+        '''
  RUNS  test/my_test.dart
   ... pass
   skipped group
@@ -346,11 +329,10 @@ Test Suites: 1 passed, 1 total
 Tests:       1 passed, 1 skipped, 2 total
 Time:        00:00:00
 ''',
-        ),
       );
 
       expect(exitCode, 0);
-    });
+    }, skip: 'need verbose mode');
 
     testScope('handles skipped tests', (ref) async {
       final exitCode = await runTest({
@@ -366,16 +348,8 @@ void main() {
       });
 
       expect(
-        testRenderer!.frames,
-        framesMatch(
-          '''
- RUNS  test/my_test.dart
----
- FAIL  test/my_test.dart
-  ✕ fail
-    Bad state: fail
-    test/my_test.dart 6:22  main.<fn>
----
+        testRenderer!.frames.last,
+        '''
  FAIL  test/my_test.dart
   ✕ fail
     Bad state: fail
@@ -389,11 +363,10 @@ Test Suites: 1 failed, 1 total
 Tests:       1 failed, 1 passed, 1 skipped, 3 total
 Time:        00:00:00
 ''',
-        ),
       );
 
       expect(exitCode, -1);
-    });
+    }, skip: 'need verbose mode');
 
     testScope('handles nested groups', (ref) async {
       final exitCode = await runTest({
@@ -541,12 +514,10 @@ Time:        00:00:00
       final exitCode = await runTest({'my_test.dart': 'invalid'});
 
       expect(
-          testRenderer!.frames,
-          framesMatch(
-            [
-              ' RUNS  test/my_test.dart\n',
-              startsWith('''
- FAIL  test/my_test.dart
+        testRenderer!.frames.last,
+        startsWith('''
+
+  ● loading test/my_test.dart test/my_test.dart
     Failed to load "test/my_test.dart":
     test/my_test.dart:1:1: Error: Variables must be declared using the keywords 'const', 'final', 'var' or a type name.
     Try adding the name of the type of the variable or the keyword 'var'.
@@ -556,8 +527,7 @@ Time:        00:00:00
     invalid
     ^^^^^^^
 '''),
-            ],
-          ));
+      );
 
       expect(exitCode, -1);
     });
@@ -579,32 +549,14 @@ void main() {
       });
 
       expect(
-        testRenderer!.frames,
-        framesMatch(
-          '''
- RUNS  test/my_test.dart
----
- RUNS  test/my_test.dart
-  ... first
----
- RUNS  test/my_test.dart
-  ... first
-hello
----
- RUNS  test/my_test.dart
-  ... first
-hello
-this is an error
----
- PASS  test/my_test.dart
----
+        testRenderer!.frames.last,
+        '''
  PASS  test/my_test.dart
 
 Test Suites: 1 passed, 1 total
 Tests:       1 passed, 1 total
 Time:        00:00:00
 ''',
-        ),
       );
 
       expect(exitCode, 0);
@@ -641,11 +593,8 @@ void main() {
       });
 
       expect(
-        testRenderer!.frames,
-        framesMatch(
-          '''
- RUNS  test/my_test.dart
----
+        testRenderer!.frames.last,
+        '''
  FAIL  test/my_test.dart
   ✕ first
 hello
@@ -667,7 +616,6 @@ Test Suites: 1 failed, 1 total
 Tests:       1 failed, 2 passed, 3 total
 Time:        00:00:00
 ''',
-        ),
       );
 
       expect(exitCode, -1);
@@ -690,19 +638,8 @@ void main() {
       });
 
       expect(
-        testRenderer!.frames,
-        framesMatch([
-          anyOf(
-            ' RUNS  test/pending_test.dart\n',
-            ' RUNS  test/pending_test.dart\n',
-          ),
-          '''
- RUNS  test/passing_test.dart
- RUNS  test/pending_test.dart
----
- PASS  test/passing_test.dart
- RUNS  test/pending_test.dart
----
+        testRenderer!.frames.last,
+        '''
  PASS  test/passing_test.dart
  PASS  test/pending_test.dart
 
@@ -710,7 +647,6 @@ Test Suites: 2 passed, 2 total
 Tests:       2 passed, 2 total
 Time:        00:00:00
 ''',
-        ]),
       );
 
       expect(exitCode, 0);
@@ -742,39 +678,14 @@ void main() {
       });
 
       expect(
-        testRenderer!.frames,
-        framesMatch(
-          '''
- RUNS  test/my_test.dart
----
- RUNS  test/my_test.dart
-  ... first
----
- RUNS  test/my_test.dart
-  ✓ first
----
- RUNS  test/my_test.dart
-  ✓ first
-  ... second
----
- RUNS  test/my_test.dart
-  ✓ first
-  ✓ second
----
- RUNS  test/my_test.dart
-  ✓ first
-  ✓ second
-  ... third
----
- PASS  test/my_test.dart
----
+        testRenderer!.frames.last,
+        '''
  PASS  test/my_test.dart
 
 Test Suites: 1 passed, 1 total
 Tests:       3 passed, 3 total
 Time:        00:00:00
 ''',
-        ),
       );
       expect(exitCode, 0);
     });
@@ -806,11 +717,8 @@ void main() {
       });
 
       expect(
-        testRenderer!.frames,
-        framesMatch(
-          '''
- RUNS  test/my_test.dart
----
+        testRenderer!.frames.last,
+        '''
  FAIL  test/my_test.dart
   ✕ first
     Bad state: first
@@ -824,7 +732,6 @@ Test Suites: 1 failed, 1 total
 Tests:       1 failed, 2 passed, 3 total
 Time:        00:00:00
 ''',
-        ),
       );
 
       expect(exitCode, -1);
@@ -841,45 +748,28 @@ void main() {
         'passing_test.dart': '''
 import 'package:test/test.dart';
 void main() {
-  test('passing', () => Future.delayed(Duration(milliseconds: 10)));
+  test('passing', () => Future.delayed(Duration(milliseconds: 100)));
 }
 ''',
       });
 
       expect(
-        testRenderer!.frames,
-        framesMatch('''
- RUNS  test/failing_test.dart
----
- RUNS  test/failing_test.dart
- RUNS  test/passing_test.dart
----
- FAIL  test/failing_test.dart
-  ✕ failing
-    Bad state: fail
-    test/failing_test.dart 3:25  main.<fn>
- RUNS  test/passing_test.dart
----
- FAIL  test/failing_test.dart
-  ✕ failing
-    Bad state: fail
-    test/failing_test.dart 3:25  main.<fn>
- PASS  test/passing_test.dart
----
+        testRenderer!.frames.last,
+        '''
  FAIL  test/failing_test.dart
   ✕ failing
     Bad state: fail
     test/failing_test.dart 3:25  main.<fn>
  PASS  test/passing_test.dart
 
-  ● failing failing test/failing_test.dart:3:3
+  ● failing test/failing_test.dart:3:3
     Bad state: fail
     test/failing_test.dart 3:25  main.<fn>
 
 Test Suites: 1 failed, 1 passed, 2 total
 Tests:       1 failed, 1 passed, 2 total
 Time:        00:00:00
-'''),
+''',
       );
 
       expect(exitCode, -1);

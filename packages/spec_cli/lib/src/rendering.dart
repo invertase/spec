@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:collection/collection.dart';
 import 'package:dart_test_adapter/dart_test_adapter.dart';
 import 'package:duration/duration.dart';
@@ -47,7 +45,8 @@ final $testPath = Provider.autoDispose
 
     return [
       suitePath,
-      '${test.rootLine ?? test.line}:${test.rootColumn ?? test.column}'
+      if (test.line != null && test.column != null)
+        '${test.rootLine ?? test.line}:${test.rootColumn ?? test.column}'
     ].join(':');
   });
 }, dependencies: [
@@ -342,11 +341,18 @@ final $timeElapsed = Provider.autoDispose<String>((ref) {
 }, dependencies: [$timeTick, $startTime]);
 
 final $summary = Provider.autoDispose<String?>((ref) {
-  final suites = ref.watch($suites);
-  final failingSuitesCount = suites
+  final nonEmptySuites = ref.watch($suites).where(
+        (suite) => ref
+            .watch($testsForSuite(suite.key))
+            .values
+            .where((e) => !e.isHidden)
+            .isNotEmpty,
+      );
+
+  final failingSuitesCount = nonEmptySuites
       .where((e) => ref.watch($suiteStatus(e.key)) == SuiteStatus.fail)
       .length;
-  final passingSuitesCount = suites
+  final passingSuitesCount = nonEmptySuites
       .where((e) => ref.watch($suiteStatus(e.key)) == SuiteStatus.pass)
       .length;
 
@@ -362,7 +368,7 @@ final $summary = Provider.autoDispose<String?>((ref) {
   final suitesDescription = [
     if (failingSuitesCount > 0) '$failingSuitesCount failed'.bold.red,
     if (passingSuitesCount > 0) '$passingSuitesCount passed'.bold.green,
-    '${suites.length} total',
+    '${nonEmptySuites.length} total',
   ].join(', ');
 
   final testsDescription = [
@@ -382,6 +388,7 @@ ${'Time:'.bold}        $timeElapsed''';
 }, dependencies: [
   $suites,
   $allTests,
+  $testsForSuite,
   $testStatus,
   $suiteStatus,
   $timeElapsed,
@@ -453,6 +460,13 @@ final $output = Provider.autoDispose<AsyncValue<String>>((ref) {
 
     final suitesOuput = ref
         .watch($completedSuiteKeysInCompletionOrder)
+        .where(
+          (suiteKey) => ref
+              .watch($testsForSuite(suiteKey))
+              .values
+              .where((e) => !e.isHidden)
+              .isNotEmpty,
+        )
         .where((suiteKey) =>
             ref.watch($suiteStatus(suiteKey)) != SuiteStatus.pending)
         .map((suiteKey) => unwrap(ref.watch($suiteOutput(suiteKey))));
@@ -473,7 +487,7 @@ final $output = Provider.autoDispose<AsyncValue<String>>((ref) {
       // In CI mode, show summary only after all tests are done
       // Because of the lack of https://github.com/dart-lang/test/issues/1652
       // we have to rely on "isDone" for edge-cases where suites have no tests
-      if (isDone || stdin.supportsAnsiEscapes) ...[
+      if (isDone || !ref.watch($isCIMode)) ...[
         // TODO(rrousselGit) on signal, test that STOP are rendered before error summary
         ...loadingSuitesOutput,
         // Only show error report on final frame
@@ -511,10 +525,12 @@ ${'Watch Usage:'.bold}
   $showWatchUsage,
   $completedSuiteKeysInCompletionOrder,
   $isDone,
+  $testsForSuite,
   $suites,
   $suiteOutput,
   $suiteStatus,
   $summary,
+  $isCIMode,
   $isWatchMode,
 ], name: 'output');
 

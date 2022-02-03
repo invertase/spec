@@ -8,6 +8,7 @@ import 'package:spec_cli/src/ansi.dart';
 import 'package:spec_cli/src/command_runner.dart';
 import 'package:spec_cli/src/container.dart';
 import 'package:spec_cli/src/renderer.dart';
+import 'package:spec_cli/src/rendering.dart';
 import 'package:test/expect.dart';
 import 'package:test/scaffolding.dart';
 
@@ -380,7 +381,7 @@ TestRenderer? testRenderer;
 Future<int> runTest(
   Map<String, String> tests, {
   bool isFlutter = false,
-  SpecOptions options = const SpecOptions(),
+  SpecOptions options = const SpecOptions(ci: false),
 }) async {
   if (testRenderer == null) {
     testRenderer = rendererOverride = TestRenderer();
@@ -397,9 +398,16 @@ Future<int> runTest(
     ),
   ]);
 
-  return spec(
-    workingDirectory: '${dir.path}/packages/a',
-    options: options,
+  return runScoped(
+    (ref) {
+      return spec(
+        workingDirectory: '${dir.path}/packages/a',
+        options: options,
+      );
+    },
+    overrides: [
+      $timeElapsed.overrideWithValue('00:00:00'),
+    ],
   );
 }
 
