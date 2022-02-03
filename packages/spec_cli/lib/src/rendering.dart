@@ -474,7 +474,9 @@ final $output = Provider.autoDispose<AsyncValue<String>>((ref) {
       // Because of the lack of https://github.com/dart-lang/test/issues/1652
       // we have to rely on "isDone" for edge-cases where suites have no tests
       if (isDone || stdin.supportsAnsiEscapes) ...[
-        if (ref.watch($errorsInOrder).isNotEmpty) ref.watch($errorsInOrder),
+        // Only show error report on final frame
+        if (isDone && ref.watch($errorsInOrder).isNotEmpty)
+          ref.watch($errorsInOrder),
         ...loadingSuitesOutput,
         if (loadingSuites.length > 3) 'And ${loadingSuites.length - 3} more.',
         ref.watch($summary)
