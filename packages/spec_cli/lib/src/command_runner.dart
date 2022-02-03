@@ -41,12 +41,6 @@ class _SpecCommandRunner extends CommandRunner<int> {
         help: 'Listens to changes in the project and '
             'run tests whenever something changed',
       )
-      ..addFlag(
-        'coverage',
-        abbr: 'c',
-        negatable: false,
-        help: 'Extract code coverage reports.',
-      )
       ..addMultiOption(
         'name',
         abbr: 'n',
