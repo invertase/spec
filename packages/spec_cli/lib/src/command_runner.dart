@@ -224,7 +224,9 @@ Future<int> spec({
         return await ref.read($exitCode.future);
       }
     } finally {
-      stdout.write(VT100.showCursor);
+      stdout
+        ..write(VT100.showCursor)
+        ..write('\n');
     }
   }, overrides: [
     if (workingDirectory != null)
@@ -300,8 +302,6 @@ void _handleWatchKeyPress(List<int> keyCodes, DartRef ref) {
           resartTests(ref);
         }
 
-        // ref.read($failedTestsLocationFromPreviousRun.notifier).state =
-        //     lastFailedTests;
         break;
       default:
     }
