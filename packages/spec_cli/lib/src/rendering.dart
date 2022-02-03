@@ -326,13 +326,22 @@ final $suiteOutput = Provider.autoDispose
 ], name: 'suiteOutput');
 
 final $timeTick = StreamProvider.autoDispose<void>((ref) {
-  return Stream.periodic(const Duration(seconds: 1));
+  return Stream.periodic(const Duration(milliseconds: 100));
 });
 
-final $summary = Provider.autoDispose<String?>((ref) {
+final $timeElapsed = Provider.autoDispose<String>((ref) {
   // Refresh timer every second
   ref.watch($timeTick);
 
+  final startTime = ref.watch($startTime);
+  final elapsedTime = DateTime.now().difference(startTime);
+
+  final timeDescription = prettyDuration(elapsedTime);
+
+  return timeDescription;
+}, dependencies: [$timeTick, $startTime]);
+
+final $summary = Provider.autoDispose<String?>((ref) {
   final suites = ref.watch($suites);
   final failingSuitesCount = suites
       .where((e) => ref.watch($suiteStatus(e.key)) == SuiteStatus.fail)
@@ -363,24 +372,19 @@ final $summary = Provider.autoDispose<String?>((ref) {
     '${tests.length} total',
   ].join(', ');
 
-  final startTime = ref.watch($startTime);
-  final elapsedTime = DateTime.now().difference(startTime);
-
-  final timeDescription = prettyDuration(elapsedTime);
+  final timeElapsed = ref.watch($timeElapsed);
 
   return '''
 
 ${'Test Suites:'.bold} $suitesDescription
 ${'Tests:'.bold}       $testsDescription
-${'Time:'.bold}        $timeDescription''';
+${'Time:'.bold}        $timeElapsed''';
 }, dependencies: [
-  $isDone,
   $suites,
   $allTests,
   $testStatus,
   $suiteStatus,
-  $startTime,
-  $timeTick,
+  $timeElapsed,
 ]);
 
 final $showWatchUsage = StateProvider.autoDispose<bool>((ref) {
