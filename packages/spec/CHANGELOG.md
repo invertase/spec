@@ -1,4 +1,4 @@
-# 0.2.0
+## 0.2.0
 
 - Fixed compilation errors when trying to perform expectations on the failure
   of a Future.
