@@ -80,6 +80,15 @@ abstract class ExpectationBase<Actual, Return, Param> {
     // TODO move to Pattern matcher
     return runMatcher(dart_test.matches(re));
   }
+
+  /// Returns a matcher that matches objects with type [T].
+  ///
+  /// ```dart
+  /// expect(shouldBeDuration).isA<Duration>();
+  /// ```
+  Return isA<T>() {
+    return runMatcher(dart_test.isA<T>());
+  }
 }
 
 /// A base class holding matchers

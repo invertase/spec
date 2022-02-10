@@ -6,7 +6,7 @@ extension FutureExpectationMapper<Actual> on Expectation<Future<Actual>> {
   FutureExpectation<Actual> get completion => _ResolveFutureExpectation(actual);
 
   /// Perform expectations on the error thrown by the future
-  FutureExpectation<Actual> get throws => _RejectFutureExpectation(actual);
+  FutureExpectation<Object?> get throws => _RejectFutureExpectation(actual);
 
   /// Matches a [Future] that does not complete.
   ///
