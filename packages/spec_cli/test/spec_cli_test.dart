@@ -1,3 +1,4 @@
+import 'package:path/path.dart';
 import 'package:spec_cli/src/command_runner.dart';
 import 'package:spec_cli/src/renderer.dart';
 import 'package:spec_cli/src/rendering.dart';
@@ -13,6 +14,67 @@ void main() {
         'handles non-json logs from the test output (such as Flutter\'s "Downloading ...")',
         (ref) async {});
     testScope('pipe stderr of dart/flutter test', (ref) async {});
+
+    testScope('applies path filter only to packages containing those paths',
+        (ref) async {
+      final testRenderer = rendererOverride = TestRenderer();
+      addTearDown(() => rendererOverride = null);
+
+      final workingDir = await createProject([
+        PackageInfo(
+          name: 'a',
+          files: {
+            'test/my_test.dart': '''
+import 'package:test/test.dart';
+void main() {
+  test('hello foo', () {});
+}
+''',
+          },
+        ),
+        PackageInfo(
+          name: 'b',
+          files: {
+            'test/another_test.dart': '''
+import 'package:test/test.dart';
+void main() {
+  test('hello bar', () {});
+}
+''',
+          },
+        ),
+        PackageInfo(
+          name: 'c',
+          files: {
+            'test/skipped_test.dart': '''
+import 'package:test/test.dart';
+void main() {
+  test('hello baz', () => throw StateError('error'));
+}
+''',
+          },
+        ),
+      ]);
+
+      final exitCode = await spec(
+        workingDirectory: join(workingDir.path, 'packages', 'a'),
+        options: SpecOptions.fromArgs(const ['.', '../b/test', '--no-ci']),
+      );
+
+      expect(
+        testRenderer.frames.last,
+        '''
+ PASS  test/my_test.dart
+ PASS  ../b/test/another_test.dart
+
+Test Suites: 2 passed, 2 total
+Tests:       2 passed, 2 total
+Time:        00:00:00
+''',
+      );
+
+      expect(exitCode, 0);
+    });
 
     testScope('handles async group errors', (ref) async {
       final exitCode = await runTest({

@@ -49,15 +49,6 @@ class TestEventsNotifier extends StateNotifier<TestEventsState> {
         ? (ref.watch($failedTestLocationToExecute) ?? [])
         : <FailedTestLocation>[];
 
-    final tests = failedTestsLocation.isNotEmpty
-        ? failedTestsLocation
-            .map(
-              (location) =>
-                  '${location.testPath}?full-name=${Uri.encodeQueryComponent(location.name)}',
-            )
-            .toList()
-        : ref.watch($filePathFilters);
-
     final arguments = [
       if (ref.watch($testNameFilters) != null)
         '--name=${ref.watch($testNameFilters)!.pattern}',
@@ -77,6 +68,32 @@ class TestEventsNotifier extends StateNotifier<TestEventsState> {
       );
 
       for (final package in packages) {
+        List<String> tests;
+
+        if (failedTestsLocation.isNotEmpty) {
+          tests = failedTestsLocation
+              .where((location) => isWithin(package.path, location.testPath))
+              .map(
+            (location) {
+              // workaround to https://github.com/dart-lang/test/issues/1667
+              final relativeTestPath = relative(
+                location.testPath,
+                from: package.path,
+              );
+
+              return '$relativeTestPath?full-name=${Uri.encodeQueryComponent(location.name)}';
+            },
+          ).toList();
+        } else {
+          tests = ref
+              .watch($filePathFilters)
+              .where((path) =>
+                  package.path == path || isWithin(package.path, path))
+              // workaround to https://github.com/dart-lang/test/issues/1667
+              .map((path) => relative(path, from: package.path))
+              .toList();
+        }
+
         final packageStream = package.isFlutter
             ? flutterTest(
                 tests: tests,
@@ -153,7 +170,7 @@ final $filteredPackages = FutureProvider<List<_Package>>(
     final result = all.where((package) {
       return filters.isEmpty ||
           filters.any((element) {
-            return isWithin(package.path, element);
+            return package.path == element || isWithin(package.path, element);
           });
     }).toList();
 

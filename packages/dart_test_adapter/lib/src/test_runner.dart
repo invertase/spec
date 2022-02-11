@@ -37,19 +37,21 @@ Stream<TestEvent> dartTest({
   // TODO(rrousselGit) expose a typed interface for CLI parameters
 }) {
   return _parseTestJsonOutput(
-    () => Process.start(
-      'dart',
-      [
-        // '--packages=${await Isolate.packageConfig}',
-        'test',
-        ...?arguments,
-        '--reporter=json',
-        '--chain-stack-traces',
-        ...?tests,
-      ],
-      environment: environment,
-      workingDirectory: workdingDirectory,
-    ),
+    () {
+      return Process.start(
+        'dart',
+        [
+          // '--packages=${await Isolate.packageConfig}',
+          'test',
+          ...?arguments,
+          '--reporter=json',
+          '--chain-stack-traces',
+          ...?tests,
+        ],
+        environment: environment,
+        workingDirectory: workdingDirectory,
+      );
+    },
   );
 }
 
