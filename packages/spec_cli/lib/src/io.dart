@@ -32,8 +32,8 @@ final $sigterm = StreamProvider<void>((ref) => ProcessSignal.sigterm.watch());
 final $didPressQ = StateProvider<bool>((ref) => false);
 
 final $isEarlyAbort = Provider<bool>((ref) {
-  return ref.watch($sigint).isData ||
-      ref.watch($sigterm).isData ||
+  return ref.watch($sigint) is AsyncData ||
+      ref.watch($sigterm) is AsyncData ||
       // During watch mode, pressing `q` quits early
       (ref.watch($isWatchMode) && ref.watch($didPressQ));
 }, dependencies: [
