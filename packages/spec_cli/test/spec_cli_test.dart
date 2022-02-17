@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:path/path.dart';
 import 'package:spec_cli/src/command_runner.dart';
 import 'package:spec_cli/src/renderer.dart';
@@ -7,63 +9,171 @@ import 'package:test/test.dart';
 import 'utils.dart';
 
 void main() {
-  groupScope('Spec', () {
-    // TODO on sigint/sigterm, report suites/tests that were not executed. Blocked by https://github.com/dart-lang/test/issues/1654
+  groupScope(
+    'Spec',
+    () {
+      // TODO on sigint/sigterm, report suites/tests that were not executed. Blocked by https://github.com/dart-lang/test/issues/1654
 
-    testScope(
-        'handles non-json logs from the test output (such as Flutter\'s "Downloading ...")',
-        (ref) async {});
-    testScope('pipe stderr of dart/flutter test', (ref) async {});
+      testScope('supports generating coverage in Flutter projects',
+          (ref) async {
+        final testRenderer = rendererOverride = TestRenderer();
+        addTearDown(() => rendererOverride = null);
 
-    testScope('applies path filter only to packages containing those paths',
-        (ref) async {
-      final testRenderer = rendererOverride = TestRenderer();
-      addTearDown(() => rendererOverride = null);
+        final workingDir = await createProject([
+          PackageInfo(
+            name: 'a',
+            isFlutterPackage: true,
+            files: {
+              'test/my_test.dart': '''
+import 'package:test/test.dart';
+import 'package:a/foo.dart';
+void main() {
+  test('hello foo', () {
+    expect(fn(), 0);
+  });
+}
+''',
+              'lib/foo.dart': '''
+int fn() {
+  return 0;
+}
+''',
+            },
+          ),
+        ]);
 
-      final workingDir = await createProject([
-        PackageInfo(
-          name: 'a',
-          files: {
-            'test/my_test.dart': '''
+        final exitCode = await spec(
+          workingDirectory: workingDir.path,
+          options: SpecOptions.fromArgs(const ['--coverage', '--no-ci']),
+        );
+
+        expect(
+          testRenderer.frames.last,
+          '''
+ PASS  packages/a/test/my_test.dart
+
+Test Suites: 1 passed, 1 total
+Tests:       1 passed, 1 total
+Time:        00:00:00
+''',
+        );
+        expect(exitCode, 0);
+
+        final lcovFile = File(
+            join(workingDir.path, 'packages', 'a', 'coverage', 'lcov.info'));
+
+        expect(
+          lcovFile.existsSync(),
+          true,
+        );
+      });
+
+      testScope('supports generating coverage in Dart projects', (ref) async {
+        final testRenderer = rendererOverride = TestRenderer();
+        addTearDown(() => rendererOverride = null);
+
+        final workingDir = await createProject([
+          PackageInfo(
+            name: 'a',
+            files: {
+              'test/my_test.dart': '''
+import 'package:test/test.dart';
+import 'package:a/foo.dart';
+void main() {
+  test('hello foo', () {
+    expect(fn(), 0);
+  });
+}
+''',
+              'lib/foo.dart': '''
+int fn() {
+  return 0;
+}
+''',
+            },
+          ),
+        ]);
+
+        final exitCode = await spec(
+          workingDirectory: workingDir.path,
+          options: SpecOptions.fromArgs(const ['--coverage', '--no-ci']),
+        );
+
+        expect(
+          testRenderer.frames.last,
+          '''
+ PASS  packages/a/test/my_test.dart
+
+Test Suites: 1 passed, 1 total
+Tests:       1 passed, 1 total
+Time:        00:00:00
+''',
+        );
+        expect(exitCode, 0);
+
+        final lcovFile = File(
+            join(workingDir.path, 'packages', 'a', 'coverage', 'lcov.info'));
+
+        expect(
+          lcovFile.existsSync(),
+          true,
+        );
+      });
+
+      testScope(
+          'handles non-json logs from the test output (such as Flutter\'s "Downloading ...")',
+          (ref) async {});
+      testScope('pipe stderr of dart/flutter test', (ref) async {});
+
+      testScope('applies path filter only to packages containing those paths',
+          (ref) async {
+        final testRenderer = rendererOverride = TestRenderer();
+        addTearDown(() => rendererOverride = null);
+
+        final workingDir = await createProject([
+          PackageInfo(
+            name: 'a',
+            files: {
+              'test/my_test.dart': '''
 import 'package:test/test.dart';
 void main() {
   test('hello foo', () {});
 }
 ''',
-          },
-        ),
-        PackageInfo(
-          name: 'b',
-          files: {
-            'test/another_test.dart': '''
+            },
+          ),
+          PackageInfo(
+            name: 'b',
+            files: {
+              'test/another_test.dart': '''
 import 'package:test/test.dart';
 void main() {
   test('hello bar', () {});
 }
 ''',
-          },
-        ),
-        PackageInfo(
-          name: 'c',
-          files: {
-            'test/skipped_test.dart': '''
+            },
+          ),
+          PackageInfo(
+            name: 'c',
+            files: {
+              'test/skipped_test.dart': '''
 import 'package:test/test.dart';
 void main() {
   test('hello baz', () => throw StateError('error'));
 }
 ''',
-          },
-        ),
-      ]);
+            },
+          ),
+        ]);
 
-      final exitCode = await spec(
-        workingDirectory: join(workingDir.path, 'packages', 'a'),
-        options: SpecOptions.fromArgs(const ['.', '../b/test', '--no-ci']),
-      );
+        final exitCode = await spec(
+          workingDirectory: join(workingDir.path, 'packages', 'a'),
+          options: SpecOptions.fromArgs(const ['.', '../b/test', '--no-ci']),
+        );
 
-      expect(
-        testRenderer.frames.last,
-        '''
+        expect(
+          testRenderer.frames.last,
+          '''
  PASS  test/my_test.dart
  PASS  ../b/test/another_test.dart
 
@@ -71,14 +181,14 @@ Test Suites: 2 passed, 2 total
 Tests:       2 passed, 2 total
 Time:        00:00:00
 ''',
-      );
+        );
 
-      expect(exitCode, 0);
-    });
+        expect(exitCode, 0);
+      });
 
-    testScope('handles async group errors', (ref) async {
-      final exitCode = await runTest({
-        'my_test.dart': '''
+      testScope('handles async group errors', (ref) async {
+        final exitCode = await runTest({
+          'my_test.dart': '''
 import 'package:test/test.dart';
 
 void main() {
@@ -88,11 +198,11 @@ void main() {
   test('valid', () {});
 } 
 '''
-      });
+        });
 
-      expect(
-        testRenderer!.frames.last,
-        '''
+        expect(
+          testRenderer!.frames.last,
+          '''
 
   ● loading test/my_test.dart test/my_test.dart
     Failed to load "test/my_test.dart": Invalid argument(s): Groups may not be async.
@@ -104,51 +214,52 @@ Test Suites: 0 total
 Tests:       0 total
 Time:        00:00:00
 ''',
+        );
+
+        expect(exitCode, 1);
+      });
+
+      testScope(
+          'on sigint/sigterm, abort and show failures details', (ref) async {},
+          skip: true);
+
+      testScope(
+        'on sigint/sigterm, pending tests/suites are shown as skipped/stopped',
+        (ref) async {},
+        skip: true,
       );
 
-      expect(exitCode, -1);
-    });
+      testScope('does not collapse passing suites if there is only one suite',
+          (ref) async {},
+          skip: true);
 
-    testScope(
-        'on sigint/sigterm, abort and show failures details', (ref) async {},
-        skip: true);
+      testScope('handles skipped tests with a reason', (ref) async {},
+          skip: true);
 
-    testScope(
-      'on sigint/sigterm, pending tests/suites are shown as skipped/stopped',
-      (ref) async {},
-      skip: true,
-    );
+      testScope('handle errors inside setup', (ref) async {}, skip: true);
 
-    testScope('does not collapse passing suites if there is only one suite',
+      testScope('handle errors inside tearDown', (ref) async {}, skip: true);
+
+      testScope('handle test failure after test done', (ref) async {},
+          skip: true);
+
+      testScope('handle test failure after test done', (ref) async {},
+          skip: true);
+
+      testScope(
+        'on file path filter, if path not found, commands fails',
         (ref) async {},
-        skip: true);
+        skip: true,
+      );
 
-    testScope('handles skipped tests with a reason', (ref) async {},
-        skip: true);
+      testScope('support flutter projects within melos workspaces',
+          (ref) async {
+        // DON'T add a "lib/main.dart"
+      }, skip: true);
 
-    testScope('handle errors inside setup', (ref) async {}, skip: true);
-
-    testScope('handle errors inside tearDown', (ref) async {}, skip: true);
-
-    testScope('handle test failure after test done', (ref) async {},
-        skip: true);
-
-    testScope('handle test failure after test done', (ref) async {},
-        skip: true);
-
-    testScope(
-      'on file path filter, if path not found, commands fails',
-      (ref) async {},
-      skip: true,
-    );
-
-    testScope('support flutter projects within melos workspaces', (ref) async {
-      // DON'T add a "lib/main.dart"
-    }, skip: true);
-
-    testScope('handles setups/teardowns', (ref) async {
-      final exitCode = await runTest({
-        'my_test.dart': '''
+      testScope('handles setups/teardowns', (ref) async {
+        final exitCode = await runTest({
+          'my_test.dart': '''
 import 'package:test/test.dart';
 void main() {
   setUpAll(() => Future.delayed(Duration(milliseconds: 10)));
@@ -166,17 +277,17 @@ void main() {
   });
 }
 ''',
-        'another_test.dart': '''
+          'another_test.dart': '''
 import 'package:test/test.dart';
 void main() {
   test('slow', () => Future.delayed(Duration(seconds: 1)));
 }
 ''',
-      });
+        });
 
-      expect(
-        testRenderer!.frames.last,
-        '''
+        expect(
+          testRenderer!.frames.last,
+          '''
  PASS  test/my_test.dart
  PASS  test/another_test.dart
 
@@ -184,15 +295,15 @@ Test Suites: 2 passed, 2 total
 Tests:       3 passed, 3 total
 Time:        00:00:00
 ''',
-      );
+        );
 
-      expect(exitCode, 0);
-    });
+        expect(exitCode, 0);
+      });
 
-    testScope('can filter tests by name', (ref) async {
-      final exitCode = await runTest(
-        {
-          'my_test.dart': '''
+      testScope('can filter tests by name', (ref) async {
+        final exitCode = await runTest(
+          {
+            'my_test.dart': '''
 import 'package:test/test.dart';
 void main() {
   test('hello world', () {});
@@ -200,11 +311,11 @@ void main() {
   test('hello baz', () {});
 }
 ''',
-        },
-        options: SpecOptions.fromArgs(const ['--name=hello', '--no-ci']),
-      );
+          },
+          options: SpecOptions.fromArgs(const ['--name=hello', '--no-ci']),
+        );
 
-      expect(testRenderer!.frames.last, '''
+        expect(testRenderer!.frames.last, '''
  PASS  test/my_test.dart
 
 Test Suites: 1 passed, 1 total
@@ -212,46 +323,46 @@ Tests:       2 passed, 2 total
 Time:        00:00:00
 ''');
 
-      expect(exitCode, 0);
-    });
+        expect(exitCode, 0);
+      });
 
-    testScope('cross package file filter works', (ref) async {
-      final testRenderer = rendererOverride = TestRenderer();
-      addTearDown(() => rendererOverride = null);
+      testScope('cross package file filter works', (ref) async {
+        final testRenderer = rendererOverride = TestRenderer();
+        addTearDown(() => rendererOverride = null);
 
-      final workingDir = await createProject([
-        PackageInfo(
-          name: 'a',
-          files: {
-            'test/my_test.dart': '''
+        final workingDir = await createProject([
+          PackageInfo(
+            name: 'a',
+            files: {
+              'test/my_test.dart': '''
 import 'package:test/test.dart';
 void main() {
   test('hello world', () {});
 }
 ''',
-          },
-        ),
-        PackageInfo(
-          name: 'b',
-          files: {
-            'test/another.dart': '''
+            },
+          ),
+          PackageInfo(
+            name: 'b',
+            files: {
+              'test/another.dart': '''
 import 'package:test/test.dart';
 void main() {
   test('hello world', () {});
 }
 ''',
-          },
-        ),
-      ]);
+            },
+          ),
+        ]);
 
-      final exitCode = await spec(
-        workingDirectory: workingDir.path,
-        options: SpecOptions.fromArgs(
-          ['${workingDir.path}/packages/a/test/my_test.dart', '--no-ci'],
-        ),
-      );
+        final exitCode = await spec(
+          workingDirectory: workingDir.path,
+          options: SpecOptions.fromArgs(
+            ['${workingDir.path}/packages/a/test/my_test.dart', '--no-ci'],
+          ),
+        );
 
-      expect(testRenderer.frames.last, '''
+        expect(testRenderer.frames.last, '''
  PASS  packages/a/test/my_test.dart
 
 Test Suites: 1 passed, 1 total
@@ -259,29 +370,29 @@ Tests:       1 passed, 1 total
 Time:        00:00:00
 ''');
 
-      expect(exitCode, 0);
-    });
+        expect(exitCode, 0);
+      });
 
-    testScope('supports empty suites due to test name filter', (ref) async {
-      final exitCode = await runTest(
-        {
-          'my_test.dart': '''
+      testScope('supports empty suites due to test name filter', (ref) async {
+        final exitCode = await runTest(
+          {
+            'my_test.dart': '''
 import 'package:test/test.dart';
 void main() {
   test('hello', () {});
 }
 ''',
-          'maybe_empty_test.dart': '''
+            'maybe_empty_test.dart': '''
 import 'package:test/test.dart';
 void main() {
   test('fail', () => throw StateError('fail'));
 }
 ''',
-        },
-        options: SpecOptions.fromArgs(const ['--name=hello', '--no-ci']),
-      );
+          },
+          options: SpecOptions.fromArgs(const ['--name=hello', '--no-ci']),
+        );
 
-      expect(testRenderer!.frames.last, '''
+        expect(testRenderer!.frames.last, '''
  PASS  test/my_test.dart
 
 Test Suites: 1 passed, 1 total
@@ -289,38 +400,38 @@ Tests:       1 passed, 1 total
 Time:        00:00:00
 ''');
 
-      expect(exitCode, 0);
-    });
+        expect(exitCode, 0);
+      });
 
-    testScope('can filter suites by path', (ref) async {
-      final exitCode = await runTest(
-        {
-          'my_test.dart': '''
+      testScope('can filter suites by path', (ref) async {
+        final exitCode = await runTest(
+          {
+            'my_test.dart': '''
 import 'package:test/test.dart';
 void main() {
   // force my_test to end after another_test to make the order reliable
   test('hello world', () => Future.delayed(Duration(milliseconds: 10)));
 }
 ''',
-          'another_test.dart': '''
+            'another_test.dart': '''
 import 'package:test/test.dart';
 void main() {
   test('pass', () {});
 }
 ''',
-          'excuded_test.dart': '''
+            'excuded_test.dart': '''
 import 'package:test/test.dart';
 void main() {
   test('fail', () => throw StateError('fail'));
 }
 ''',
-        },
-        options: SpecOptions.fromArgs(
-          const ['test/my_test.dart', 'test/another_test.dart', '--no-ci'],
-        ),
-      );
+          },
+          options: SpecOptions.fromArgs(
+            const ['test/my_test.dart', 'test/another_test.dart', '--no-ci'],
+          ),
+        );
 
-      expect(testRenderer!.frames.last, '''
+        expect(testRenderer!.frames.last, '''
  PASS  test/another_test.dart
  PASS  test/my_test.dart
 
@@ -329,12 +440,12 @@ Tests:       2 passed, 2 total
 Time:        00:00:00
 ''');
 
-      expect(exitCode, 0);
-    });
+        expect(exitCode, 0);
+      });
 
-    testScope('handles flutter packages', (ref) async {
-      final exitCode = await runTest({
-        'my_test.dart': '''
+      testScope('handles flutter packages', (ref) async {
+        final exitCode = await runTest({
+          'my_test.dart': '''
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 
@@ -348,9 +459,9 @@ void main() {
   });
 }
 ''',
-      }, isFlutter: true);
+        }, isFlutter: true);
 
-      expect(testRenderer!.frames.last, '''
+        expect(testRenderer!.frames.last, '''
  PASS  test/my_test.dart
 
 Test Suites: 1 passed, 1 total
@@ -358,12 +469,12 @@ Tests:       1 passed, 1 total
 Time:        00:00:00
 ''');
 
-      expect(exitCode, 0);
-    });
+        expect(exitCode, 0);
+      });
 
-    testScope('handles skipped groups', (ref) async {
-      final exitCode = await runTest({
-        'my_test.dart': '''
+      testScope('handles skipped groups', (ref) async {
+        final exitCode = await runTest({
+          'my_test.dart': '''
 import 'package:test/test.dart';
 
 void main() {
@@ -373,11 +484,11 @@ void main() {
   test('pass', () => Future.delayed(Duration(seconds: 1)));
 }
 ''',
-      });
+        });
 
-      expect(
-        testRenderer!.frames.last,
-        '''
+        expect(
+          testRenderer!.frames.last,
+          '''
  RUNS  test/my_test.dart
   ... pass
   skipped group
@@ -391,14 +502,14 @@ Test Suites: 1 passed, 1 total
 Tests:       1 passed, 1 skipped, 2 total
 Time:        00:00:00
 ''',
-      );
+        );
 
-      expect(exitCode, 0);
-    }, skip: 'need verbose mode');
+        expect(exitCode, 0);
+      }, skip: 'need verbose mode');
 
-    testScope('handles skipped tests', (ref) async {
-      final exitCode = await runTest({
-        'my_test.dart': '''
+      testScope('handles skipped tests', (ref) async {
+        final exitCode = await runTest({
+          'my_test.dart': '''
 import 'package:test/test.dart';
 
 void main() {
@@ -407,11 +518,11 @@ void main() {
   test('fail', () => throw StateError('fail'));
 }
 ''',
-      });
+        });
 
-      expect(
-        testRenderer!.frames.last,
-        '''
+        expect(
+          testRenderer!.frames.last,
+          '''
  FAIL  test/my_test.dart
   ✕ fail
     Bad state: fail
@@ -425,14 +536,14 @@ Test Suites: 1 failed, 1 total
 Tests:       1 failed, 1 passed, 1 skipped, 3 total
 Time:        00:00:00
 ''',
-      );
+        );
 
-      expect(exitCode, -1);
-    }, skip: 'need verbose mode');
+        expect(exitCode, 1);
+      }, skip: 'need verbose mode');
 
-    testScope('handles nested groups', (ref) async {
-      final exitCode = await runTest({
-        'my_test.dart': '''
+      testScope('handles nested groups', (ref) async {
+        final exitCode = await runTest({
+          'my_test.dart': '''
 import 'package:test/test.dart';
 
 void main() {
@@ -461,11 +572,11 @@ void main() {
   test('root failing test', () => throw StateError('fail'));
 }
 ''',
-      });
+        });
 
-      expect(
-        testRenderer!.frames.last,
-        '''
+        expect(
+          testRenderer!.frames.last,
+          '''
  FAIL  test/my_test.dart
   ✕ root failing test
     Bad state: fail
@@ -497,26 +608,26 @@ Test Suites: 1 failed, 1 total
 Tests:       3 failed, 5 passed, 8 total
 Time:        00:00:00
 ''',
-      );
+        );
 
-      expect(exitCode, -1);
-    });
+        expect(exitCode, 1);
+      });
 
-    testScope(
-      'handles empty suites',
-      (ref) async {
-        final exitCode = await runTest({
-          'my_test.dart': '''
+      testScope(
+        'handles empty suites',
+        (ref) async {
+          final exitCode = await runTest({
+            'my_test.dart': '''
 import 'package:test/test.dart';
 
 void main() {}
 ''',
-        });
+          });
 
-        expect(
-          testRenderer!.frames,
-          framesMatch(
-            '''
+          expect(
+            testRenderer!.frames,
+            framesMatch(
+              '''
  RUNS  test/my_test.dart
 ---
  PASS  test/my_test.dart
@@ -527,32 +638,33 @@ Test Suites: 1 passed, 1 total
 Tests:       1 passed, 1 total
 Time:        00:00:00
 ''',
-          ),
-        );
+            ),
+          );
 
-        expect(exitCode, 0);
-      },
-      skip: 'blocked by https://github.com/dart-lang/test/issues/1652 because '
-          'we cannot determine if a suite is completed without tests',
-    );
+          expect(exitCode, 0);
+        },
+        skip:
+            'blocked by https://github.com/dart-lang/test/issues/1652 because '
+            'we cannot determine if a suite is completed without tests',
+      );
 
-    testScope(
-      'handle empty groups',
-      (ref) async {
-        final exitCode = await runTest({
-          'my_test.dart': '''
+      testScope(
+        'handle empty groups',
+        (ref) async {
+          final exitCode = await runTest({
+            'my_test.dart': '''
 import 'package:test/test.dart';
 
 void main() {
   group('empty', () {});
 }
 ''',
-        });
+          });
 
-        expect(
-          testRenderer!.frames,
-          framesMatch(
-            '''
+          expect(
+            testRenderer!.frames,
+            framesMatch(
+              '''
  RUNS  test/my_test.dart
 ---
  PASS  test/my_test.dart
@@ -563,21 +675,22 @@ Test Suites: 1 passed, 1 total
 Tests:       0 total
 Time:        00:00:00
 ''',
-          ),
-        );
+            ),
+          );
 
-        expect(exitCode, 0);
-      },
-      skip: 'blocked by https://github.com/dart-lang/test/issues/1652 because '
-          'we cannot determine if a group is completed without tests',
-    );
+          expect(exitCode, 0);
+        },
+        skip:
+            'blocked by https://github.com/dart-lang/test/issues/1652 because '
+            'we cannot determine if a group is completed without tests',
+      );
 
-    testScope('handle suites that fail to compile', (ref) async {
-      final exitCode = await runTest({'my_test.dart': 'invalid'});
+      testScope('handle suites that fail to compile', (ref) async {
+        final exitCode = await runTest({'my_test.dart': 'invalid'});
 
-      expect(
-        testRenderer!.frames.last,
-        startsWith('''
+        expect(
+          testRenderer!.frames.last,
+          startsWith('''
 
   ● loading test/my_test.dart test/my_test.dart
     Failed to load "test/my_test.dart":
@@ -589,14 +702,14 @@ Time:        00:00:00
     invalid
     ^^^^^^^
 '''),
-      );
+        );
 
-      expect(exitCode, -1);
-    });
+        expect(exitCode, 1);
+      });
 
-    testScope('render error logs made during tests', (ref) async {
-      final exitCode = await runTest({
-        'my_test.dart': '''
+      testScope('render error logs made during tests', (ref) async {
+        final exitCode = await runTest({
+          'my_test.dart': '''
 import 'package:test/test.dart';
 import 'dart:io';
 
@@ -608,25 +721,25 @@ void main() {
   });
 }
 ''',
-      });
+        });
 
-      expect(
-        testRenderer!.frames.last,
-        '''
+        expect(
+          testRenderer!.frames.last,
+          '''
  PASS  test/my_test.dart
 
 Test Suites: 1 passed, 1 total
 Tests:       1 passed, 1 total
 Time:        00:00:00
 ''',
-      );
+        );
 
-      expect(exitCode, 0);
-    });
+        expect(exitCode, 0);
+      });
 
-    testScope('render logs made during tests', (ref) async {
-      final exitCode = await runTest({
-        'my_test.dart': r'''
+      testScope('render logs made during tests', (ref) async {
+        final exitCode = await runTest({
+          'my_test.dart': r'''
 import 'package:test/test.dart';
 import 'dart:async';
 
@@ -652,11 +765,11 @@ void main() {
   });
 }
 ''',
-      });
+        });
 
-      expect(
-        testRenderer!.frames.last,
-        '''
+        expect(
+          testRenderer!.frames.last,
+          '''
  FAIL  test/my_test.dart
   ✕ first
 hello
@@ -678,30 +791,30 @@ Test Suites: 1 failed, 1 total
 Tests:       1 failed, 2 passed, 3 total
 Time:        00:00:00
 ''',
-      );
+        );
 
-      expect(exitCode, -1);
-    });
+        expect(exitCode, 1);
+      });
 
-    testScope('passing suites are showed first and collapsed', (ref) async {
-      final exitCode = await runTest({
-        'pending_test.dart': '''
+      testScope('passing suites are showed first and collapsed', (ref) async {
+        final exitCode = await runTest({
+          'pending_test.dart': '''
 import 'package:test/test.dart';
 void main() {
   test('pending', () => Future.delayed(Duration(milliseconds: 100)));
 }
 ''',
-        'passing_test.dart': '''
+          'passing_test.dart': '''
 import 'package:test/test.dart';
 void main() {
   test('passing', () {});
 }
 ''',
-      });
+        });
 
-      expect(
-        testRenderer!.frames.last,
-        '''
+        expect(
+          testRenderer!.frames.last,
+          '''
  PASS  test/passing_test.dart
  PASS  test/pending_test.dart
 
@@ -709,14 +822,14 @@ Test Suites: 2 passed, 2 total
 Tests:       2 passed, 2 total
 Time:        00:00:00
 ''',
-      );
+        );
 
-      expect(exitCode, 0);
-    });
+        expect(exitCode, 0);
+      });
 
-    testScope('shows progress as tests complete', (ref) async {
-      final exitCode = await runTest({
-        'my_test.dart': '''
+      testScope('shows progress as tests complete', (ref) async {
+        final exitCode = await runTest({
+          'my_test.dart': '''
 import 'package:test/test.dart';
 import 'dart:async';
 
@@ -737,24 +850,24 @@ void main() {
   });
 }
 ''',
-      });
+        });
 
-      expect(
-        testRenderer!.frames.last,
-        '''
+        expect(
+          testRenderer!.frames.last,
+          '''
  PASS  test/my_test.dart
 
 Test Suites: 1 passed, 1 total
 Tests:       3 passed, 3 total
 Time:        00:00:00
 ''',
-      );
-      expect(exitCode, 0);
-    });
+        );
+        expect(exitCode, 0);
+      });
 
-    testScope('errors within a file are showed last', (ref) async {
-      final exitCode = await runTest({
-        'my_test.dart': '''
+      testScope('errors within a file are showed last', (ref) async {
+        final exitCode = await runTest({
+          'my_test.dart': '''
 import 'package:test/test.dart';
 import 'dart:async';
 
@@ -776,11 +889,11 @@ void main() {
   });
 }
 ''',
-      });
+        });
 
-      expect(
-        testRenderer!.frames.last,
-        '''
+        expect(
+          testRenderer!.frames.last,
+          '''
  FAIL  test/my_test.dart
   ✕ first
     Bad state: first
@@ -794,30 +907,30 @@ Test Suites: 1 failed, 1 total
 Tests:       1 failed, 2 passed, 3 total
 Time:        00:00:00
 ''',
-      );
+        );
 
-      expect(exitCode, -1);
-    });
+        expect(exitCode, 1);
+      });
 
-    testScope('errored suites are showed last', (ref) async {
-      final exitCode = await runTest({
-        'failing_test.dart': '''
+      testScope('errored suites are showed last', (ref) async {
+        final exitCode = await runTest({
+          'failing_test.dart': '''
 import 'package:test/test.dart';
 void main() {
   test('failing', () => throw StateError('fail'));
 }
 ''',
-        'passing_test.dart': '''
+          'passing_test.dart': '''
 import 'package:test/test.dart';
 void main() {
   test('passing', () => Future.delayed(Duration(milliseconds: 100)));
 }
 ''',
-      });
+        });
 
-      expect(
-        testRenderer!.frames.last,
-        '''
+        expect(
+          testRenderer!.frames.last,
+          '''
  FAIL  test/failing_test.dart
   ✕ failing
     Bad state: fail
@@ -832,23 +945,23 @@ Test Suites: 1 failed, 1 passed, 2 total
 Tests:       1 failed, 1 passed, 2 total
 Time:        00:00:00
 ''',
-      );
+        );
 
-      expect(exitCode, -1);
-    });
+        expect(exitCode, 1);
+      });
 
-    testScope(
-        'summary contains list of all errors independently from suites/groups',
-        (ref) async {
-      final exitCode = await runTest({
-        'failing_test.dart': '''
+      testScope(
+          'summary contains list of all errors independently from suites/groups',
+          (ref) async {
+        final exitCode = await runTest({
+          'failing_test.dart': '''
 import 'package:test/test.dart';
 void main() {
   test('failing', () => throw StateError('fail'));
   test('passing', () {});
 }
 ''',
-        'failing_group_test.dart': '''
+          'failing_group_test.dart': '''
 import 'package:test/test.dart';
 void main() {
   group('group', () {
@@ -857,15 +970,15 @@ void main() {
   test('passing', () => Future.delayed(Duration(milliseconds: 50)));
 }
 ''',
-        'passing_test.dart': '''
+          'passing_test.dart': '''
 import 'package:test/test.dart';
 void main() {
   test('passing', () => Future.delayed(Duration(milliseconds: 100)));
 }
 ''',
-      });
+        });
 
-      expect(testRenderer!.frames.last, '''
+        expect(testRenderer!.frames.last, '''
  FAIL  test/failing_test.dart
   ✕ failing
     Bad state: fail
@@ -890,9 +1003,10 @@ Tests:       2 failed, 3 passed, 5 total
 Time:        00:00:00
 ''');
 
-      expect(exitCode, -1);
-    });
-  }, overrides: [
-    $spinner.overrideWithValue('...'),
-  ]);
+        expect(exitCode, 1);
+      });
+    },
+    overrides: [$spinner.overrideWithValue('...')],
+    timeout: const Timeout.factor(2),
+  );
 }

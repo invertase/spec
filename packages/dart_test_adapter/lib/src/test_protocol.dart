@@ -156,16 +156,17 @@ class TestEvent with _$TestEvent {
     String? remoteDebugger,
   }) = TestEventDebug;
 
+  /// The test process finished
+  factory TestEvent.processDone({
+    required int exitCode,
+  }) = TestProcessDone;
+
   /// When an event that doesn't match any other type was received.
-  factory TestEvent.unknown({required int time}) = TestEventUnknown;
+  factory TestEvent.unknown() = TestEventUnknown;
 
   /// Deserialize a [TestEvent] from a JSON Object
   factory TestEvent.fromJson(Map<String, Object?> json) =>
       _$TestEventFromJson(json);
-
-  /// The time when this event was received.
-  @override
-  int get time;
 }
 
 /// {@template dart_test_adapter.test}

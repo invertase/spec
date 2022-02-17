@@ -179,15 +179,25 @@ Map<String, dynamic> _$$TestEventDebugToJson(_$TestEventDebug instance) =>
       'type': instance.$type,
     };
 
+_$TestProcessDone _$$TestProcessDoneFromJson(Map<String, dynamic> json) =>
+    _$TestProcessDone(
+      exitCode: json['exitCode'] as int,
+      $type: json['type'] as String?,
+    );
+
+Map<String, dynamic> _$$TestProcessDoneToJson(_$TestProcessDone instance) =>
+    <String, dynamic>{
+      'exitCode': instance.exitCode,
+      'type': instance.$type,
+    };
+
 _$TestEventUnknown _$$TestEventUnknownFromJson(Map<String, dynamic> json) =>
     _$TestEventUnknown(
-      time: json['time'] as int,
       $type: json['type'] as String?,
     );
 
 Map<String, dynamic> _$$TestEventUnknownToJson(_$TestEventUnknown instance) =>
     <String, dynamic>{
-      'time': instance.time,
       'type': instance.$type,
     };
 

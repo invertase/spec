@@ -10,6 +10,7 @@ import 'package:riverpod/riverpod.dart';
 
 import 'dart_test_utils.dart';
 import 'io.dart';
+import 'third-party/format_coverage.dart';
 
 part 'dart_test.freezed.dart';
 
@@ -21,6 +22,7 @@ final $filePathFilters = StateProvider<List<String>>((ref) => []);
 final $isWatchMode = StateProvider<bool>((ref) => false);
 final $isRunningOnlyFailingTests = StateProvider<bool>((ref) => false);
 final $isCIMode = Provider((ref) => !stdin.supportsAnsiEscapes);
+final $isCoverageMode = Provider<bool>((ref) => throw UnimplementedError());
 
 final $events = StateNotifierProvider<TestEventsNotifier, TestEventsState>(
   (ref) => TestEventsNotifier(ref),
@@ -31,6 +33,7 @@ final $events = StateNotifierProvider<TestEventsNotifier, TestEventsState>(
     $filePathFilters,
     $failedTestLocationToExecute,
     $isRunningOnlyFailingTests,
+    $isCoverageMode,
   ],
 );
 
@@ -45,15 +48,6 @@ class TestEventsState with _$TestEventsState {
 class TestEventsNotifier extends StateNotifier<TestEventsState> {
   TestEventsNotifier(Ref ref)
       : super(const TestEventsState(isInterrupted: false, events: [])) {
-    final failedTestsLocation = ref.watch($isRunningOnlyFailingTests)
-        ? (ref.watch($failedTestLocationToExecute) ?? [])
-        : <FailedTestLocation>[];
-
-    final arguments = [
-      if (ref.watch($testNameFilters) != null)
-        '--name=${ref.watch($testNameFilters)!.pattern}',
-    ];
-
     Future(() async {
       final packages = await ref.watch($filteredPackages.future);
 
@@ -68,43 +62,7 @@ class TestEventsNotifier extends StateNotifier<TestEventsState> {
       );
 
       for (final package in packages) {
-        List<String> tests;
-
-        if (failedTestsLocation.isNotEmpty) {
-          tests = failedTestsLocation
-              .where((location) => isWithin(package.path, location.testPath))
-              .map(
-            (location) {
-              // workaround to https://github.com/dart-lang/test/issues/1667
-              final relativeTestPath = relative(
-                location.testPath,
-                from: package.path,
-              );
-
-              return '$relativeTestPath?full-name=${Uri.encodeQueryComponent(location.name)}';
-            },
-          ).toList();
-        } else {
-          tests = ref
-              .watch($filePathFilters)
-              .where((path) =>
-                  package.path == path || isWithin(package.path, path))
-              // workaround to https://github.com/dart-lang/test/issues/1667
-              .map((path) => relative(path, from: package.path))
-              .toList();
-        }
-
-        final packageStream = package.isFlutter
-            ? flutterTest(
-                tests: tests,
-                arguments: arguments,
-                workdingDirectory: package.path,
-              )
-            : dartTest(
-                tests: tests,
-                arguments: arguments,
-                workdingDirectory: package.path,
-              );
+        final packageStream = _runPackage(package, ref);
 
         packagesSubscriptions.add(
           packageStream.listen((event) {
@@ -123,6 +81,62 @@ class TestEventsNotifier extends StateNotifier<TestEventsState> {
 
   void Function()? _closeSubs;
 
+  Stream<TestEvent> _runPackage(_Package package, Ref ref) {
+    final arguments = [
+      if (ref.watch($testNameFilters) != null)
+        '--name=${ref.watch($testNameFilters)!.pattern}',
+    ];
+
+    final failedTestsLocation = ref.watch($isRunningOnlyFailingTests)
+        ? (ref.watch($failedTestLocationToExecute) ?? [])
+        : const <FailedTestLocation>[];
+
+    List<String> tests;
+
+    if (failedTestsLocation.isNotEmpty) {
+      tests = failedTestsLocation
+          .where((location) => isWithin(package.path, location.testPath))
+          .map(
+        (location) {
+          // workaround to https://github.com/dart-lang/test/issues/1667
+          final relativeTestPath = relative(
+            location.testPath,
+            from: package.path,
+          );
+
+          return '$relativeTestPath?full-name=${Uri.encodeQueryComponent(location.name)}';
+        },
+      ).toList();
+    } else {
+      tests = ref
+          .watch($filePathFilters)
+          .where((path) => package.path == path || isWithin(package.path, path))
+          // workaround to https://github.com/dart-lang/test/issues/1667
+          .map((path) => relative(path, from: package.path))
+          .toList();
+    }
+
+    final coverage = ref.watch($isCoverageMode);
+
+    return package.isFlutter
+        ? flutterTest(
+            tests: tests,
+            arguments: [
+              ...arguments,
+              if (coverage) '--coverage',
+            ],
+            workdingDirectory: package.path,
+          )
+        : dartTest(
+            tests: tests,
+            arguments: [
+              ...arguments,
+              if (coverage) '--coverage=.dart_tool/spec_coverage/',
+            ],
+            workdingDirectory: package.path,
+          );
+  }
+
   /// Stops the test process
   void stop() {
     // Cancelling the stream subscription will ultimately kill the process
@@ -130,6 +144,37 @@ class TestEventsNotifier extends StateNotifier<TestEventsState> {
     state = state.copyWith(isInterrupted: true);
   }
 }
+
+final $coverageForPackage =
+    FutureProvider.autoDispose.family<void, String>((ref, packagePath) async {
+  if (!ref.watch($isCoverageMode)) return;
+
+  final package = await ref.watch($package(packagePath).future);
+
+  if (package.isFlutter) {
+    return;
+  }
+
+  final completer = Completer<void>();
+  // TODO onDispose completerError the completer
+
+  late ProviderSubscription<TestEventsState> sub;
+  sub = ref.listen($events, (previous, next) {
+    if (next.events.any((event) => event.value is TestEventDone)) {
+      completer.complete();
+      sub.close();
+    }
+  });
+
+  await completer.future;
+
+  await formatCoverage(
+    input: '$packagePath/.dart_tool/spec_coverage/',
+    packagesPath: '$packagePath/.packages',
+    reportOn: ['$packagePath/lib'],
+    output: '$packagePath/coverage/lcov.info',
+  );
+}, dependencies: [$package, $isCoverageMode]);
 
 final $allPackages = FutureProvider<List<_Package>>((ref) async {
   final workingDir = ref.watch($workingDirectory);

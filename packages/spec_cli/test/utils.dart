@@ -30,15 +30,20 @@ void groupScope(
   String description,
   FutureOr<void> Function() cb, {
   List<Override>? overrides,
+  Timeout? timeout,
 }) {
-  group(description, () {
-    return runZoned(
-      cb,
-      zoneValues: {
-        if (overrides != null) _defaultOverridesKey: overrides,
-      },
-    );
-  });
+  group(
+    description,
+    () {
+      return runZoned(
+        cb,
+        zoneValues: {
+          if (overrides != null) _defaultOverridesKey: overrides,
+        },
+      );
+    },
+    timeout: timeout,
+  );
 }
 
 @isTest
@@ -195,8 +200,6 @@ class _FramesMatch extends Matcher {
       // current frame matches current frame-matcher, testing next frame
       if (expectedFrame.matches(actualFrame, matchState)) {
         lastMatchIndex = expectedFrameIndex;
-        // TODO allow an expectation to match multiple frames
-        expectedFrameIndex++;
         actualFrameIndex++;
         continue;
       }
@@ -208,7 +211,7 @@ class _FramesMatch extends Matcher {
     }
 
     /// All the frames were matched, yet some frame matchers are remaining
-    if (expectedFrameIndex < frameMatchers.length) {
+    if (lastMatchIndex != frameMatchers.length - 1) {
       matchState[_extraExpectedFrameKey] = frameMatchers[expectedFrameIndex];
       matchState[_expectedFrameStartAtKey] = expectedFrameIndex;
       return false;

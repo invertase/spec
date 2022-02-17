@@ -93,6 +93,10 @@ Stream<TestEvent> _parseTestJsonOutput(
     eventSub = events.listen(
       controller.add,
       onError: controller.addError,
+      onDone: () async {
+        controller.add(TestProcessDone(exitCode: await process.exitCode));
+        await controller.close();
+      },
     );
   };
 
