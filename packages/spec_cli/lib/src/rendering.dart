@@ -329,8 +329,11 @@ final $timeTick = StreamProvider.autoDispose<void>((ref) {
 });
 
 final $timeElapsed = Provider.autoDispose<String>((ref) {
-  // Refresh timer every second
-  ref.watch($timeTick);
+  // Keep refreshing the timer only if tests are still pending.
+  if (ref.watch($exitCode).isLoading) {
+    // Refresh timer every second
+    ref.watch($timeTick);
+  }
 
   final startTime = ref.watch($startTime);
   final elapsedTime = DateTime.now().difference(startTime);
@@ -338,7 +341,7 @@ final $timeElapsed = Provider.autoDispose<String>((ref) {
   final timeDescription = prettyDuration(elapsedTime);
 
   return timeDescription;
-}, dependencies: [$timeTick, $startTime]);
+}, dependencies: [$timeTick, $startTime, $exitCode]);
 
 final $summary = Provider.autoDispose<String?>((ref) {
   final nonEmptySuites = ref.watch($suites).where(

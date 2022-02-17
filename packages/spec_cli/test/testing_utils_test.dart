@@ -38,6 +38,7 @@ void main() {
 
       await spec(
         workingDirectory: '${dir.path}/packages/a',
+        options: const SpecOptions(ci: false),
       );
 
       expect(
