@@ -54,5 +54,12 @@ void main() {
         const SpecOptions(watch: true),
       );
     });
+
+    test('can specify --coverage', () {
+      expect(
+        SpecOptions.fromArgs(const ['--coverage']),
+        const SpecOptions(coverage: true),
+      );
+    });
   });
 }

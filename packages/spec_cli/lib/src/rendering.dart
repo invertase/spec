@@ -459,6 +459,7 @@ final $output = Provider.autoDispose<AsyncValue<String>>((ref) {
     final isDone = ref.watch($isDone);
 
     final suitesOuput = ref
+        // TODO Don't render empty suites (suites with no user-defined test)
         .watch($completedSuiteKeysInCompletionOrder)
         .where(
           (suiteKey) => ref

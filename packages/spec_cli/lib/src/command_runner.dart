@@ -47,6 +47,11 @@ class _SpecCommandRunner extends CommandRunner<int> {
         help: 'Changes the rendering to be more adaped to CI environments.'
             ' Default to determining the environment automatically.',
       )
+      ..addFlag(
+        'coverage',
+        negatable: false,
+        help: 'Whether to collect coverage information.',
+      )
       ..addMultiOption(
         'name',
         abbr: 'n',
@@ -60,6 +65,7 @@ class _SpecCommandRunner extends CommandRunner<int> {
       fileFilters: result.rest,
       testNameFilters: result['name'] as List<String>,
       ci: result['ci'] as bool?,
+      coverage: result['coverage'] as bool,
     );
   }
 
@@ -80,6 +86,7 @@ class SpecOptions {
     this.testNameFilters = const [],
     this.watch = false,
     this.ci,
+    this.coverage = false,
   });
 
   factory SpecOptions.fromArgs(List<String> args) {
@@ -94,6 +101,7 @@ class SpecOptions {
   final List<String> fileFilters;
   final List<String> testNameFilters;
   final bool watch;
+  final bool coverage;
   final bool? ci;
 
   @override
@@ -102,6 +110,7 @@ class SpecOptions {
       other.runtimeType == runtimeType &&
       other.ci == ci &&
       other.watch == watch &&
+      other.coverage == coverage &&
       const DeepCollectionEquality().equals(other.fileFilters, fileFilters) &&
       const DeepCollectionEquality()
           .equals(testNameFilters, other.testNameFilters);
@@ -111,6 +120,7 @@ class SpecOptions {
         runtimeType,
         ci,
         watch,
+        coverage,
         const DeepCollectionEquality().hash(fileFilters),
         const DeepCollectionEquality().hash(testNameFilters),
       );
@@ -232,6 +242,7 @@ Future<int> spec({
     if (workingDirectory != null)
       $workingDirectory.overrideWithValue(Directory(workingDirectory)),
     if (options.ci != null) $isCIMode.overrideWithValue(options.ci!),
+    $isCoverageMode.overrideWithValue(options.coverage)
   ]);
 }
 

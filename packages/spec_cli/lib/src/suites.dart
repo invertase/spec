@@ -64,6 +64,7 @@ final $completedSuiteKeysInCompletionOrder =
 
           sortedSuiteKeys.add(test.next((value) => value.suiteKey));
         },
+        processDone: (_) {},
         suite: (e) {},
         start: (_) {},
         done: (_) {},
@@ -112,14 +113,23 @@ enum SuiteStatus {
   pending,
 }
 
-final $isPackageDone =
-    Provider.family.autoDispose<bool, String>((ref, packagePath) {
+final $packageExitCode =
+    Provider.family.autoDispose<AsyncValue<int>, String>((ref, packagePath) {
   return ref
       .watch($events)
       .events
       .where((e) => e.packagePath == packagePath)
-      .any((e) => e.value is TestEventDone);
+      .map((e) => e.value)
+      .whereType<TestProcessDone>()
+      .map((e) => e.exitCode)
+      .firstDataOrLoading;
 }, dependencies: [$events]);
+
+final $isPackageDone =
+    Provider.family.autoDispose<bool, String>((ref, packagePath) {
+  return !ref.watch($packageExitCode(packagePath)).isLoading &&
+      !ref.watch($coverageForPackage(packagePath)).isLoading;
+}, dependencies: [$events, $packageExitCode]);
 
 final $suiteStatus = Provider.family
     .autoDispose<SuiteStatus, Packaged<SuiteKey>>((ref, suiteKey) {
@@ -182,42 +192,27 @@ final $exitCode = Provider.autoDispose<AsyncValue<int>>(
     final packages = ref.watch($filteredPackages);
     if (packages.isLoading) return const AsyncLoading();
 
-    /// Whether the done event was emitted for all packages
-    final allPackagesDone = packages.value!.every(
-      (package) => ref
-          .watch($events)
-          .events
-          .where((event) => event.packagePath == package.path)
-          .any((event) => event.value is TestEventDone),
-    );
-
-    if (allPackagesDone) {
-      // Something probably went wrong as we likely should've been able to quit
-      // before obtaining the true "done" event, so we'll safely quit.
-
-      final hasFailingDoneEvent = ref
-          .watch($events)
-          .events
-          .map((e) => e.value)
-          .whereType<TestEventDone>()
-          .any((done) => done.success == false);
-
-      return hasFailingDoneEvent ? const AsyncData(-1) : const AsyncData(0);
+    final coverageReports = packages.value!
+        .map((p) => ref.watch($coverageForPackage(p.path)))
+        .toList();
+    if (coverageReports.any((element) => element.isLoading)) {
+      return const AsyncLoading();
+    }
+    if (coverageReports.any((element) => element.hasError)) {
+      // TODO print error
+      return const AsyncData(-1);
     }
 
-    final suites = ref.watch($suites);
-    final hasPendingSuite = suites.any(
-      (suite) => ref.watch($suiteStatus(suite.key)) == SuiteStatus.pending,
+    final hasPendingPackage = packages.value!.any(
+      (package) => !ref.watch($isPackageDone(package.path)),
     );
-    if (hasPendingSuite) return const AsyncLoading();
+    if (hasPendingPackage) return const AsyncLoading();
 
-    final hasErroredSuite = suites.any(
-      (suite) => ref.watch($suiteStatus(suite.key)) == SuiteStatus.fail,
-    );
-    if (hasErroredSuite) return const AsyncData(-1);
+    final exitCode = packages.value!
+        .map((package) => ref.watch($packageExitCode(package.path)).value!)
+        .firstWhereOrNull((exitCode) => exitCode != 0);
 
-    // All suites are completed and passing
-    return const AsyncData(0);
+    return AsyncData(exitCode ?? 0);
   },
   dependencies: [
     $suites,
@@ -226,6 +221,9 @@ final $exitCode = Provider.autoDispose<AsyncValue<int>>(
     $isEarlyAbort,
     $hasAllSuites,
     $events,
+    $isPackageDone,
+    $coverageForPackage,
+    $packageExitCode,
   ],
   name: 'exitCode',
 );

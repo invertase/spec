@@ -51,6 +51,12 @@ Time:        00:00:00
 ---
  RUNS  test/my_test.dart
 
+Test Suites: 0 total
+Tests:       0 total
+Time:        00:00:00
+---
+ RUNS  test/my_test.dart
+
 Test Suites: 1 total
 Tests:       0 total
 Time:        00:00:00

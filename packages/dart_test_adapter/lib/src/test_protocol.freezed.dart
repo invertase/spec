@@ -36,6 +36,8 @@ TestEvent _$TestEventFromJson(Map<String, dynamic> json) {
       return TestEventTestError.fromJson(json);
     case 'debug':
       return TestEventDebug.fromJson(json);
+    case 'processDone':
+      return TestProcessDone.fromJson(json);
 
     default:
       return TestEventUnknown.fromJson(json);
@@ -150,10 +152,14 @@ class _$TestEventTearOff {
     );
   }
 
-  TestEventUnknown unknown({required int time}) {
-    return TestEventUnknown(
-      time: time,
+  TestProcessDone processDone({required int exitCode}) {
+    return TestProcessDone(
+      exitCode: exitCode,
     );
+  }
+
+  TestEventUnknown unknown() {
+    return TestEventUnknown();
   }
 
   TestEvent fromJson(Map<String, Object?> json) {
@@ -166,8 +172,6 @@ const $TestEvent = _$TestEventTearOff();
 
 /// @nodoc
 mixin _$TestEvent {
-  int get time => throw _privateConstructorUsedError;
-
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
     required TResult Function(
@@ -190,7 +194,8 @@ mixin _$TestEvent {
     required TResult Function(
             int time, int suiteID, String? observatory, String? remoteDebugger)
         debug,
-    required TResult Function(int time) unknown,
+    required TResult Function(int exitCode) processDone,
+    required TResult Function() unknown,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
@@ -214,7 +219,8 @@ mixin _$TestEvent {
     TResult Function(
             int time, int suiteID, String? observatory, String? remoteDebugger)?
         debug,
-    TResult Function(int time)? unknown,
+    TResult Function(int exitCode)? processDone,
+    TResult Function()? unknown,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
@@ -238,7 +244,8 @@ mixin _$TestEvent {
     TResult Function(
             int time, int suiteID, String? observatory, String? remoteDebugger)?
         debug,
-    TResult Function(int time)? unknown,
+    TResult Function(int exitCode)? processDone,
+    TResult Function()? unknown,
     required TResult orElse(),
   }) =>
       throw _privateConstructorUsedError;
@@ -254,6 +261,7 @@ mixin _$TestEvent {
     required TResult Function(TestEventMessage value) print,
     required TResult Function(TestEventTestError value) error,
     required TResult Function(TestEventDebug value) debug,
+    required TResult Function(TestProcessDone value) processDone,
     required TResult Function(TestEventUnknown value) unknown,
   }) =>
       throw _privateConstructorUsedError;
@@ -269,6 +277,7 @@ mixin _$TestEvent {
     TResult Function(TestEventMessage value)? print,
     TResult Function(TestEventTestError value)? error,
     TResult Function(TestEventDebug value)? debug,
+    TResult Function(TestProcessDone value)? processDone,
     TResult Function(TestEventUnknown value)? unknown,
   }) =>
       throw _privateConstructorUsedError;
@@ -284,21 +293,18 @@ mixin _$TestEvent {
     TResult Function(TestEventMessage value)? print,
     TResult Function(TestEventTestError value)? error,
     TResult Function(TestEventDebug value)? debug,
+    TResult Function(TestProcessDone value)? processDone,
     TResult Function(TestEventUnknown value)? unknown,
     required TResult orElse(),
   }) =>
       throw _privateConstructorUsedError;
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-  @JsonKey(ignore: true)
-  $TestEventCopyWith<TestEvent> get copyWith =>
-      throw _privateConstructorUsedError;
 }
 
 /// @nodoc
 abstract class $TestEventCopyWith<$Res> {
   factory $TestEventCopyWith(TestEvent value, $Res Function(TestEvent) then) =
       _$TestEventCopyWithImpl<$Res>;
-  $Res call({int time});
 }
 
 /// @nodoc
@@ -308,27 +314,13 @@ class _$TestEventCopyWithImpl<$Res> implements $TestEventCopyWith<$Res> {
   final TestEvent _value;
   // ignore: unused_field
   final $Res Function(TestEvent) _then;
-
-  @override
-  $Res call({
-    Object? time = freezed,
-  }) {
-    return _then(_value.copyWith(
-      time: time == freezed
-          ? _value.time
-          : time // ignore: cast_nullable_to_non_nullable
-              as int,
-    ));
-  }
 }
 
 /// @nodoc
-abstract class $TestEventStartCopyWith<$Res>
-    implements $TestEventCopyWith<$Res> {
+abstract class $TestEventStartCopyWith<$Res> {
   factory $TestEventStartCopyWith(
           TestEventStart value, $Res Function(TestEventStart) then) =
       _$TestEventStartCopyWithImpl<$Res>;
-  @override
   $Res call({String protocolVersion, int pid, int time, String? runnerVersion});
 }
 
@@ -450,7 +442,8 @@ class _$TestEventStart implements TestEventStart {
     required TResult Function(
             int time, int suiteID, String? observatory, String? remoteDebugger)
         debug,
-    required TResult Function(int time) unknown,
+    required TResult Function(int exitCode) processDone,
+    required TResult Function() unknown,
   }) {
     return start(protocolVersion, pid, time, runnerVersion);
   }
@@ -477,7 +470,8 @@ class _$TestEventStart implements TestEventStart {
     TResult Function(
             int time, int suiteID, String? observatory, String? remoteDebugger)?
         debug,
-    TResult Function(int time)? unknown,
+    TResult Function(int exitCode)? processDone,
+    TResult Function()? unknown,
   }) {
     return start?.call(protocolVersion, pid, time, runnerVersion);
   }
@@ -504,7 +498,8 @@ class _$TestEventStart implements TestEventStart {
     TResult Function(
             int time, int suiteID, String? observatory, String? remoteDebugger)?
         debug,
-    TResult Function(int time)? unknown,
+    TResult Function(int exitCode)? processDone,
+    TResult Function()? unknown,
     required TResult orElse(),
   }) {
     if (start != null) {
@@ -526,6 +521,7 @@ class _$TestEventStart implements TestEventStart {
     required TResult Function(TestEventMessage value) print,
     required TResult Function(TestEventTestError value) error,
     required TResult Function(TestEventDebug value) debug,
+    required TResult Function(TestProcessDone value) processDone,
     required TResult Function(TestEventUnknown value) unknown,
   }) {
     return start(this);
@@ -544,6 +540,7 @@ class _$TestEventStart implements TestEventStart {
     TResult Function(TestEventMessage value)? print,
     TResult Function(TestEventTestError value)? error,
     TResult Function(TestEventDebug value)? debug,
+    TResult Function(TestProcessDone value)? processDone,
     TResult Function(TestEventUnknown value)? unknown,
   }) {
     return start?.call(this);
@@ -562,6 +559,7 @@ class _$TestEventStart implements TestEventStart {
     TResult Function(TestEventMessage value)? print,
     TResult Function(TestEventTestError value)? error,
     TResult Function(TestEventDebug value)? debug,
+    TResult Function(TestProcessDone value)? processDone,
     TResult Function(TestEventUnknown value)? unknown,
     required TResult orElse(),
   }) {
@@ -589,22 +587,18 @@ abstract class TestEventStart implements TestEvent {
 
   String get protocolVersion;
   int get pid;
-  @override
   int get time;
   String? get runnerVersion;
-  @override
   @JsonKey(ignore: true)
   $TestEventStartCopyWith<TestEventStart> get copyWith =>
       throw _privateConstructorUsedError;
 }
 
 /// @nodoc
-abstract class $TestEventDoneCopyWith<$Res>
-    implements $TestEventCopyWith<$Res> {
+abstract class $TestEventDoneCopyWith<$Res> {
   factory $TestEventDoneCopyWith(
           TestEventDone value, $Res Function(TestEventDone) then) =
       _$TestEventDoneCopyWithImpl<$Res>;
-  @override
   $Res call({bool? success, int time});
 }
 
@@ -706,7 +700,8 @@ class _$TestEventDone implements TestEventDone {
     required TResult Function(
             int time, int suiteID, String? observatory, String? remoteDebugger)
         debug,
-    required TResult Function(int time) unknown,
+    required TResult Function(int exitCode) processDone,
+    required TResult Function() unknown,
   }) {
     return done(success, time);
   }
@@ -733,7 +728,8 @@ class _$TestEventDone implements TestEventDone {
     TResult Function(
             int time, int suiteID, String? observatory, String? remoteDebugger)?
         debug,
-    TResult Function(int time)? unknown,
+    TResult Function(int exitCode)? processDone,
+    TResult Function()? unknown,
   }) {
     return done?.call(success, time);
   }
@@ -760,7 +756,8 @@ class _$TestEventDone implements TestEventDone {
     TResult Function(
             int time, int suiteID, String? observatory, String? remoteDebugger)?
         debug,
-    TResult Function(int time)? unknown,
+    TResult Function(int exitCode)? processDone,
+    TResult Function()? unknown,
     required TResult orElse(),
   }) {
     if (done != null) {
@@ -782,6 +779,7 @@ class _$TestEventDone implements TestEventDone {
     required TResult Function(TestEventMessage value) print,
     required TResult Function(TestEventTestError value) error,
     required TResult Function(TestEventDebug value) debug,
+    required TResult Function(TestProcessDone value) processDone,
     required TResult Function(TestEventUnknown value) unknown,
   }) {
     return done(this);
@@ -800,6 +798,7 @@ class _$TestEventDone implements TestEventDone {
     TResult Function(TestEventMessage value)? print,
     TResult Function(TestEventTestError value)? error,
     TResult Function(TestEventDebug value)? debug,
+    TResult Function(TestProcessDone value)? processDone,
     TResult Function(TestEventUnknown value)? unknown,
   }) {
     return done?.call(this);
@@ -818,6 +817,7 @@ class _$TestEventDone implements TestEventDone {
     TResult Function(TestEventMessage value)? print,
     TResult Function(TestEventTestError value)? error,
     TResult Function(TestEventDebug value)? debug,
+    TResult Function(TestProcessDone value)? processDone,
     TResult Function(TestEventUnknown value)? unknown,
     required TResult orElse(),
   }) {
@@ -845,21 +845,17 @@ abstract class TestEventDone implements TestEvent {
   /// Will be `null` if the test runner was close before all tests completed
   /// running.
   bool? get success;
-  @override
   int get time;
-  @override
   @JsonKey(ignore: true)
   $TestEventDoneCopyWith<TestEventDone> get copyWith =>
       throw _privateConstructorUsedError;
 }
 
 /// @nodoc
-abstract class $TestEventAllSuitesCopyWith<$Res>
-    implements $TestEventCopyWith<$Res> {
+abstract class $TestEventAllSuitesCopyWith<$Res> {
   factory $TestEventAllSuitesCopyWith(
           TestEventAllSuites value, $Res Function(TestEventAllSuites) then) =
       _$TestEventAllSuitesCopyWithImpl<$Res>;
-  @override
   $Res call({int count, int time});
 }
 
@@ -957,7 +953,8 @@ class _$TestEventAllSuites implements TestEventAllSuites {
     required TResult Function(
             int time, int suiteID, String? observatory, String? remoteDebugger)
         debug,
-    required TResult Function(int time) unknown,
+    required TResult Function(int exitCode) processDone,
+    required TResult Function() unknown,
   }) {
     return allSuites(count, time);
   }
@@ -984,7 +981,8 @@ class _$TestEventAllSuites implements TestEventAllSuites {
     TResult Function(
             int time, int suiteID, String? observatory, String? remoteDebugger)?
         debug,
-    TResult Function(int time)? unknown,
+    TResult Function(int exitCode)? processDone,
+    TResult Function()? unknown,
   }) {
     return allSuites?.call(count, time);
   }
@@ -1011,7 +1009,8 @@ class _$TestEventAllSuites implements TestEventAllSuites {
     TResult Function(
             int time, int suiteID, String? observatory, String? remoteDebugger)?
         debug,
-    TResult Function(int time)? unknown,
+    TResult Function(int exitCode)? processDone,
+    TResult Function()? unknown,
     required TResult orElse(),
   }) {
     if (allSuites != null) {
@@ -1033,6 +1032,7 @@ class _$TestEventAllSuites implements TestEventAllSuites {
     required TResult Function(TestEventMessage value) print,
     required TResult Function(TestEventTestError value) error,
     required TResult Function(TestEventDebug value) debug,
+    required TResult Function(TestProcessDone value) processDone,
     required TResult Function(TestEventUnknown value) unknown,
   }) {
     return allSuites(this);
@@ -1051,6 +1051,7 @@ class _$TestEventAllSuites implements TestEventAllSuites {
     TResult Function(TestEventMessage value)? print,
     TResult Function(TestEventTestError value)? error,
     TResult Function(TestEventDebug value)? debug,
+    TResult Function(TestProcessDone value)? processDone,
     TResult Function(TestEventUnknown value)? unknown,
   }) {
     return allSuites?.call(this);
@@ -1069,6 +1070,7 @@ class _$TestEventAllSuites implements TestEventAllSuites {
     TResult Function(TestEventMessage value)? print,
     TResult Function(TestEventTestError value)? error,
     TResult Function(TestEventDebug value)? debug,
+    TResult Function(TestProcessDone value)? processDone,
     TResult Function(TestEventUnknown value)? unknown,
     required TResult orElse(),
   }) {
@@ -1092,21 +1094,17 @@ abstract class TestEventAllSuites implements TestEvent {
       _$TestEventAllSuites.fromJson;
 
   int get count;
-  @override
   int get time;
-  @override
   @JsonKey(ignore: true)
   $TestEventAllSuitesCopyWith<TestEventAllSuites> get copyWith =>
       throw _privateConstructorUsedError;
 }
 
 /// @nodoc
-abstract class $TestEventSuiteCopyWith<$Res>
-    implements $TestEventCopyWith<$Res> {
+abstract class $TestEventSuiteCopyWith<$Res> {
   factory $TestEventSuiteCopyWith(
           TestEventSuite value, $Res Function(TestEventSuite) then) =
       _$TestEventSuiteCopyWithImpl<$Res>;
-  @override
   $Res call({Suite suite, int time});
 
   $SuiteCopyWith<$Res> get suite;
@@ -1212,7 +1210,8 @@ class _$TestEventSuite implements TestEventSuite {
     required TResult Function(
             int time, int suiteID, String? observatory, String? remoteDebugger)
         debug,
-    required TResult Function(int time) unknown,
+    required TResult Function(int exitCode) processDone,
+    required TResult Function() unknown,
   }) {
     return suite(this.suite, time);
   }
@@ -1239,7 +1238,8 @@ class _$TestEventSuite implements TestEventSuite {
     TResult Function(
             int time, int suiteID, String? observatory, String? remoteDebugger)?
         debug,
-    TResult Function(int time)? unknown,
+    TResult Function(int exitCode)? processDone,
+    TResult Function()? unknown,
   }) {
     return suite?.call(this.suite, time);
   }
@@ -1266,7 +1266,8 @@ class _$TestEventSuite implements TestEventSuite {
     TResult Function(
             int time, int suiteID, String? observatory, String? remoteDebugger)?
         debug,
-    TResult Function(int time)? unknown,
+    TResult Function(int exitCode)? processDone,
+    TResult Function()? unknown,
     required TResult orElse(),
   }) {
     if (suite != null) {
@@ -1288,6 +1289,7 @@ class _$TestEventSuite implements TestEventSuite {
     required TResult Function(TestEventMessage value) print,
     required TResult Function(TestEventTestError value) error,
     required TResult Function(TestEventDebug value) debug,
+    required TResult Function(TestProcessDone value) processDone,
     required TResult Function(TestEventUnknown value) unknown,
   }) {
     return suite(this);
@@ -1306,6 +1308,7 @@ class _$TestEventSuite implements TestEventSuite {
     TResult Function(TestEventMessage value)? print,
     TResult Function(TestEventTestError value)? error,
     TResult Function(TestEventDebug value)? debug,
+    TResult Function(TestProcessDone value)? processDone,
     TResult Function(TestEventUnknown value)? unknown,
   }) {
     return suite?.call(this);
@@ -1324,6 +1327,7 @@ class _$TestEventSuite implements TestEventSuite {
     TResult Function(TestEventMessage value)? print,
     TResult Function(TestEventTestError value)? error,
     TResult Function(TestEventDebug value)? debug,
+    TResult Function(TestProcessDone value)? processDone,
     TResult Function(TestEventUnknown value)? unknown,
     required TResult orElse(),
   }) {
@@ -1346,21 +1350,17 @@ abstract class TestEventSuite implements TestEvent {
       _$TestEventSuite.fromJson;
 
   Suite get suite;
-  @override
   int get time;
-  @override
   @JsonKey(ignore: true)
   $TestEventSuiteCopyWith<TestEventSuite> get copyWith =>
       throw _privateConstructorUsedError;
 }
 
 /// @nodoc
-abstract class $TestEventGroupCopyWith<$Res>
-    implements $TestEventCopyWith<$Res> {
+abstract class $TestEventGroupCopyWith<$Res> {
   factory $TestEventGroupCopyWith(
           TestEventGroup value, $Res Function(TestEventGroup) then) =
       _$TestEventGroupCopyWithImpl<$Res>;
-  @override
   $Res call({Group group, int time});
 
   $GroupCopyWith<$Res> get group;
@@ -1466,7 +1466,8 @@ class _$TestEventGroup implements TestEventGroup {
     required TResult Function(
             int time, int suiteID, String? observatory, String? remoteDebugger)
         debug,
-    required TResult Function(int time) unknown,
+    required TResult Function(int exitCode) processDone,
+    required TResult Function() unknown,
   }) {
     return group(this.group, time);
   }
@@ -1493,7 +1494,8 @@ class _$TestEventGroup implements TestEventGroup {
     TResult Function(
             int time, int suiteID, String? observatory, String? remoteDebugger)?
         debug,
-    TResult Function(int time)? unknown,
+    TResult Function(int exitCode)? processDone,
+    TResult Function()? unknown,
   }) {
     return group?.call(this.group, time);
   }
@@ -1520,7 +1522,8 @@ class _$TestEventGroup implements TestEventGroup {
     TResult Function(
             int time, int suiteID, String? observatory, String? remoteDebugger)?
         debug,
-    TResult Function(int time)? unknown,
+    TResult Function(int exitCode)? processDone,
+    TResult Function()? unknown,
     required TResult orElse(),
   }) {
     if (group != null) {
@@ -1542,6 +1545,7 @@ class _$TestEventGroup implements TestEventGroup {
     required TResult Function(TestEventMessage value) print,
     required TResult Function(TestEventTestError value) error,
     required TResult Function(TestEventDebug value) debug,
+    required TResult Function(TestProcessDone value) processDone,
     required TResult Function(TestEventUnknown value) unknown,
   }) {
     return group(this);
@@ -1560,6 +1564,7 @@ class _$TestEventGroup implements TestEventGroup {
     TResult Function(TestEventMessage value)? print,
     TResult Function(TestEventTestError value)? error,
     TResult Function(TestEventDebug value)? debug,
+    TResult Function(TestProcessDone value)? processDone,
     TResult Function(TestEventUnknown value)? unknown,
   }) {
     return group?.call(this);
@@ -1578,6 +1583,7 @@ class _$TestEventGroup implements TestEventGroup {
     TResult Function(TestEventMessage value)? print,
     TResult Function(TestEventTestError value)? error,
     TResult Function(TestEventDebug value)? debug,
+    TResult Function(TestProcessDone value)? processDone,
     TResult Function(TestEventUnknown value)? unknown,
     required TResult orElse(),
   }) {
@@ -1600,21 +1606,17 @@ abstract class TestEventGroup implements TestEvent {
       _$TestEventGroup.fromJson;
 
   Group get group;
-  @override
   int get time;
-  @override
   @JsonKey(ignore: true)
   $TestEventGroupCopyWith<TestEventGroup> get copyWith =>
       throw _privateConstructorUsedError;
 }
 
 /// @nodoc
-abstract class $TestEventTestStartCopyWith<$Res>
-    implements $TestEventCopyWith<$Res> {
+abstract class $TestEventTestStartCopyWith<$Res> {
   factory $TestEventTestStartCopyWith(
           TestEventTestStart value, $Res Function(TestEventTestStart) then) =
       _$TestEventTestStartCopyWithImpl<$Res>;
-  @override
   $Res call({Test test, int time});
 
   $TestCopyWith<$Res> get test;
@@ -1721,7 +1723,8 @@ class _$TestEventTestStart implements TestEventTestStart {
     required TResult Function(
             int time, int suiteID, String? observatory, String? remoteDebugger)
         debug,
-    required TResult Function(int time) unknown,
+    required TResult Function(int exitCode) processDone,
+    required TResult Function() unknown,
   }) {
     return testStart(test, time);
   }
@@ -1748,7 +1751,8 @@ class _$TestEventTestStart implements TestEventTestStart {
     TResult Function(
             int time, int suiteID, String? observatory, String? remoteDebugger)?
         debug,
-    TResult Function(int time)? unknown,
+    TResult Function(int exitCode)? processDone,
+    TResult Function()? unknown,
   }) {
     return testStart?.call(test, time);
   }
@@ -1775,7 +1779,8 @@ class _$TestEventTestStart implements TestEventTestStart {
     TResult Function(
             int time, int suiteID, String? observatory, String? remoteDebugger)?
         debug,
-    TResult Function(int time)? unknown,
+    TResult Function(int exitCode)? processDone,
+    TResult Function()? unknown,
     required TResult orElse(),
   }) {
     if (testStart != null) {
@@ -1797,6 +1802,7 @@ class _$TestEventTestStart implements TestEventTestStart {
     required TResult Function(TestEventMessage value) print,
     required TResult Function(TestEventTestError value) error,
     required TResult Function(TestEventDebug value) debug,
+    required TResult Function(TestProcessDone value) processDone,
     required TResult Function(TestEventUnknown value) unknown,
   }) {
     return testStart(this);
@@ -1815,6 +1821,7 @@ class _$TestEventTestStart implements TestEventTestStart {
     TResult Function(TestEventMessage value)? print,
     TResult Function(TestEventTestError value)? error,
     TResult Function(TestEventDebug value)? debug,
+    TResult Function(TestProcessDone value)? processDone,
     TResult Function(TestEventUnknown value)? unknown,
   }) {
     return testStart?.call(this);
@@ -1833,6 +1840,7 @@ class _$TestEventTestStart implements TestEventTestStart {
     TResult Function(TestEventMessage value)? print,
     TResult Function(TestEventTestError value)? error,
     TResult Function(TestEventDebug value)? debug,
+    TResult Function(TestProcessDone value)? processDone,
     TResult Function(TestEventUnknown value)? unknown,
     required TResult orElse(),
   }) {
@@ -1856,21 +1864,17 @@ abstract class TestEventTestStart implements TestEvent {
       _$TestEventTestStart.fromJson;
 
   Test get test;
-  @override
   int get time;
-  @override
   @JsonKey(ignore: true)
   $TestEventTestStartCopyWith<TestEventTestStart> get copyWith =>
       throw _privateConstructorUsedError;
 }
 
 /// @nodoc
-abstract class $TestEventTestDoneCopyWith<$Res>
-    implements $TestEventCopyWith<$Res> {
+abstract class $TestEventTestDoneCopyWith<$Res> {
   factory $TestEventTestDoneCopyWith(
           TestEventTestDone value, $Res Function(TestEventTestDone) then) =
       _$TestEventTestDoneCopyWithImpl<$Res>;
-  @override
   $Res call(
       {int time, int testID, bool hidden, bool skipped, TestDoneStatus result});
 }
@@ -2002,7 +2006,8 @@ class _$TestEventTestDone implements TestEventTestDone {
     required TResult Function(
             int time, int suiteID, String? observatory, String? remoteDebugger)
         debug,
-    required TResult Function(int time) unknown,
+    required TResult Function(int exitCode) processDone,
+    required TResult Function() unknown,
   }) {
     return testDone(time, testID, hidden, skipped, result);
   }
@@ -2029,7 +2034,8 @@ class _$TestEventTestDone implements TestEventTestDone {
     TResult Function(
             int time, int suiteID, String? observatory, String? remoteDebugger)?
         debug,
-    TResult Function(int time)? unknown,
+    TResult Function(int exitCode)? processDone,
+    TResult Function()? unknown,
   }) {
     return testDone?.call(time, testID, hidden, skipped, result);
   }
@@ -2056,7 +2062,8 @@ class _$TestEventTestDone implements TestEventTestDone {
     TResult Function(
             int time, int suiteID, String? observatory, String? remoteDebugger)?
         debug,
-    TResult Function(int time)? unknown,
+    TResult Function(int exitCode)? processDone,
+    TResult Function()? unknown,
     required TResult orElse(),
   }) {
     if (testDone != null) {
@@ -2078,6 +2085,7 @@ class _$TestEventTestDone implements TestEventTestDone {
     required TResult Function(TestEventMessage value) print,
     required TResult Function(TestEventTestError value) error,
     required TResult Function(TestEventDebug value) debug,
+    required TResult Function(TestProcessDone value) processDone,
     required TResult Function(TestEventUnknown value) unknown,
   }) {
     return testDone(this);
@@ -2096,6 +2104,7 @@ class _$TestEventTestDone implements TestEventTestDone {
     TResult Function(TestEventMessage value)? print,
     TResult Function(TestEventTestError value)? error,
     TResult Function(TestEventDebug value)? debug,
+    TResult Function(TestProcessDone value)? processDone,
     TResult Function(TestEventUnknown value)? unknown,
   }) {
     return testDone?.call(this);
@@ -2114,6 +2123,7 @@ class _$TestEventTestDone implements TestEventTestDone {
     TResult Function(TestEventMessage value)? print,
     TResult Function(TestEventTestError value)? error,
     TResult Function(TestEventDebug value)? debug,
+    TResult Function(TestProcessDone value)? processDone,
     TResult Function(TestEventUnknown value)? unknown,
     required TResult orElse(),
   }) {
@@ -2140,25 +2150,21 @@ abstract class TestEventTestDone implements TestEvent {
   factory TestEventTestDone.fromJson(Map<String, dynamic> json) =
       _$TestEventTestDone.fromJson;
 
-  @override
   int get time;
   int get testID;
   bool get hidden;
   bool get skipped;
   TestDoneStatus get result;
-  @override
   @JsonKey(ignore: true)
   $TestEventTestDoneCopyWith<TestEventTestDone> get copyWith =>
       throw _privateConstructorUsedError;
 }
 
 /// @nodoc
-abstract class $TestEventMessageCopyWith<$Res>
-    implements $TestEventCopyWith<$Res> {
+abstract class $TestEventMessageCopyWith<$Res> {
   factory $TestEventMessageCopyWith(
           TestEventMessage value, $Res Function(TestEventMessage) then) =
       _$TestEventMessageCopyWithImpl<$Res>;
-  @override
   $Res call({int time, int testID, String messageType, String message});
 }
 
@@ -2279,7 +2285,8 @@ class _$TestEventMessage implements TestEventMessage {
     required TResult Function(
             int time, int suiteID, String? observatory, String? remoteDebugger)
         debug,
-    required TResult Function(int time) unknown,
+    required TResult Function(int exitCode) processDone,
+    required TResult Function() unknown,
   }) {
     return print(time, testID, messageType, message);
   }
@@ -2306,7 +2313,8 @@ class _$TestEventMessage implements TestEventMessage {
     TResult Function(
             int time, int suiteID, String? observatory, String? remoteDebugger)?
         debug,
-    TResult Function(int time)? unknown,
+    TResult Function(int exitCode)? processDone,
+    TResult Function()? unknown,
   }) {
     return print?.call(time, testID, messageType, message);
   }
@@ -2333,7 +2341,8 @@ class _$TestEventMessage implements TestEventMessage {
     TResult Function(
             int time, int suiteID, String? observatory, String? remoteDebugger)?
         debug,
-    TResult Function(int time)? unknown,
+    TResult Function(int exitCode)? processDone,
+    TResult Function()? unknown,
     required TResult orElse(),
   }) {
     if (print != null) {
@@ -2355,6 +2364,7 @@ class _$TestEventMessage implements TestEventMessage {
     required TResult Function(TestEventMessage value) print,
     required TResult Function(TestEventTestError value) error,
     required TResult Function(TestEventDebug value) debug,
+    required TResult Function(TestProcessDone value) processDone,
     required TResult Function(TestEventUnknown value) unknown,
   }) {
     return print(this);
@@ -2373,6 +2383,7 @@ class _$TestEventMessage implements TestEventMessage {
     TResult Function(TestEventMessage value)? print,
     TResult Function(TestEventTestError value)? error,
     TResult Function(TestEventDebug value)? debug,
+    TResult Function(TestProcessDone value)? processDone,
     TResult Function(TestEventUnknown value)? unknown,
   }) {
     return print?.call(this);
@@ -2391,6 +2402,7 @@ class _$TestEventMessage implements TestEventMessage {
     TResult Function(TestEventMessage value)? print,
     TResult Function(TestEventTestError value)? error,
     TResult Function(TestEventDebug value)? debug,
+    TResult Function(TestProcessDone value)? processDone,
     TResult Function(TestEventUnknown value)? unknown,
     required TResult orElse(),
   }) {
@@ -2416,24 +2428,20 @@ abstract class TestEventMessage implements TestEvent {
   factory TestEventMessage.fromJson(Map<String, dynamic> json) =
       _$TestEventMessage.fromJson;
 
-  @override
   int get time;
   int get testID;
   String get messageType;
   String get message;
-  @override
   @JsonKey(ignore: true)
   $TestEventMessageCopyWith<TestEventMessage> get copyWith =>
       throw _privateConstructorUsedError;
 }
 
 /// @nodoc
-abstract class $TestEventTestErrorCopyWith<$Res>
-    implements $TestEventCopyWith<$Res> {
+abstract class $TestEventTestErrorCopyWith<$Res> {
   factory $TestEventTestErrorCopyWith(
           TestEventTestError value, $Res Function(TestEventTestError) then) =
       _$TestEventTestErrorCopyWithImpl<$Res>;
-  @override
   $Res call(
       {int time, int testID, String error, String stackTrace, bool isFailure});
 }
@@ -2566,7 +2574,8 @@ class _$TestEventTestError implements TestEventTestError {
     required TResult Function(
             int time, int suiteID, String? observatory, String? remoteDebugger)
         debug,
-    required TResult Function(int time) unknown,
+    required TResult Function(int exitCode) processDone,
+    required TResult Function() unknown,
   }) {
     return error(time, testID, this.error, stackTrace, isFailure);
   }
@@ -2593,7 +2602,8 @@ class _$TestEventTestError implements TestEventTestError {
     TResult Function(
             int time, int suiteID, String? observatory, String? remoteDebugger)?
         debug,
-    TResult Function(int time)? unknown,
+    TResult Function(int exitCode)? processDone,
+    TResult Function()? unknown,
   }) {
     return error?.call(time, testID, this.error, stackTrace, isFailure);
   }
@@ -2620,7 +2630,8 @@ class _$TestEventTestError implements TestEventTestError {
     TResult Function(
             int time, int suiteID, String? observatory, String? remoteDebugger)?
         debug,
-    TResult Function(int time)? unknown,
+    TResult Function(int exitCode)? processDone,
+    TResult Function()? unknown,
     required TResult orElse(),
   }) {
     if (error != null) {
@@ -2642,6 +2653,7 @@ class _$TestEventTestError implements TestEventTestError {
     required TResult Function(TestEventMessage value) print,
     required TResult Function(TestEventTestError value) error,
     required TResult Function(TestEventDebug value) debug,
+    required TResult Function(TestProcessDone value) processDone,
     required TResult Function(TestEventUnknown value) unknown,
   }) {
     return error(this);
@@ -2660,6 +2672,7 @@ class _$TestEventTestError implements TestEventTestError {
     TResult Function(TestEventMessage value)? print,
     TResult Function(TestEventTestError value)? error,
     TResult Function(TestEventDebug value)? debug,
+    TResult Function(TestProcessDone value)? processDone,
     TResult Function(TestEventUnknown value)? unknown,
   }) {
     return error?.call(this);
@@ -2678,6 +2691,7 @@ class _$TestEventTestError implements TestEventTestError {
     TResult Function(TestEventMessage value)? print,
     TResult Function(TestEventTestError value)? error,
     TResult Function(TestEventDebug value)? debug,
+    TResult Function(TestProcessDone value)? processDone,
     TResult Function(TestEventUnknown value)? unknown,
     required TResult orElse(),
   }) {
@@ -2704,25 +2718,21 @@ abstract class TestEventTestError implements TestEvent {
   factory TestEventTestError.fromJson(Map<String, dynamic> json) =
       _$TestEventTestError.fromJson;
 
-  @override
   int get time;
   int get testID;
   String get error;
   String get stackTrace;
   bool get isFailure;
-  @override
   @JsonKey(ignore: true)
   $TestEventTestErrorCopyWith<TestEventTestError> get copyWith =>
       throw _privateConstructorUsedError;
 }
 
 /// @nodoc
-abstract class $TestEventDebugCopyWith<$Res>
-    implements $TestEventCopyWith<$Res> {
+abstract class $TestEventDebugCopyWith<$Res> {
   factory $TestEventDebugCopyWith(
           TestEventDebug value, $Res Function(TestEventDebug) then) =
       _$TestEventDebugCopyWithImpl<$Res>;
-  @override
   $Res call(
       {int time, int suiteID, String? observatory, String? remoteDebugger});
 }
@@ -2845,7 +2855,8 @@ class _$TestEventDebug implements TestEventDebug {
     required TResult Function(
             int time, int suiteID, String? observatory, String? remoteDebugger)
         debug,
-    required TResult Function(int time) unknown,
+    required TResult Function(int exitCode) processDone,
+    required TResult Function() unknown,
   }) {
     return debug(time, suiteID, observatory, remoteDebugger);
   }
@@ -2872,7 +2883,8 @@ class _$TestEventDebug implements TestEventDebug {
     TResult Function(
             int time, int suiteID, String? observatory, String? remoteDebugger)?
         debug,
-    TResult Function(int time)? unknown,
+    TResult Function(int exitCode)? processDone,
+    TResult Function()? unknown,
   }) {
     return debug?.call(time, suiteID, observatory, remoteDebugger);
   }
@@ -2899,7 +2911,8 @@ class _$TestEventDebug implements TestEventDebug {
     TResult Function(
             int time, int suiteID, String? observatory, String? remoteDebugger)?
         debug,
-    TResult Function(int time)? unknown,
+    TResult Function(int exitCode)? processDone,
+    TResult Function()? unknown,
     required TResult orElse(),
   }) {
     if (debug != null) {
@@ -2921,6 +2934,7 @@ class _$TestEventDebug implements TestEventDebug {
     required TResult Function(TestEventMessage value) print,
     required TResult Function(TestEventTestError value) error,
     required TResult Function(TestEventDebug value) debug,
+    required TResult Function(TestProcessDone value) processDone,
     required TResult Function(TestEventUnknown value) unknown,
   }) {
     return debug(this);
@@ -2939,6 +2953,7 @@ class _$TestEventDebug implements TestEventDebug {
     TResult Function(TestEventMessage value)? print,
     TResult Function(TestEventTestError value)? error,
     TResult Function(TestEventDebug value)? debug,
+    TResult Function(TestProcessDone value)? processDone,
     TResult Function(TestEventUnknown value)? unknown,
   }) {
     return debug?.call(this);
@@ -2957,6 +2972,7 @@ class _$TestEventDebug implements TestEventDebug {
     TResult Function(TestEventMessage value)? print,
     TResult Function(TestEventTestError value)? error,
     TResult Function(TestEventDebug value)? debug,
+    TResult Function(TestProcessDone value)? processDone,
     TResult Function(TestEventUnknown value)? unknown,
     required TResult orElse(),
   }) {
@@ -2982,45 +2998,41 @@ abstract class TestEventDebug implements TestEvent {
   factory TestEventDebug.fromJson(Map<String, dynamic> json) =
       _$TestEventDebug.fromJson;
 
-  @override
   int get time;
   int get suiteID;
   String? get observatory;
   String? get remoteDebugger;
-  @override
   @JsonKey(ignore: true)
   $TestEventDebugCopyWith<TestEventDebug> get copyWith =>
       throw _privateConstructorUsedError;
 }
 
 /// @nodoc
-abstract class $TestEventUnknownCopyWith<$Res>
-    implements $TestEventCopyWith<$Res> {
-  factory $TestEventUnknownCopyWith(
-          TestEventUnknown value, $Res Function(TestEventUnknown) then) =
-      _$TestEventUnknownCopyWithImpl<$Res>;
-  @override
-  $Res call({int time});
+abstract class $TestProcessDoneCopyWith<$Res> {
+  factory $TestProcessDoneCopyWith(
+          TestProcessDone value, $Res Function(TestProcessDone) then) =
+      _$TestProcessDoneCopyWithImpl<$Res>;
+  $Res call({int exitCode});
 }
 
 /// @nodoc
-class _$TestEventUnknownCopyWithImpl<$Res> extends _$TestEventCopyWithImpl<$Res>
-    implements $TestEventUnknownCopyWith<$Res> {
-  _$TestEventUnknownCopyWithImpl(
-      TestEventUnknown _value, $Res Function(TestEventUnknown) _then)
-      : super(_value, (v) => _then(v as TestEventUnknown));
+class _$TestProcessDoneCopyWithImpl<$Res> extends _$TestEventCopyWithImpl<$Res>
+    implements $TestProcessDoneCopyWith<$Res> {
+  _$TestProcessDoneCopyWithImpl(
+      TestProcessDone _value, $Res Function(TestProcessDone) _then)
+      : super(_value, (v) => _then(v as TestProcessDone));
 
   @override
-  TestEventUnknown get _value => super._value as TestEventUnknown;
+  TestProcessDone get _value => super._value as TestProcessDone;
 
   @override
   $Res call({
-    Object? time = freezed,
+    Object? exitCode = freezed,
   }) {
-    return _then(TestEventUnknown(
-      time: time == freezed
-          ? _value.time
-          : time // ignore: cast_nullable_to_non_nullable
+    return _then(TestProcessDone(
+      exitCode: exitCode == freezed
+          ? _value.exitCode
+          : exitCode // ignore: cast_nullable_to_non_nullable
               as int,
     ));
   }
@@ -3028,40 +3040,40 @@ class _$TestEventUnknownCopyWithImpl<$Res> extends _$TestEventCopyWithImpl<$Res>
 
 /// @nodoc
 @JsonSerializable()
-class _$TestEventUnknown implements TestEventUnknown {
-  _$TestEventUnknown({required this.time, String? $type})
-      : $type = $type ?? 'unknown';
+class _$TestProcessDone implements TestProcessDone {
+  _$TestProcessDone({required this.exitCode, String? $type})
+      : $type = $type ?? 'processDone';
 
-  factory _$TestEventUnknown.fromJson(Map<String, dynamic> json) =>
-      _$$TestEventUnknownFromJson(json);
+  factory _$TestProcessDone.fromJson(Map<String, dynamic> json) =>
+      _$$TestProcessDoneFromJson(json);
 
   @override
-  final int time;
+  final int exitCode;
 
   @JsonKey(name: 'type')
   final String $type;
 
   @override
   String toString() {
-    return 'TestEvent.unknown(time: $time)';
+    return 'TestEvent.processDone(exitCode: $exitCode)';
   }
 
   @override
   bool operator ==(dynamic other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is TestEventUnknown &&
-            const DeepCollectionEquality().equals(other.time, time));
+            other is TestProcessDone &&
+            const DeepCollectionEquality().equals(other.exitCode, exitCode));
   }
 
   @override
   int get hashCode =>
-      Object.hash(runtimeType, const DeepCollectionEquality().hash(time));
+      Object.hash(runtimeType, const DeepCollectionEquality().hash(exitCode));
 
   @JsonKey(ignore: true)
   @override
-  $TestEventUnknownCopyWith<TestEventUnknown> get copyWith =>
-      _$TestEventUnknownCopyWithImpl<TestEventUnknown>(this, _$identity);
+  $TestProcessDoneCopyWith<TestProcessDone> get copyWith =>
+      _$TestProcessDoneCopyWithImpl<TestProcessDone>(this, _$identity);
 
   @override
   @optionalTypeArgs
@@ -3086,9 +3098,10 @@ class _$TestEventUnknown implements TestEventUnknown {
     required TResult Function(
             int time, int suiteID, String? observatory, String? remoteDebugger)
         debug,
-    required TResult Function(int time) unknown,
+    required TResult Function(int exitCode) processDone,
+    required TResult Function() unknown,
   }) {
-    return unknown(time);
+    return processDone(exitCode);
   }
 
   @override
@@ -3113,9 +3126,10 @@ class _$TestEventUnknown implements TestEventUnknown {
     TResult Function(
             int time, int suiteID, String? observatory, String? remoteDebugger)?
         debug,
-    TResult Function(int time)? unknown,
+    TResult Function(int exitCode)? processDone,
+    TResult Function()? unknown,
   }) {
-    return unknown?.call(time);
+    return processDone?.call(exitCode);
   }
 
   @override
@@ -3140,11 +3154,12 @@ class _$TestEventUnknown implements TestEventUnknown {
     TResult Function(
             int time, int suiteID, String? observatory, String? remoteDebugger)?
         debug,
-    TResult Function(int time)? unknown,
+    TResult Function(int exitCode)? processDone,
+    TResult Function()? unknown,
     required TResult orElse(),
   }) {
-    if (unknown != null) {
-      return unknown(time);
+    if (processDone != null) {
+      return processDone(exitCode);
     }
     return orElse();
   }
@@ -3162,6 +3177,218 @@ class _$TestEventUnknown implements TestEventUnknown {
     required TResult Function(TestEventMessage value) print,
     required TResult Function(TestEventTestError value) error,
     required TResult Function(TestEventDebug value) debug,
+    required TResult Function(TestProcessDone value) processDone,
+    required TResult Function(TestEventUnknown value) unknown,
+  }) {
+    return processDone(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult Function(TestEventStart value)? start,
+    TResult Function(TestEventDone value)? done,
+    TResult Function(TestEventAllSuites value)? allSuites,
+    TResult Function(TestEventSuite value)? suite,
+    TResult Function(TestEventGroup value)? group,
+    TResult Function(TestEventTestStart value)? testStart,
+    TResult Function(TestEventTestDone value)? testDone,
+    TResult Function(TestEventMessage value)? print,
+    TResult Function(TestEventTestError value)? error,
+    TResult Function(TestEventDebug value)? debug,
+    TResult Function(TestProcessDone value)? processDone,
+    TResult Function(TestEventUnknown value)? unknown,
+  }) {
+    return processDone?.call(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(TestEventStart value)? start,
+    TResult Function(TestEventDone value)? done,
+    TResult Function(TestEventAllSuites value)? allSuites,
+    TResult Function(TestEventSuite value)? suite,
+    TResult Function(TestEventGroup value)? group,
+    TResult Function(TestEventTestStart value)? testStart,
+    TResult Function(TestEventTestDone value)? testDone,
+    TResult Function(TestEventMessage value)? print,
+    TResult Function(TestEventTestError value)? error,
+    TResult Function(TestEventDebug value)? debug,
+    TResult Function(TestProcessDone value)? processDone,
+    TResult Function(TestEventUnknown value)? unknown,
+    required TResult orElse(),
+  }) {
+    if (processDone != null) {
+      return processDone(this);
+    }
+    return orElse();
+  }
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$TestProcessDoneToJson(this);
+  }
+}
+
+abstract class TestProcessDone implements TestEvent {
+  factory TestProcessDone({required int exitCode}) = _$TestProcessDone;
+
+  factory TestProcessDone.fromJson(Map<String, dynamic> json) =
+      _$TestProcessDone.fromJson;
+
+  int get exitCode;
+  @JsonKey(ignore: true)
+  $TestProcessDoneCopyWith<TestProcessDone> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $TestEventUnknownCopyWith<$Res> {
+  factory $TestEventUnknownCopyWith(
+          TestEventUnknown value, $Res Function(TestEventUnknown) then) =
+      _$TestEventUnknownCopyWithImpl<$Res>;
+}
+
+/// @nodoc
+class _$TestEventUnknownCopyWithImpl<$Res> extends _$TestEventCopyWithImpl<$Res>
+    implements $TestEventUnknownCopyWith<$Res> {
+  _$TestEventUnknownCopyWithImpl(
+      TestEventUnknown _value, $Res Function(TestEventUnknown) _then)
+      : super(_value, (v) => _then(v as TestEventUnknown));
+
+  @override
+  TestEventUnknown get _value => super._value as TestEventUnknown;
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$TestEventUnknown implements TestEventUnknown {
+  _$TestEventUnknown({String? $type}) : $type = $type ?? 'unknown';
+
+  factory _$TestEventUnknown.fromJson(Map<String, dynamic> json) =>
+      _$$TestEventUnknownFromJson(json);
+
+  @JsonKey(name: 'type')
+  final String $type;
+
+  @override
+  String toString() {
+    return 'TestEvent.unknown()';
+  }
+
+  @override
+  bool operator ==(dynamic other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType && other is TestEventUnknown);
+  }
+
+  @override
+  int get hashCode => runtimeType.hashCode;
+
+  @override
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function(
+            String protocolVersion, int pid, int time, String? runnerVersion)
+        start,
+    required TResult Function(bool? success, int time) done,
+    required TResult Function(int count, int time) allSuites,
+    required TResult Function(Suite suite, int time) suite,
+    required TResult Function(Group group, int time) group,
+    required TResult Function(Test test, int time) testStart,
+    required TResult Function(int time, int testID, bool hidden, bool skipped,
+            TestDoneStatus result)
+        testDone,
+    required TResult Function(
+            int time, int testID, String messageType, String message)
+        print,
+    required TResult Function(int time, int testID, String error,
+            String stackTrace, bool isFailure)
+        error,
+    required TResult Function(
+            int time, int suiteID, String? observatory, String? remoteDebugger)
+        debug,
+    required TResult Function(int exitCode) processDone,
+    required TResult Function() unknown,
+  }) {
+    return unknown();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult Function(
+            String protocolVersion, int pid, int time, String? runnerVersion)?
+        start,
+    TResult Function(bool? success, int time)? done,
+    TResult Function(int count, int time)? allSuites,
+    TResult Function(Suite suite, int time)? suite,
+    TResult Function(Group group, int time)? group,
+    TResult Function(Test test, int time)? testStart,
+    TResult Function(int time, int testID, bool hidden, bool skipped,
+            TestDoneStatus result)?
+        testDone,
+    TResult Function(int time, int testID, String messageType, String message)?
+        print,
+    TResult Function(int time, int testID, String error, String stackTrace,
+            bool isFailure)?
+        error,
+    TResult Function(
+            int time, int suiteID, String? observatory, String? remoteDebugger)?
+        debug,
+    TResult Function(int exitCode)? processDone,
+    TResult Function()? unknown,
+  }) {
+    return unknown?.call();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function(
+            String protocolVersion, int pid, int time, String? runnerVersion)?
+        start,
+    TResult Function(bool? success, int time)? done,
+    TResult Function(int count, int time)? allSuites,
+    TResult Function(Suite suite, int time)? suite,
+    TResult Function(Group group, int time)? group,
+    TResult Function(Test test, int time)? testStart,
+    TResult Function(int time, int testID, bool hidden, bool skipped,
+            TestDoneStatus result)?
+        testDone,
+    TResult Function(int time, int testID, String messageType, String message)?
+        print,
+    TResult Function(int time, int testID, String error, String stackTrace,
+            bool isFailure)?
+        error,
+    TResult Function(
+            int time, int suiteID, String? observatory, String? remoteDebugger)?
+        debug,
+    TResult Function(int exitCode)? processDone,
+    TResult Function()? unknown,
+    required TResult orElse(),
+  }) {
+    if (unknown != null) {
+      return unknown();
+    }
+    return orElse();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>({
+    required TResult Function(TestEventStart value) start,
+    required TResult Function(TestEventDone value) done,
+    required TResult Function(TestEventAllSuites value) allSuites,
+    required TResult Function(TestEventSuite value) suite,
+    required TResult Function(TestEventGroup value) group,
+    required TResult Function(TestEventTestStart value) testStart,
+    required TResult Function(TestEventTestDone value) testDone,
+    required TResult Function(TestEventMessage value) print,
+    required TResult Function(TestEventTestError value) error,
+    required TResult Function(TestEventDebug value) debug,
+    required TResult Function(TestProcessDone value) processDone,
     required TResult Function(TestEventUnknown value) unknown,
   }) {
     return unknown(this);
@@ -3180,6 +3407,7 @@ class _$TestEventUnknown implements TestEventUnknown {
     TResult Function(TestEventMessage value)? print,
     TResult Function(TestEventTestError value)? error,
     TResult Function(TestEventDebug value)? debug,
+    TResult Function(TestProcessDone value)? processDone,
     TResult Function(TestEventUnknown value)? unknown,
   }) {
     return unknown?.call(this);
@@ -3198,6 +3426,7 @@ class _$TestEventUnknown implements TestEventUnknown {
     TResult Function(TestEventMessage value)? print,
     TResult Function(TestEventTestError value)? error,
     TResult Function(TestEventDebug value)? debug,
+    TResult Function(TestProcessDone value)? processDone,
     TResult Function(TestEventUnknown value)? unknown,
     required TResult orElse(),
   }) {
@@ -3214,17 +3443,10 @@ class _$TestEventUnknown implements TestEventUnknown {
 }
 
 abstract class TestEventUnknown implements TestEvent {
-  factory TestEventUnknown({required int time}) = _$TestEventUnknown;
+  factory TestEventUnknown() = _$TestEventUnknown;
 
   factory TestEventUnknown.fromJson(Map<String, dynamic> json) =
       _$TestEventUnknown.fromJson;
-
-  @override
-  int get time;
-  @override
-  @JsonKey(ignore: true)
-  $TestEventUnknownCopyWith<TestEventUnknown> get copyWith =>
-      throw _privateConstructorUsedError;
 }
 
 Test _$TestFromJson(Map<String, dynamic> json) {
