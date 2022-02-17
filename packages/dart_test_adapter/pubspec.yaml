@@ -1,5 +1,5 @@
 name: dart_test_adapter
-version: 0.1.1
+version: 0.2.0
 description: Provides a Dart API for interacting with `dart test`/`flutter test` programatically
 homepage: "https://github.com/invertase/spec"
 

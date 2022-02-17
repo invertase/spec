@@ -1,5 +1,5 @@
 name: spec_cli
-version: 0.1.1+2
+version: 0.1.2
 description: CLI for Spec - a streamlined testing framework for Dart & Flutter.
 homepage: "https://github.com/invertase/spec"
 
@@ -12,7 +12,7 @@ dependencies:
   cli_util: ^0.3.0
   collection: ^1.15.0
   coverage: ^1.1.0
-  dart_test_adapter: ^0.1.0
+  dart_test_adapter: ^0.2.0
   duration: ^3.0.8
   freezed_annotation: ^1.1.0
   melos: ^1.1.2

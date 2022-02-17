@@ -1,3 +1,8 @@
+## 0.1.2
+
+ - Added support for `--coverage` to generate a `coverage/lcov.info`
+   file in both Dart and Flutter projects.
+ 
 ## 0.1.1+2
 
  - Update Riverpod dependency
