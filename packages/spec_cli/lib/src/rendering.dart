@@ -1,10 +1,10 @@
+import 'package:ansi_styles/extension.dart';
 import 'package:collection/collection.dart';
 import 'package:dart_test_adapter/dart_test_adapter.dart';
 import 'package:duration/duration.dart';
 import 'package:path/path.dart';
 import 'package:riverpod/riverpod.dart';
 
-import 'ansi.dart';
 import 'dart_test.dart';
 import 'dart_test_utils.dart';
 import 'groups.dart';

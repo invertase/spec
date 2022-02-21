@@ -3,10 +3,10 @@
 import 'dart:io';
 import 'dart:math';
 
+import 'package:ansi_styles/extension.dart';
 import 'package:cli_util/cli_logging.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-import 'ansi.dart';
 import 'vt100.dart';
 
 Renderer? rendererOverride;
@@ -41,7 +41,7 @@ class FullScreenRenderer implements Renderer {
 
 int computeOutputHeight(String output, {required int terminalWidth}) {
   if (output.isEmpty) return 0;
-  return output.withoutAnsi.split('\n').fold(0, (acc, line) {
+  return output.strip.split('\n').fold(0, (acc, line) {
     return acc + max(1, (line.length / terminalWidth).ceil());
   });
 }

@@ -1,10 +1,10 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:ansi_styles/extension.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:path/path.dart';
 import 'package:riverpod/riverpod.dart';
-import 'package:spec_cli/src/ansi.dart';
 import 'package:spec_cli/src/command_runner.dart';
 import 'package:spec_cli/src/container.dart';
 import 'package:spec_cli/src/renderer.dart';
@@ -85,7 +85,7 @@ class TestRenderer extends Renderer {
 
   @override
   void renderFrame(String output) {
-    final normalizedOutput = output.withoutAnsi.replaceFirst(
+    final normalizedOutput = output.strip.replaceFirst(
       RegExp(r'Time:.+$', multiLine: true),
       'Time:        00:00:00',
     );
@@ -277,7 +277,7 @@ class _IsEqualIgnoringAnsi extends Matcher {
 
   @override
   bool matches(Object? object, Map<Object?, Object?> matchState) {
-    final description = (object! as String).withoutAnsi;
+    final description = (object! as String).strip;
     if (_value != description) {
       matchState[_mismatchedValueKey] = description;
       return false;
