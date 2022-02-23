@@ -1,3 +1,7 @@
+## 0.1.2+1
+
+Fixed the minimum Dart version required to match what spec_cli uses (>= 2.16.0)
+
 ## 0.1.2
 
 - Added support for `--coverage` to generate a `coverage/lcov.info`
