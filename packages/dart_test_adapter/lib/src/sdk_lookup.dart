@@ -56,7 +56,7 @@ extension ExtendedSdk on Sdk {
   ///
   /// Might be empty if the [Sdk] is not found.
   Future<Iterable<String>> getExecutablePaths({
-    required Map<String, String>? env,
+    Map<String, String>? env,
   }) async {
     final commandLookupResult = await Process.run(
       _lookupCommand,
@@ -73,7 +73,7 @@ extension ExtendedSdk on Sdk {
   ///
   /// Throws [SdkNotFoundException] if the [Sdk] is not found.
   Future<String> getDefaultExecutablePath({
-    required Map<String, String>? env,
+    Map<String, String>? env,
   }) async {
     final paths = await getExecutablePaths(env: env);
     if (paths.isEmpty) throw SdkNotFoundException(sdk: this);
