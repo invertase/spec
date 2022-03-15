@@ -2,44 +2,49 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'sdk_lookup.dart';
 import 'test_protocol.dart';
 
-/// Executes `flutter test` and decode the output
+/// Executes `flutter test` and decode the output.
+///
+/// Throws a [SdkNotFoundException] if the Flutter SDK is not found.
 Stream<TestEvent> flutterTest({
   Map<String, String>? environment,
   List<String>? arguments,
   List<String>? tests,
+  // TODO: Typo
   String? workdingDirectory,
   // TODO(rrousselGit) expose a typed interface for CLI parameters
-}) {
-  return _parseTestJsonOutput(
-    () => Process.start(
-      'flutter',
-      [
-        'test',
-        ...?arguments,
-        '--reporter=json',
-        '--no-pub',
-        ...?tests,
-      ],
-      environment: environment,
-      workingDirectory: workdingDirectory,
-    ),
-  );
-}
+}) =>
+    _parseTestJsonOutput(
+      () async => Process.start(
+        await Sdk.flutter.getDefaultExecutablePath(env: environment),
+        [
+          'test',
+          ...?arguments,
+          '--reporter=json',
+          '--no-pub',
+          ...?tests,
+        ],
+        environment: environment,
+        workingDirectory: workdingDirectory,
+      ),
+    );
 
-/// Executes `dart test` and decode the output
+/// Executes `dart test` and decode the output.
+///
+/// Throws a [SdkNotFoundException] if the Dart SDK is not found.
 Stream<TestEvent> dartTest({
   Map<String, String>? environment,
   List<String>? arguments,
   List<String>? tests,
+  // TODO: Typo
   String? workdingDirectory,
   // TODO(rrousselGit) expose a typed interface for CLI parameters
-}) {
-  return _parseTestJsonOutput(
-    () {
-      return Process.start(
-        'dart',
+}) =>
+    _parseTestJsonOutput(
+      () async => Process.start(
+        await Sdk.dart.getDefaultExecutablePath(env: environment),
         [
           // '--packages=${await Isolate.packageConfig}',
           'test',
@@ -50,10 +55,8 @@ Stream<TestEvent> dartTest({
         ],
         environment: environment,
         workingDirectory: workdingDirectory,
-      );
-    },
-  );
-}
+      ),
+    );
 
 Stream<TestEvent> _parseTestJsonOutput(
   Future<Process> Function() processCb,
