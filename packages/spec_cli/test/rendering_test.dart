@@ -1,4 +1,4 @@
-import 'package:spec_cli/src/ansi.dart';
+import 'package:ansi_styles/extension.dart';
 import 'package:spec_cli/src/renderer.dart';
 import 'package:spec_cli/src/vt100.dart';
 import 'package:test/test.dart';
