@@ -138,7 +138,7 @@ class BacktrackingRenderer implements Renderer {
       );
       final lastOutputHeight = computeOutputHeight(
         diff.previous,
-        terminalWidth: stdout.terminalColumns,
+        terminalWidth: stdout.hasTerminal ? stdout.terminalColumns : 80,
       );
       toRender = diff.next;
 
