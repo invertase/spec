@@ -82,8 +82,7 @@ void main() {
         final env = <String, String>{'PATH': executablesDir.path};
         Future<void> defaultExecutableLookup() =>
             sdk.getDefaultExecutablePath(env: env);
-        final errorMsg =
-            '''
+        final errorMsg = '''
 ${sdk.capitalizedName} SDK not found.
 Verify that the SDK path has been added to your PATH environment variable.''';
         expect(
