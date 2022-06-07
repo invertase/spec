@@ -25,7 +25,7 @@ final $isCIMode = Provider((ref) => !stdin.supportsAnsiEscapes);
 final $isCoverageMode = Provider<bool>((ref) => throw UnimplementedError());
 
 final $events = StateNotifierProvider<TestEventsNotifier, TestEventsState>(
-  (ref) => TestEventsNotifier(ref),
+  TestEventsNotifier.new,
   dependencies: [
     $filteredPackages,
     $filteredPackages.future,
@@ -170,7 +170,7 @@ final $coverageForPackage =
 
   await formatCoverage(
     input: '$packagePath/.dart_tool/spec_coverage/',
-    packagesPath: '$packagePath/.packages',
+    packagePath: '$packagePath/.packages',
     reportOn: ['$packagePath/lib'],
     output: '$packagePath/coverage/lcov.info',
   );
