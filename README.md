@@ -96,6 +96,13 @@ Watch Usage:
  › Press Enter to trigger a test run.
 ```
 
+### GitHub Action
+
+If you want to use Spec in your GitHub actions pipeline you can utilize the
+[Spec GitHub action](https://github.com/marketplace/actions/spec-action), instructions for
+how to use it can be found on the the `spec-action`'s marketplace page and in its
+[repository](https://github.com/bluefireteam/spec-action).
+
 ---
 
 [LICENSE](/LICENSE)
