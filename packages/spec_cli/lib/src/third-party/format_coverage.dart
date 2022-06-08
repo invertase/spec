@@ -4,7 +4,7 @@ import 'package:coverage/coverage.dart';
 
 Future<void> formatCoverage({
   required String input,
-  required String packagesPath,
+  required String packagePath,
   required List<String> reportOn,
   required String output,
 }) async {
@@ -12,10 +12,10 @@ Future<void> formatCoverage({
 
   final hitmap = await HitMap.parseFiles(
     files,
-    packagesPath: packagesPath,
+    packagePath: packagePath,
   );
 
-  final resolver = Resolver(packagesPath: packagesPath);
+  final resolver = await Resolver.create(packagePath: packagePath);
   final result = hitmap.formatLcov(
     resolver,
     reportOn: reportOn,
