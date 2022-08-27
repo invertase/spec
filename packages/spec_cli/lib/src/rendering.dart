@@ -111,13 +111,13 @@ final $spinner = Provider.autoDispose<String>((ref) {
   }
 
   var offset = 0;
-  final inverval = Stream.periodic(const Duration(milliseconds: 200), (_) {
+  final interval = Stream.periodic(const Duration(milliseconds: 200), (_) {
     offset++;
     if (offset > 7) offset = 0;
     ref.state = charForOffset(offset);
   });
 
-  ref.onDispose(inverval.listen((_) {}).cancel);
+  ref.onDispose(interval.listen((_) {}).cancel);
 
   return charForOffset(offset);
 });
@@ -461,7 +461,7 @@ final $output = Provider.autoDispose<AsyncValue<String>>((ref) {
 
     final isDone = ref.watch($isDone);
 
-    final suitesOuput = ref
+    final suitesOutput = ref
         // TODO Don't render empty suites (suites with no user-defined test)
         .watch($completedSuiteKeysInCompletionOrder)
         .where(
@@ -486,7 +486,7 @@ final $output = Provider.autoDispose<AsyncValue<String>>((ref) {
         .sortedBy((element) => element);
 
     final result = [
-      ...suitesOuput,
+      ...suitesOutput,
 
       // In CI mode, show summary only after all tests are done
       // Because of the lack of https://github.com/dart-lang/test/issues/1652

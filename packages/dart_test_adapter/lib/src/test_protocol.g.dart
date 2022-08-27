@@ -112,7 +112,7 @@ Map<String, dynamic> _$$TestEventTestDoneToJson(_$TestEventTestDone instance) =>
       'testID': instance.testID,
       'hidden': instance.hidden,
       'skipped': instance.skipped,
-      'result': _$TestDoneStatusEnumMap[instance.result],
+      'result': _$TestDoneStatusEnumMap[instance.result]!,
       'type': instance.$type,
     };
 

@@ -16,7 +16,7 @@ void main() {
       );
     });
 
-    test('exludes invisible characters', () {
+    test('excludes invisible characters', () {
       expect(
         computeOutputHeight('''
 12345${VT100.clearScreen}
