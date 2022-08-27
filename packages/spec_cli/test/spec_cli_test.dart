@@ -174,8 +174,8 @@ void main() {
         expect(
           testRenderer.frames.last,
           '''
- PASS  test/my_test.dart
  PASS  ../b/test/another_test.dart
+ PASS  test/my_test.dart
 
 Test Suites: 2 passed, 2 total
 Tests:       2 passed, 2 total
