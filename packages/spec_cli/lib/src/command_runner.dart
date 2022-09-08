@@ -44,7 +44,7 @@ class _SpecCommandRunner extends CommandRunner<int> {
       ..addFlag(
         'ci',
         defaultsTo: null,
-        help: 'Changes the rendering to be more adaped to CI environments.'
+        help: 'Changes the rendering to be more adapted to CI environments.'
             ' Default to determining the environment automatically.',
       )
       ..addFlag(
@@ -185,7 +185,7 @@ Future<int> spec({
         ref.listen(
           $fileChange,
           (prev, value) {
-            resartTests(ref);
+            restartTests(ref);
           },
         );
 
@@ -256,7 +256,7 @@ void _handleTestNameEditKeyPress(List<int> keyCodes, DartRef ref) {
             ref.read($editingTestNameTextField).isEmpty
                 ? null
                 : RegExp(ref.read($editingTestNameTextField));
-        resartTests(ref);
+        restartTests(ref);
         break;
       case KeyCode.escape:
         // aborts the edit
@@ -291,7 +291,7 @@ void _handleWatchKeyPress(List<int> keyCodes, DartRef ref) {
         // pressed `f`, toggling "run failing tests" mode
 
         ref.read($isRunningOnlyFailingTests.notifier).update((state) => !state);
-        resartTests(ref);
+        restartTests(ref);
         break;
       case KeyCode.t:
         // pressed `t`, starting the editing of "filter by name"
@@ -299,7 +299,7 @@ void _handleWatchKeyPress(List<int> keyCodes, DartRef ref) {
         ref.read($editingTestNameTextField.notifier).state =
             ref.read($testNameFilters)?.pattern ?? '';
         ref.read($isEditingTestNameFilter.notifier).state = true;
-        resartTests(ref);
+        restartTests(ref);
         break;
       case KeyCode.enter:
         // stop the watch mode
@@ -311,7 +311,7 @@ void _handleWatchKeyPress(List<int> keyCodes, DartRef ref) {
         if (areTestsRunning) {
           ref.read($events.notifier).stop();
         } else {
-          resartTests(ref);
+          restartTests(ref);
         }
 
         break;
@@ -320,7 +320,7 @@ void _handleWatchKeyPress(List<int> keyCodes, DartRef ref) {
   }
 }
 
-void resartTests(DartRef ref) {
+void restartTests(DartRef ref) {
   ref.read($startTime.notifier).state = DateTime.now();
   ref.read($failedTestLocationToExecute.notifier).state =
       ref.read(_$lastFailedTests);

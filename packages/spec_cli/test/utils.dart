@@ -55,7 +55,7 @@ void testScope(
   Object? skip,
   int? retry,
   Map<String, Object?>? onPlatform,
-  @Deprecated('solo should only be used during developemnt') bool solo = false,
+  @Deprecated('solo should only be used during development') bool solo = false,
   Object? tags,
   String? testOn,
 }) {
@@ -119,7 +119,7 @@ class TestRenderer extends Renderer {
 /// second frame
 /// ---
 /// third frame
-/// ''', // litterals works too
+/// ''', // literals works too
 /// ])
 /// ```
 ///
@@ -137,7 +137,7 @@ class TestRenderer extends Renderer {
 /// ```
 ///
 /// will accept "A then B then C", "A then C" and "B then C". But it will reject:
-/// - "A then C then B", becauses frames are not in the correct order
+/// - "A then C then B", because frames are not in the correct order
 /// - "A then G", because even if B/C were skipped, G is not a known frame
 /// - "A then B then C then C", because this defines 4 frames instead of 3
 Matcher framesMatch(Object expectation) {
