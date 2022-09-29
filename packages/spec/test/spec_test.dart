@@ -83,5 +83,14 @@ void main() {
       t.expect(() => expect(1).toBeFalsy(), throwsTestFailure);
       t.expect(() => expect('foo').toBeFalsy(), throwsTestFailure);
     });
+
+    test('toBeTruthy', () {
+      expect(true).toBeTruthy();
+      expect(7).toBeTruthy();
+      expect('foo').toBeTruthy();
+
+      t.expect(() => expect(false).toBeTruthy(), throwsTestFailure);
+      t.expect(() => expect(null).toBeTruthy(), throwsTestFailure);
+    });
   });
 }

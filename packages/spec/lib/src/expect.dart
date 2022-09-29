@@ -98,6 +98,19 @@ abstract class ExpectationBase<Actual, Return, Param> {
   Return toBeFalsy() {
     return runMatcher(dart_test.anyOf(dart_test.isFalse, dart_test.isNull));
   }
+
+  /// Returns a matcher that matches any value that is not false or null.
+  ///
+  /// ```dart
+  /// expect(value).toBeTruthy()
+  /// ```
+  Return toBeTruthy() {
+    return runMatcher(
+      dart_test.isNot(
+        dart_test.anyOf(dart_test.isFalse, dart_test.isNull),
+      ),
+    );
+  }
 }
 
 /// A base class holding matchers
