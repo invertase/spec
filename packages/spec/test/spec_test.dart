@@ -75,6 +75,15 @@ void main() {
       );
     });
 
+    test('toBeNull', () {
+      expect(null).toBeNull();
+
+      t.expect(
+        () => expect(42).toBeNull(),
+        throwsTestFailure,
+      );
+    });
+
     test('toBeFalsy', () {
       expect(false).toBeFalsy();
       expect(null).toBeFalsy();

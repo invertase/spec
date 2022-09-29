@@ -71,6 +71,15 @@ abstract class ExpectationBase<Actual, Return, Param> {
     return runMatcher(dart_test.isNull);
   }
 
+  /// A matcher that matches any null value.
+  ///
+  /// ```dart
+  /// expect(value).toBeNull();
+  /// ```
+  Return toBeNull() {
+    return isNull();
+  }
+
   /// Returns a matcher that matches if the match argument is a string and
   /// matches the regular expression given by [re].
   ///
