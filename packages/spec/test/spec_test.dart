@@ -74,5 +74,14 @@ void main() {
         throwsTestFailure,
       );
     });
+
+    test('toBeFalsy', () {
+      expect(false).toBeFalsy();
+      expect(null).toBeFalsy();
+
+      t.expect(() => expect(true).toBeFalsy(), throwsTestFailure);
+      t.expect(() => expect(1).toBeFalsy(), throwsTestFailure);
+      t.expect(() => expect('foo').toBeFalsy(), throwsTestFailure);
+    });
   });
 }

@@ -89,6 +89,15 @@ abstract class ExpectationBase<Actual, Return, Param> {
   Return isA<T>() {
     return runMatcher(dart_test.isA<T>());
   }
+
+  /// Returns a matcher that matches any value to be false or null.
+  ///
+  /// ```dart
+  /// expect(value).toBeFalsy()
+  /// ```
+  Return toBeFalsy() {
+    return runMatcher(dart_test.anyOf(dart_test.isFalse, dart_test.isNull));
+  }
 }
 
 /// A base class holding matchers
