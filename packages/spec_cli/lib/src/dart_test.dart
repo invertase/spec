@@ -35,6 +35,7 @@ final $events = StateNotifierProvider<TestEventsNotifier, TestEventsState>(
     $failedTestLocationToExecute,
     $isRunningOnlyFailingTests,
     $isCoverageMode,
+    $isUpdateGoldensMode,
   ],
 );
 
