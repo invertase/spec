@@ -23,6 +23,7 @@ final $isWatchMode = StateProvider<bool>((ref) => false);
 final $isRunningOnlyFailingTests = StateProvider<bool>((ref) => false);
 final $isCIMode = Provider((ref) => !stdin.supportsAnsiEscapes);
 final $isCoverageMode = Provider<bool>((ref) => throw UnimplementedError());
+final $isUpdateGoldensMode = StateProvider<bool>((ref) => false);
 
 final $events = StateNotifierProvider<TestEventsNotifier, TestEventsState>(
   TestEventsNotifier.new,
@@ -117,6 +118,7 @@ class TestEventsNotifier extends StateNotifier<TestEventsState> {
     }
 
     final coverage = ref.watch($isCoverageMode);
+    final updateGoldens = ref.watch($isUpdateGoldensMode);
 
     return package.isFlutter
         ? flutterTest(
@@ -124,6 +126,7 @@ class TestEventsNotifier extends StateNotifier<TestEventsState> {
             arguments: [
               ...arguments,
               if (coverage) '--coverage',
+              if (updateGoldens) '--update-goldens',
             ],
             workdingDirectory: package.path,
           )
