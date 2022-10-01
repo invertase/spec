@@ -314,6 +314,12 @@ void _handleWatchKeyPress(List<int> keyCodes, DartRef ref) {
         ref.read($isEditingTestNameFilter.notifier).state = true;
         restartTests(ref);
         break;
+      case KeyCode.g:
+        // pressed `g`, toggling --update-goldens mode
+
+        ref.read($isUpdateGoldensMode.notifier).update((state) => !state);
+
+        break;
       case KeyCode.enter:
         // stop the watch mode
         // Aborting/resuming tests

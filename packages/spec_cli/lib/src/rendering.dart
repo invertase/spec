@@ -511,6 +511,7 @@ ${'Watch Usage:'.bold}
  › Press f to run only failed tests.
  › Press t to filter by a test name regex pattern.
  › Press q to quit watch mode.
+ › Press g to ${ref.read($isUpdateGoldensMode) ? 'disable' : 'enable'} update-goldens mode.
  › Press Enter to trigger a test run.
 '''
         else
