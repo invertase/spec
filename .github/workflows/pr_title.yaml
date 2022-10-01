@@ -1,4 +1,4 @@
-name: 'PR Title is Conventional'
+name: "PR Title is Conventional"
 on:
   pull_request_target:
     types:
