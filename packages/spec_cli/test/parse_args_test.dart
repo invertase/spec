@@ -61,5 +61,12 @@ void main() {
         const SpecOptions(coverage: true),
       );
     });
+
+    test('can specify --update-goldens', () {
+      expect(
+        SpecOptions.fromArgs(const ['--update-goldens']),
+        const SpecOptions(updateGoldens: true),
+      );
+    });
   });
 }
