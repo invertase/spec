@@ -19,7 +19,7 @@ dependencies:
   meta: ^1.7.0
   path: ^1.8.0
   pubspec: ^2.0.1
-  riverpod: ^2.0.0-dev.3
+  riverpod: 2.0.0-dev.3
   test: ^1.17.8
 
 dev_dependencies:
