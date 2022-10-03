@@ -10,6 +10,7 @@ part 'future_expect.dart';
 part 'num_expect.dart';
 part 'stream_expect.dart';
 part 'string_expect.dart';
+part 'list_expect.dart';
 
 /// Perform expectations in a type safe way
 Expectation<Actual> expect<Actual>(Actual value) {
