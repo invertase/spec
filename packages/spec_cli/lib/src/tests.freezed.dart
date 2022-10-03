@@ -15,35 +15,6 @@ final _privateConstructorUsedError = UnsupportedError(
     'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#custom-getters-and-methods');
 
 /// @nodoc
-class _$TestStatusTearOff {
-  const _$TestStatusTearOff();
-
-  _TestStatusPass pass() {
-    return const _TestStatusPass();
-  }
-
-  _TestStatusFail fail(String error, {required String stackTrace}) {
-    return _TestStatusFail(
-      error,
-      stackTrace: stackTrace,
-    );
-  }
-
-  _TestStatusSkip skip({String? skipReason}) {
-    return _TestStatusSkip(
-      skipReason: skipReason,
-    );
-  }
-
-  _TestStatusPending pending() {
-    return const _TestStatusPending();
-  }
-}
-
-/// @nodoc
-const $TestStatus = _$TestStatusTearOff();
-
-/// @nodoc
 mixin _$TestStatus {
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
@@ -114,21 +85,22 @@ class _$TestStatusCopyWithImpl<$Res> implements $TestStatusCopyWith<$Res> {
 }
 
 /// @nodoc
-abstract class _$TestStatusPassCopyWith<$Res> {
-  factory _$TestStatusPassCopyWith(
-          _TestStatusPass value, $Res Function(_TestStatusPass) then) =
-      __$TestStatusPassCopyWithImpl<$Res>;
+abstract class _$$_TestStatusPassCopyWith<$Res> {
+  factory _$$_TestStatusPassCopyWith(
+          _$_TestStatusPass value, $Res Function(_$_TestStatusPass) then) =
+      __$$_TestStatusPassCopyWithImpl<$Res>;
 }
 
 /// @nodoc
-class __$TestStatusPassCopyWithImpl<$Res> extends _$TestStatusCopyWithImpl<$Res>
-    implements _$TestStatusPassCopyWith<$Res> {
-  __$TestStatusPassCopyWithImpl(
-      _TestStatusPass _value, $Res Function(_TestStatusPass) _then)
-      : super(_value, (v) => _then(v as _TestStatusPass));
+class __$$_TestStatusPassCopyWithImpl<$Res>
+    extends _$TestStatusCopyWithImpl<$Res>
+    implements _$$_TestStatusPassCopyWith<$Res> {
+  __$$_TestStatusPassCopyWithImpl(
+      _$_TestStatusPass _value, $Res Function(_$_TestStatusPass) _then)
+      : super(_value, (v) => _then(v as _$_TestStatusPass));
 
   @override
-  _TestStatusPass get _value => super._value as _TestStatusPass;
+  _$_TestStatusPass get _value => super._value as _$_TestStatusPass;
 }
 
 /// @nodoc
@@ -144,7 +116,7 @@ class _$_TestStatusPass extends _TestStatusPass {
   @override
   bool operator ==(dynamic other) {
     return identical(this, other) ||
-        (other.runtimeType == runtimeType && other is _TestStatusPass);
+        (other.runtimeType == runtimeType && other is _$_TestStatusPass);
   }
 
   @override
@@ -231,29 +203,30 @@ abstract class _TestStatusPass extends TestStatus {
 }
 
 /// @nodoc
-abstract class _$TestStatusFailCopyWith<$Res> {
-  factory _$TestStatusFailCopyWith(
-          _TestStatusFail value, $Res Function(_TestStatusFail) then) =
-      __$TestStatusFailCopyWithImpl<$Res>;
+abstract class _$$_TestStatusFailCopyWith<$Res> {
+  factory _$$_TestStatusFailCopyWith(
+          _$_TestStatusFail value, $Res Function(_$_TestStatusFail) then) =
+      __$$_TestStatusFailCopyWithImpl<$Res>;
   $Res call({String error, String stackTrace});
 }
 
 /// @nodoc
-class __$TestStatusFailCopyWithImpl<$Res> extends _$TestStatusCopyWithImpl<$Res>
-    implements _$TestStatusFailCopyWith<$Res> {
-  __$TestStatusFailCopyWithImpl(
-      _TestStatusFail _value, $Res Function(_TestStatusFail) _then)
-      : super(_value, (v) => _then(v as _TestStatusFail));
+class __$$_TestStatusFailCopyWithImpl<$Res>
+    extends _$TestStatusCopyWithImpl<$Res>
+    implements _$$_TestStatusFailCopyWith<$Res> {
+  __$$_TestStatusFailCopyWithImpl(
+      _$_TestStatusFail _value, $Res Function(_$_TestStatusFail) _then)
+      : super(_value, (v) => _then(v as _$_TestStatusFail));
 
   @override
-  _TestStatusFail get _value => super._value as _TestStatusFail;
+  _$_TestStatusFail get _value => super._value as _$_TestStatusFail;
 
   @override
   $Res call({
     Object? error = freezed,
     Object? stackTrace = freezed,
   }) {
-    return _then(_TestStatusFail(
+    return _then(_$_TestStatusFail(
       error == freezed
           ? _value.error
           : error // ignore: cast_nullable_to_non_nullable
@@ -285,7 +258,7 @@ class _$_TestStatusFail extends _TestStatusFail {
   bool operator ==(dynamic other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _TestStatusFail &&
+            other is _$_TestStatusFail &&
             const DeepCollectionEquality().equals(other.error, error) &&
             const DeepCollectionEquality()
                 .equals(other.stackTrace, stackTrace));
@@ -299,8 +272,8 @@ class _$_TestStatusFail extends _TestStatusFail {
 
   @JsonKey(ignore: true)
   @override
-  _$TestStatusFailCopyWith<_TestStatusFail> get copyWith =>
-      __$TestStatusFailCopyWithImpl<_TestStatusFail>(this, _$identity);
+  _$$_TestStatusFailCopyWith<_$_TestStatusFail> get copyWith =>
+      __$$_TestStatusFailCopyWithImpl<_$_TestStatusFail>(this, _$identity);
 
   @override
   @optionalTypeArgs
@@ -378,40 +351,41 @@ class _$_TestStatusFail extends _TestStatusFail {
 }
 
 abstract class _TestStatusFail extends TestStatus {
-  const factory _TestStatusFail(String error, {required String stackTrace}) =
-      _$_TestStatusFail;
+  const factory _TestStatusFail(final String error,
+      {required final String stackTrace}) = _$_TestStatusFail;
   const _TestStatusFail._() : super._();
 
   String get error;
   String get stackTrace;
   @JsonKey(ignore: true)
-  _$TestStatusFailCopyWith<_TestStatusFail> get copyWith =>
+  _$$_TestStatusFailCopyWith<_$_TestStatusFail> get copyWith =>
       throw _privateConstructorUsedError;
 }
 
 /// @nodoc
-abstract class _$TestStatusSkipCopyWith<$Res> {
-  factory _$TestStatusSkipCopyWith(
-          _TestStatusSkip value, $Res Function(_TestStatusSkip) then) =
-      __$TestStatusSkipCopyWithImpl<$Res>;
+abstract class _$$_TestStatusSkipCopyWith<$Res> {
+  factory _$$_TestStatusSkipCopyWith(
+          _$_TestStatusSkip value, $Res Function(_$_TestStatusSkip) then) =
+      __$$_TestStatusSkipCopyWithImpl<$Res>;
   $Res call({String? skipReason});
 }
 
 /// @nodoc
-class __$TestStatusSkipCopyWithImpl<$Res> extends _$TestStatusCopyWithImpl<$Res>
-    implements _$TestStatusSkipCopyWith<$Res> {
-  __$TestStatusSkipCopyWithImpl(
-      _TestStatusSkip _value, $Res Function(_TestStatusSkip) _then)
-      : super(_value, (v) => _then(v as _TestStatusSkip));
+class __$$_TestStatusSkipCopyWithImpl<$Res>
+    extends _$TestStatusCopyWithImpl<$Res>
+    implements _$$_TestStatusSkipCopyWith<$Res> {
+  __$$_TestStatusSkipCopyWithImpl(
+      _$_TestStatusSkip _value, $Res Function(_$_TestStatusSkip) _then)
+      : super(_value, (v) => _then(v as _$_TestStatusSkip));
 
   @override
-  _TestStatusSkip get _value => super._value as _TestStatusSkip;
+  _$_TestStatusSkip get _value => super._value as _$_TestStatusSkip;
 
   @override
   $Res call({
     Object? skipReason = freezed,
   }) {
-    return _then(_TestStatusSkip(
+    return _then(_$_TestStatusSkip(
       skipReason: skipReason == freezed
           ? _value.skipReason
           : skipReason // ignore: cast_nullable_to_non_nullable
@@ -437,7 +411,7 @@ class _$_TestStatusSkip extends _TestStatusSkip {
   bool operator ==(dynamic other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _TestStatusSkip &&
+            other is _$_TestStatusSkip &&
             const DeepCollectionEquality()
                 .equals(other.skipReason, skipReason));
   }
@@ -448,8 +422,8 @@ class _$_TestStatusSkip extends _TestStatusSkip {
 
   @JsonKey(ignore: true)
   @override
-  _$TestStatusSkipCopyWith<_TestStatusSkip> get copyWith =>
-      __$TestStatusSkipCopyWithImpl<_TestStatusSkip>(this, _$identity);
+  _$$_TestStatusSkipCopyWith<_$_TestStatusSkip> get copyWith =>
+      __$$_TestStatusSkipCopyWithImpl<_$_TestStatusSkip>(this, _$identity);
 
   @override
   @optionalTypeArgs
@@ -527,32 +501,32 @@ class _$_TestStatusSkip extends _TestStatusSkip {
 }
 
 abstract class _TestStatusSkip extends TestStatus {
-  const factory _TestStatusSkip({String? skipReason}) = _$_TestStatusSkip;
+  const factory _TestStatusSkip({final String? skipReason}) = _$_TestStatusSkip;
   const _TestStatusSkip._() : super._();
 
   String? get skipReason;
   @JsonKey(ignore: true)
-  _$TestStatusSkipCopyWith<_TestStatusSkip> get copyWith =>
+  _$$_TestStatusSkipCopyWith<_$_TestStatusSkip> get copyWith =>
       throw _privateConstructorUsedError;
 }
 
 /// @nodoc
-abstract class _$TestStatusPendingCopyWith<$Res> {
-  factory _$TestStatusPendingCopyWith(
-          _TestStatusPending value, $Res Function(_TestStatusPending) then) =
-      __$TestStatusPendingCopyWithImpl<$Res>;
+abstract class _$$_TestStatusPendingCopyWith<$Res> {
+  factory _$$_TestStatusPendingCopyWith(_$_TestStatusPending value,
+          $Res Function(_$_TestStatusPending) then) =
+      __$$_TestStatusPendingCopyWithImpl<$Res>;
 }
 
 /// @nodoc
-class __$TestStatusPendingCopyWithImpl<$Res>
+class __$$_TestStatusPendingCopyWithImpl<$Res>
     extends _$TestStatusCopyWithImpl<$Res>
-    implements _$TestStatusPendingCopyWith<$Res> {
-  __$TestStatusPendingCopyWithImpl(
-      _TestStatusPending _value, $Res Function(_TestStatusPending) _then)
-      : super(_value, (v) => _then(v as _TestStatusPending));
+    implements _$$_TestStatusPendingCopyWith<$Res> {
+  __$$_TestStatusPendingCopyWithImpl(
+      _$_TestStatusPending _value, $Res Function(_$_TestStatusPending) _then)
+      : super(_value, (v) => _then(v as _$_TestStatusPending));
 
   @override
-  _TestStatusPending get _value => super._value as _TestStatusPending;
+  _$_TestStatusPending get _value => super._value as _$_TestStatusPending;
 }
 
 /// @nodoc
@@ -568,7 +542,7 @@ class _$_TestStatusPending extends _TestStatusPending {
   @override
   bool operator ==(dynamic other) {
     return identical(this, other) ||
-        (other.runtimeType == runtimeType && other is _TestStatusPending);
+        (other.runtimeType == runtimeType && other is _$_TestStatusPending);
   }
 
   @override

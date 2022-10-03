@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:dart_test_adapter/dart_test_adapter.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:riverpod/riverpod.dart';
@@ -60,7 +61,7 @@ final $testName = Provider.autoDispose
     // and a whitespace. So to determine the true group name, we're removing those
     return test.name.substring(parentGroup.name.length + 1);
   });
-}, dependencies: [$test]);
+}, dependencies: [$test, $group]);
 
 final $testsForGroup = Provider.autoDispose
     .family<AsyncValue<List<Test>>, Packaged<GroupKey>>((ref, groupKey) {
@@ -73,7 +74,7 @@ final $testsForGroup = Provider.autoDispose
         .where((test) => test.groupKey == groupKey.value)
         .toList();
   });
-}, dependencies: [$testsForSuite]);
+}, dependencies: [$testsForSuite, $group]);
 
 final $testsForSuite = Provider.autoDispose
     .family<Map<Packaged<TestKey>, Test>, Packaged<SuiteKey>>((ref, suiteKey) {
@@ -165,7 +166,7 @@ final $testStatus =
   }
 
   return const TestStatus.pending();
-}, dependencies: [$events]);
+}, dependencies: [$events, $test]);
 
 final $currentlyFailedTestsLocation =
     Provider.autoDispose<AsyncValue<List<FailedTestLocation>>>((ref) {
