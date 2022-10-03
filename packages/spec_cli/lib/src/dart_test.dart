@@ -28,7 +28,7 @@ final $events = StateNotifierProvider<TestEventsNotifier, TestEventsState>(
   TestEventsNotifier.new,
   dependencies: [
     $filteredPackages,
-    $filteredPackages.future,
+    $filteredPackages,
     $testNameFilters,
     $filePathFilters,
     $failedTestLocationToExecute,
@@ -174,7 +174,7 @@ final $coverageForPackage =
     reportOn: ['$packagePath/lib'],
     output: '$packagePath/coverage/lcov.info',
   );
-}, dependencies: [$package, $isCoverageMode]);
+}, dependencies: [$package, $isCoverageMode, $events]);
 
 final $allPackages = FutureProvider<List<_Package>>((ref) async {
   final workingDir = ref.watch($workingDirectory);
@@ -221,7 +221,7 @@ final $filteredPackages = FutureProvider<List<_Package>>(
 
     return result;
   },
-  dependencies: [$allPackages.future, $filePathFilters],
+  dependencies: [$allPackages, $filePathFilters],
 );
 
 final $package =

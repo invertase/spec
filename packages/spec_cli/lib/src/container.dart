@@ -39,14 +39,14 @@ abstract class DartRef {
     return container;
   }
 
-  T read<T>(ProviderBase<T> provider) => _container.read(provider);
+  T read<T>(ProviderListenable<T> provider) => _container.read(provider);
 
-  T refresh<T>(ProviderBase<T> provider) => _container.refresh(provider);
+  T refresh<T>(Refreshable<T> provider) => _container.refresh(provider);
 
   Future<void> pump() => _container.pump();
 
   ProviderSubscription<T> listen<T>(
-    ProviderBase<T> provider,
+    ProviderListenable<T> provider,
     void Function(T? previous, T current) listener, {
     void Function(Object error, StackTrace stackTrace)? onError,
     bool fireImmediately = false,

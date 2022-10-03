@@ -1,0 +1,3 @@
+dependency_overrides:
+  dart_test_adapter:
+    path: ../dart_test_adapter
