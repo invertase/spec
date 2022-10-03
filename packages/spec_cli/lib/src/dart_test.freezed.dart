@@ -15,23 +15,6 @@ final _privateConstructorUsedError = UnsupportedError(
     'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#custom-getters-and-methods');
 
 /// @nodoc
-class _$TestEventsStateTearOff {
-  const _$TestEventsStateTearOff();
-
-  _TestEventsState call(
-      {required bool isInterrupted,
-      required List<Packaged<TestEvent>> events}) {
-    return _TestEventsState(
-      isInterrupted: isInterrupted,
-      events: events,
-    );
-  }
-}
-
-/// @nodoc
-const $TestEventsState = _$TestEventsStateTearOff();
-
-/// @nodoc
 mixin _$TestEventsState {
   bool get isInterrupted => throw _privateConstructorUsedError;
   List<Packaged<TestEvent>> get events => throw _privateConstructorUsedError;
@@ -77,38 +60,38 @@ class _$TestEventsStateCopyWithImpl<$Res>
 }
 
 /// @nodoc
-abstract class _$TestEventsStateCopyWith<$Res>
+abstract class _$$_TestEventsStateCopyWith<$Res>
     implements $TestEventsStateCopyWith<$Res> {
-  factory _$TestEventsStateCopyWith(
-          _TestEventsState value, $Res Function(_TestEventsState) then) =
-      __$TestEventsStateCopyWithImpl<$Res>;
+  factory _$$_TestEventsStateCopyWith(
+          _$_TestEventsState value, $Res Function(_$_TestEventsState) then) =
+      __$$_TestEventsStateCopyWithImpl<$Res>;
   @override
   $Res call({bool isInterrupted, List<Packaged<TestEvent>> events});
 }
 
 /// @nodoc
-class __$TestEventsStateCopyWithImpl<$Res>
+class __$$_TestEventsStateCopyWithImpl<$Res>
     extends _$TestEventsStateCopyWithImpl<$Res>
-    implements _$TestEventsStateCopyWith<$Res> {
-  __$TestEventsStateCopyWithImpl(
-      _TestEventsState _value, $Res Function(_TestEventsState) _then)
-      : super(_value, (v) => _then(v as _TestEventsState));
+    implements _$$_TestEventsStateCopyWith<$Res> {
+  __$$_TestEventsStateCopyWithImpl(
+      _$_TestEventsState _value, $Res Function(_$_TestEventsState) _then)
+      : super(_value, (v) => _then(v as _$_TestEventsState));
 
   @override
-  _TestEventsState get _value => super._value as _TestEventsState;
+  _$_TestEventsState get _value => super._value as _$_TestEventsState;
 
   @override
   $Res call({
     Object? isInterrupted = freezed,
     Object? events = freezed,
   }) {
-    return _then(_TestEventsState(
+    return _then(_$_TestEventsState(
       isInterrupted: isInterrupted == freezed
           ? _value.isInterrupted
           : isInterrupted // ignore: cast_nullable_to_non_nullable
               as bool,
       events: events == freezed
-          ? _value.events
+          ? _value._events
           : events // ignore: cast_nullable_to_non_nullable
               as List<Packaged<TestEvent>>,
     ));
@@ -118,12 +101,19 @@ class __$TestEventsStateCopyWithImpl<$Res>
 /// @nodoc
 
 class _$_TestEventsState implements _TestEventsState {
-  const _$_TestEventsState({required this.isInterrupted, required this.events});
+  const _$_TestEventsState(
+      {required this.isInterrupted,
+      required final List<Packaged<TestEvent>> events})
+      : _events = events;
 
   @override
   final bool isInterrupted;
+  final List<Packaged<TestEvent>> _events;
   @override
-  final List<Packaged<TestEvent>> events;
+  List<Packaged<TestEvent>> get events {
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_events);
+  }
 
   @override
   String toString() {
@@ -134,28 +124,28 @@ class _$_TestEventsState implements _TestEventsState {
   bool operator ==(dynamic other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _TestEventsState &&
+            other is _$_TestEventsState &&
             const DeepCollectionEquality()
                 .equals(other.isInterrupted, isInterrupted) &&
-            const DeepCollectionEquality().equals(other.events, events));
+            const DeepCollectionEquality().equals(other._events, _events));
   }
 
   @override
   int get hashCode => Object.hash(
       runtimeType,
       const DeepCollectionEquality().hash(isInterrupted),
-      const DeepCollectionEquality().hash(events));
+      const DeepCollectionEquality().hash(_events));
 
   @JsonKey(ignore: true)
   @override
-  _$TestEventsStateCopyWith<_TestEventsState> get copyWith =>
-      __$TestEventsStateCopyWithImpl<_TestEventsState>(this, _$identity);
+  _$$_TestEventsStateCopyWith<_$_TestEventsState> get copyWith =>
+      __$$_TestEventsStateCopyWithImpl<_$_TestEventsState>(this, _$identity);
 }
 
 abstract class _TestEventsState implements TestEventsState {
   const factory _TestEventsState(
-      {required bool isInterrupted,
-      required List<Packaged<TestEvent>> events}) = _$_TestEventsState;
+      {required final bool isInterrupted,
+      required final List<Packaged<TestEvent>> events}) = _$_TestEventsState;
 
   @override
   bool get isInterrupted;
@@ -163,6 +153,6 @@ abstract class _TestEventsState implements TestEventsState {
   List<Packaged<TestEvent>> get events;
   @override
   @JsonKey(ignore: true)
-  _$TestEventsStateCopyWith<_TestEventsState> get copyWith =>
+  _$$_TestEventsStateCopyWith<_$_TestEventsState> get copyWith =>
       throw _privateConstructorUsedError;
 }

@@ -1,3 +1,7 @@
+## 0.1.3
+
+Upgrade Riverpod dependency
+
 ## 0.1.2+2
 
  - **REFACTOR**: switch to use built-in string extension methods in `ansi_styles` package (#16). ([695e9692](https://github.com/invertase/spec/commit/695e9692325ec8cd47e09216b8ea7e16f2e26187))
