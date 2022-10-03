@@ -66,4 +66,4 @@ jobs:
           channel: 'stable'
       - uses: bluefireteam/melos-action@v2
       - name: "Run Tests"
-        run: cmd /K melos run test --no-select
+        run: melos run test --no-select
