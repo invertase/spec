@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:dart_test_adapter/dart_test_adapter.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:riverpod/riverpod.dart';

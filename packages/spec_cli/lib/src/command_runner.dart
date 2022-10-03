@@ -177,7 +177,7 @@ Future<int> spec({
             data: (value) => ref.read(_$lastFailedTests.notifier).state = value,
             loading: () => ref.read(_$lastFailedTests.notifier).state = [],
             error: (err, stack) {
-              Zone.current.handleUncaughtError(err, stack!);
+              Zone.current.handleUncaughtError(err, stack);
             },
           );
         });
@@ -206,7 +206,7 @@ Future<int> spec({
           output.when(
             loading: () {}, // nothing to do
             error: (err, stack) {
-              Zone.current.handleUncaughtError(err, stack!);
+              Zone.current.handleUncaughtError(err, stack);
             },
             data: (output) {
               if (output.trim().isNotEmpty) renderer.renderFrame(output);

@@ -28,7 +28,7 @@ final $events = StateNotifierProvider<TestEventsNotifier, TestEventsState>(
   TestEventsNotifier.new,
   dependencies: [
     $filteredPackages,
-    $filteredPackages.future,
+    $filteredPackages,
     $testNameFilters,
     $filePathFilters,
     $failedTestLocationToExecute,
@@ -221,7 +221,7 @@ final $filteredPackages = FutureProvider<List<_Package>>(
 
     return result;
   },
-  dependencies: [$allPackages.future, $filePathFilters],
+  dependencies: [$allPackages, $filePathFilters],
 );
 
 final $package =

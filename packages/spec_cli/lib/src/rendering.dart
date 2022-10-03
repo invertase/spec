@@ -402,14 +402,14 @@ final $showWatchUsage = StateProvider.autoDispose<bool>((ref) {
   ref.watch($events.notifier);
 
   return false;
-}, dependencies: [$events.notifier]);
+}, dependencies: [$events]);
 
 final $isEditingTestNameFilter = StateProvider.autoDispose<bool>((ref) {
   // collapse watch usage when the tests are restarted
   ref.watch($events.notifier);
 
   return false;
-}, dependencies: [$events.notifier]);
+}, dependencies: [$events]);
 
 final $editingTestNameTextField = StateProvider.autoDispose((ref) => '');
 
