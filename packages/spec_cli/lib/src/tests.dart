@@ -166,7 +166,7 @@ final $testStatus =
   }
 
   return const TestStatus.pending();
-}, dependencies: [$events]);
+}, dependencies: [$events, $test]);
 
 final $currentlyFailedTestsLocation =
     Provider.autoDispose<AsyncValue<List<FailedTestLocation>>>((ref) {
