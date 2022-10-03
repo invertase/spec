@@ -50,8 +50,8 @@ final $testPath = Provider.autoDispose
     ].join(':');
   });
 }, dependencies: [
-  $suite,
-  $workingDirectory,
+  $suitePath,
+  $test,
 ]);
 
 final $suiteOutputLabel = Provider.autoDispose
@@ -80,7 +80,6 @@ final $suiteOutputLabel = Provider.autoDispose
     ].join(' ');
   });
 }, dependencies: [
-  $scaffoldGroup,
   $suiteStatus,
   $isEarlyAbort,
   $suitePath,
@@ -168,8 +167,6 @@ final $testLabel =
 
 final $testError =
     Provider.autoDispose.family<String?, Packaged<TestKey>>((ref, testKey) {
-  // if (!ref.watch($isDone)) return null;
-
   final status = ref.watch($testStatus(testKey));
 
   return status.whenOrNull<String?>(
@@ -179,7 +176,7 @@ $err
 ${stack.trim()}''';
     },
   );
-}, dependencies: [$test, $testStatus, $spinner, $testName, $isDone]);
+}, dependencies: [$testStatus]);
 
 final AutoDisposeProviderFamily<AsyncValue<String?>, Packaged<GroupKey>>
     $groupOutput = Provider.autoDispose
@@ -225,6 +222,7 @@ final AutoDisposeProviderFamily<AsyncValue<String?>, Packaged<GroupKey>>
     ].join('\n');
   });
 }, dependencies: [
+  $suiteStatus,
   $groupName,
   $groupDepth,
   $testsForGroup,
