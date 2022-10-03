@@ -61,7 +61,7 @@ final $testName = Provider.autoDispose
     // and a whitespace. So to determine the true group name, we're removing those
     return test.name.substring(parentGroup.name.length + 1);
   });
-}, dependencies: [$test]);
+}, dependencies: [$test, $group]);
 
 final $testsForGroup = Provider.autoDispose
     .family<AsyncValue<List<Test>>, Packaged<GroupKey>>((ref, groupKey) {
@@ -74,7 +74,7 @@ final $testsForGroup = Provider.autoDispose
         .where((test) => test.groupKey == groupKey.value)
         .toList();
   });
-}, dependencies: [$testsForSuite]);
+}, dependencies: [$testsForSuite, $group]);
 
 final $testsForSuite = Provider.autoDispose
     .family<Map<Packaged<TestKey>, Test>, Packaged<SuiteKey>>((ref, suiteKey) {

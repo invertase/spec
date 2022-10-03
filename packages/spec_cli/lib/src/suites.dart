@@ -93,7 +93,7 @@ final $hasAllSuites = Provider.autoDispose<bool>(
     final suites = ref.watch($suites);
     return suites.length == suiteCount;
   },
-  dependencies: [$suites, $suiteCount, $filteredPackages],
+  dependencies: [$suites, $suiteCount],
 );
 
 final $suite = Provider.autoDispose
@@ -183,12 +183,9 @@ final $suiteStatus = Provider.family
 final $exitCode = AsyncNotifierProvider.autoDispose<ExitCode, int>(
   ExitCode.new,
   dependencies: [
-    $suites,
     $filteredPackages,
-    $suiteStatus,
     $isEarlyAbort,
     $hasAllSuites,
-    $events,
     $isPackageDone,
     $coverageForPackage,
     $packageExitCode,

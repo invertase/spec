@@ -174,7 +174,7 @@ final $coverageForPackage =
     reportOn: ['$packagePath/lib'],
     output: '$packagePath/coverage/lcov.info',
   );
-}, dependencies: [$package, $isCoverageMode]);
+}, dependencies: [$package, $isCoverageMode, $events]);
 
 final $allPackages = FutureProvider<List<_Package>>((ref) async {
   final workingDir = ref.watch($workingDirectory);
