@@ -131,7 +131,7 @@ final $isPackageDone =
     Provider.family.autoDispose<bool, String>((ref, packagePath) {
   return !ref.watch($packageExitCode(packagePath)).isLoading &&
       !ref.watch($coverageForPackage(packagePath)).isLoading;
-}, dependencies: [$events, $packageExitCode]);
+}, dependencies: [$packageExitCode, $coverageForPackage]);
 
 final $suiteStatus = Provider.family
     .autoDispose<SuiteStatus, Packaged<SuiteKey>>((ref, suiteKey) {

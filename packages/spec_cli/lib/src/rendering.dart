@@ -320,6 +320,8 @@ final $suiteOutput = Provider.autoDispose
   $rootGroupsForSuite,
   $groupOutput,
   $testLabel,
+  $testMessages,
+  $testError,
   $suiteOutputLabel,
   $rootTestsForSuite,
 ], name: 'suiteOutput');
