@@ -286,18 +286,17 @@ void main() {
 ''',
         });
 
+        final lastFrame = testRenderer!.frames.last;
+        expect(lastFrame, contains('PASS  test/my_test.dart'));
+        expect(lastFrame, contains('PASS  test/another_test.dart'));
         expect(
-          testRenderer!.frames.last,
-          '''
- PASS  test/my_test.dart
- PASS  test/another_test.dart
-
+          lastFrame,
+          endsWith('''
 Test Suites: 2 passed, 2 total
 Tests:       3 passed, 3 total
 Time:        00:00:00
-''',
+'''),
         );
-
         expect(exitCode, 0);
       });
 
@@ -432,15 +431,17 @@ void main() {
           ),
         );
 
-        expect(testRenderer!.frames.last, '''
- PASS  test/another_test.dart
- PASS  test/my_test.dart
-
+        final lastFrame = testRenderer!.frames.last;
+        expect(lastFrame, contains('PASS  test/another_test.dart'));
+        expect(lastFrame, contains('PASS  test/my_test.dart'));
+        expect(
+          lastFrame,
+          endsWith('''
 Test Suites: 2 passed, 2 total
 Tests:       2 passed, 2 total
 Time:        00:00:00
-''');
-
+'''),
+        );
         expect(exitCode, 0);
       });
 
@@ -813,18 +814,17 @@ void main() {
 ''',
         });
 
+        final lastFrame = testRenderer!.frames.last;
+        expect(lastFrame, contains('PASS  test/passing_test.dart'));
+        expect(lastFrame, contains('PASS  test/pending_test.dart'));
         expect(
-          testRenderer!.frames.last,
-          '''
- PASS  test/passing_test.dart
- PASS  test/pending_test.dart
-
+          lastFrame,
+          endsWith('''
 Test Suites: 2 passed, 2 total
 Tests:       2 passed, 2 total
 Time:        00:00:00
-''',
+'''),
         );
-
         expect(exitCode, 0);
       });
 
