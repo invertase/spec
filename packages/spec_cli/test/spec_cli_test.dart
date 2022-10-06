@@ -1024,15 +1024,11 @@ Time:        00:00:00
 ''';
         final hasProperErrorSummary = lastFrame.endsWith('''
 $groupFailingTest
-
 $failingTest
-
 $testResults
 ''') || lastFrame.endsWith('''
 $failingTest
-
 $groupFailingTest
-
 $testResults
 ''');
 
