@@ -34,9 +34,7 @@ scripts:
       depends-on: "build_runner"
 
   test:
-    run: |
-      melos exec -- \
-        "dart test --concurrency=1"
+    run: melos exec -- "dart test"
     description: Run Dart tests.
     select-package:
       dir-exists: "test"

@@ -171,16 +171,17 @@ void main() {
           options: SpecOptions.fromArgs(const ['.', '../b/test', '--no-ci']),
         );
 
+        final lastFrame = testRenderer.frames.last;
+        expect(lastFrame, contains('PASS  ../b/test/another_test.dart'));
+        expect(lastFrame, contains('PASS  test/my_test.dart'));
+        expect(lastFrame, isNot(contains('PASS  ../c/test/skipped_test.dart')));
         expect(
-          testRenderer.frames.last,
-          '''
- PASS  ../b/test/another_test.dart
- PASS  test/my_test.dart
-
+          lastFrame,
+          endsWith('''
 Test Suites: 2 passed, 2 total
 Tests:       2 passed, 2 total
 Time:        00:00:00
-''',
+'''),
         );
 
         expect(exitCode, 0);
