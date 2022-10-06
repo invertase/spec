@@ -989,9 +989,9 @@ void main() {
           lastFrame,
           contains('''
  FAIL  test/failing_test.dart
- ✕ failing
- Bad state: fail
- test/failing_test.dart 3:25  main.<fn>
+  ✕ failing
+    Bad state: fail
+    test/failing_test.dart 3:25  main.<fn>
 '''),
         );
         expect(
@@ -1005,23 +1005,40 @@ void main() {
 '''),
         );
 
+        const groupFailingTest = '''
+  ● group failing test/failing_group_test.dart:4:5
+    Bad state: fail
+    test/failing_group_test.dart 4:27  main.<fn>.<fn>
+''';
+
+        const failingTest = '''
+  ● failing test/failing_test.dart:3:3
+    Bad state: fail
+    test/failing_test.dart 3:25  main.<fn>
+''';
+
+        const testResults = '''
+Test Suites: 2 failed, 1 passed, 3 total
+Tests:       2 failed, 3 passed, 5 total
+Time:        00:00:00
+''';
+        final hasProperErrorSummary = lastFrame.endsWith('''
+$groupFailingTest
+
+$failingTest
+
+$testResults
+''') || lastFrame.endsWith('''
+$failingTest
+
+$groupFailingTest
+
+$testResults
+''');
+
         expect(
-          lastFrame,
-          endsWith(
-            '''
- ● group failing test/failing_group_test.dart:4:5
- Bad state: fail
- test/failing_group_test.dart 4:27  main.<fn>.<fn>
-
- ● failing test/failing_test.dart:3:3
- Bad state: fail
- test/failing_test.dart 3:25  main.<fn>
-
- Test Suites: 2 failed, 1 passed, 3 total
- Tests:       2 failed, 3 passed, 5 total
- Time:        00:00:00
-''',
-          ),
+          hasProperErrorSummary,
+          isTrue,
         );
 
         expect(exitCode, 1);
