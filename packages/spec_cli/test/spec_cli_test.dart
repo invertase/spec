@@ -929,14 +929,17 @@ void main() {
 ''',
         });
 
+        final lastFrame = testRenderer!.frames.last;
+        expect(lastFrame, contains('PASS  test/passing_test.dart'));
+        expect(lastFrame, contains('FAIL  test/failing_test.dart'));
         expect(
-          testRenderer!.frames.last,
-          '''
- FAIL  test/failing_test.dart
+          lastFrame,
+          endsWith(
+            '''
+
   ✕ failing
     Bad state: fail
     test/failing_test.dart 3:25  main.<fn>
- PASS  test/passing_test.dart
 
   ● failing test/failing_test.dart:3:3
     Bad state: fail
@@ -946,6 +949,7 @@ Test Suites: 1 failed, 1 passed, 2 total
 Tests:       1 failed, 1 passed, 2 total
 Time:        00:00:00
 ''',
+          ),
         );
 
         expect(exitCode, 1);
@@ -979,30 +983,46 @@ void main() {
 ''',
         });
 
-        expect(testRenderer!.frames.last, '''
+        final lastFrame = testRenderer!.frames.last;
+        expect(lastFrame, contains('PASS  test/passing_test.dart'));
+        expect(
+          lastFrame,
+          contains('''
  FAIL  test/failing_test.dart
-  ✕ failing
-    Bad state: fail
-    test/failing_test.dart 3:25  main.<fn>
+ ✕ failing
+ Bad state: fail
+ test/failing_test.dart 3:25  main.<fn>
+'''),
+        );
+        expect(
+          lastFrame,
+          contains('''
  FAIL  test/failing_group_test.dart
   group
     ✕ failing
       Bad state: fail
       test/failing_group_test.dart 4:27  main.<fn>.<fn>
- PASS  test/passing_test.dart
+'''),
+        );
 
-  ● group failing test/failing_group_test.dart:4:5
-    Bad state: fail
-    test/failing_group_test.dart 4:27  main.<fn>.<fn>
+        expect(
+          lastFrame,
+          endsWith(
+            '''
+ ● group failing test/failing_group_test.dart:4:5
+ Bad state: fail
+ test/failing_group_test.dart 4:27  main.<fn>.<fn>
 
-  ● failing test/failing_test.dart:3:3
-    Bad state: fail
-    test/failing_test.dart 3:25  main.<fn>
+ ● failing test/failing_test.dart:3:3
+ Bad state: fail
+ test/failing_test.dart 3:25  main.<fn>
 
-Test Suites: 2 failed, 1 passed, 3 total
-Tests:       2 failed, 3 passed, 5 total
-Time:        00:00:00
-''');
+ Test Suites: 2 failed, 1 passed, 3 total
+ Tests:       2 failed, 3 passed, 5 total
+ Time:        00:00:00
+''',
+          ),
+        );
 
         expect(exitCode, 1);
       });
