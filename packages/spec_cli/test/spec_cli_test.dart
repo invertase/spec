@@ -1107,8 +1107,9 @@ Time:        00:00:00
 ''',
     );
     expect(
-        File('${workingDir.path}/packages/a/test/container.png').existsSync(),
-        true);
+      File('${workingDir.path}/packages/a/test/container.png').existsSync(),
+      true,
+    );
     expect(exitCode, 0);
   });
 }
