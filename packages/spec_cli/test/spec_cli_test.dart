@@ -1,3 +1,5 @@
+@Timeout(Duration(seconds: 90))
+
 import 'dart:io';
 
 import 'package:path/path.dart';

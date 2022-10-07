@@ -1,4 +1,4 @@
-@Timeout(Duration(seconds: 60))
+@Timeout(Duration(seconds: 90))
 
 import 'package:spec_cli/src/command_runner.dart';
 import 'package:spec_cli/src/renderer.dart';
