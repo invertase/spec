@@ -1,6 +1,7 @@
 ## 0.1.4
 
 - feat: Allow running spec_cli with `dart pub global run spec_cli` (#22)
+- upgrade dependencies
 
 ## 0.1.3
 
