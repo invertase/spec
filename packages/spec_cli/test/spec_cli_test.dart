@@ -1,3 +1,5 @@
+@Timeout(Duration(seconds: 90))
+
 import 'dart:io';
 
 import 'package:path/path.dart';
@@ -171,17 +173,19 @@ void main() {
           options: SpecOptions.fromArgs(const ['.', '../b/test', '--no-ci']),
         );
 
+        final lastFrame = testRenderer.frames.last;
+        expect(lastFrame, contains(' PASS  ../b/test/another_test.dart\n'));
+        expect(lastFrame, contains(' PASS  test/my_test.dart\n'));
+        expect(lastFrame, isNot(contains('PASS  ../c/test/skipped_test.dart')));
         expect(
-          testRenderer.frames.last,
-          '''
- PASS  ../b/test/another_test.dart
- PASS  test/my_test.dart
-
+          lastFrame,
+          endsWith('''
 Test Suites: 2 passed, 2 total
 Tests:       2 passed, 2 total
 Time:        00:00:00
-''',
+'''),
         );
+        expect(lastFrame.split('\n').length, 7);
 
         expect(exitCode, 0);
       });
@@ -285,18 +289,17 @@ void main() {
 ''',
         });
 
+        final lastFrame = testRenderer!.frames.last;
+        expect(lastFrame, contains('PASS  test/my_test.dart'));
+        expect(lastFrame, contains('PASS  test/another_test.dart'));
         expect(
-          testRenderer!.frames.last,
-          '''
- PASS  test/my_test.dart
- PASS  test/another_test.dart
-
+          lastFrame,
+          endsWith('''
 Test Suites: 2 passed, 2 total
 Tests:       3 passed, 3 total
 Time:        00:00:00
-''',
+'''),
         );
-
         expect(exitCode, 0);
       });
 
@@ -431,15 +434,17 @@ void main() {
           ),
         );
 
-        expect(testRenderer!.frames.last, '''
- PASS  test/another_test.dart
- PASS  test/my_test.dart
-
+        final lastFrame = testRenderer!.frames.last;
+        expect(lastFrame, contains('PASS  test/another_test.dart'));
+        expect(lastFrame, contains('PASS  test/my_test.dart'));
+        expect(
+          lastFrame,
+          endsWith('''
 Test Suites: 2 passed, 2 total
 Tests:       2 passed, 2 total
 Time:        00:00:00
-''');
-
+'''),
+        );
         expect(exitCode, 0);
       });
 
@@ -812,18 +817,17 @@ void main() {
 ''',
         });
 
+        final lastFrame = testRenderer!.frames.last;
+        expect(lastFrame, contains('PASS  test/passing_test.dart'));
+        expect(lastFrame, contains('PASS  test/pending_test.dart'));
         expect(
-          testRenderer!.frames.last,
-          '''
- PASS  test/passing_test.dart
- PASS  test/pending_test.dart
-
+          lastFrame,
+          endsWith('''
 Test Suites: 2 passed, 2 total
 Tests:       2 passed, 2 total
 Time:        00:00:00
-''',
+'''),
         );
-
         expect(exitCode, 0);
       });
 
@@ -928,15 +932,24 @@ void main() {
 ''',
         });
 
+        final lastFrame = testRenderer!.frames.last;
+        expect(lastFrame, contains('PASS  test/passing_test.dart'));
+        expect(lastFrame, contains('FAIL  test/failing_test.dart'));
         expect(
-          testRenderer!.frames.last,
-          '''
- FAIL  test/failing_test.dart
+          lastFrame,
+          contains(
+            '''
   ✕ failing
     Bad state: fail
     test/failing_test.dart 3:25  main.<fn>
- PASS  test/passing_test.dart
+''',
+          ),
+        );
 
+        expect(
+          lastFrame,
+          endsWith(
+            '''
   ● failing test/failing_test.dart:3:3
     Bad state: fail
     test/failing_test.dart 3:25  main.<fn>
@@ -945,6 +958,7 @@ Test Suites: 1 failed, 1 passed, 2 total
 Tests:       1 failed, 1 passed, 2 total
 Time:        00:00:00
 ''',
+          ),
         );
 
         expect(exitCode, 1);
@@ -978,31 +992,70 @@ void main() {
 ''',
         });
 
-        expect(testRenderer!.frames.last, '''
+        final lastFrame = testRenderer!.frames.last;
+        expect(lastFrame, contains('PASS  test/passing_test.dart'));
+        expect(
+          lastFrame,
+          contains('''
  FAIL  test/failing_test.dart
   ✕ failing
     Bad state: fail
     test/failing_test.dart 3:25  main.<fn>
+'''),
+        );
+        expect(
+          lastFrame,
+          contains('''
  FAIL  test/failing_group_test.dart
   group
     ✕ failing
       Bad state: fail
       test/failing_group_test.dart 4:27  main.<fn>.<fn>
- PASS  test/passing_test.dart
+'''),
+        );
 
+        const groupFailingTest = '''
   ● group failing test/failing_group_test.dart:4:5
     Bad state: fail
     test/failing_group_test.dart 4:27  main.<fn>.<fn>
+''';
 
+        const failingTest = '''
   ● failing test/failing_test.dart:3:3
     Bad state: fail
     test/failing_test.dart 3:25  main.<fn>
+''';
 
+        const testResults = '''
 Test Suites: 2 failed, 1 passed, 3 total
 Tests:       2 failed, 3 passed, 5 total
-Time:        00:00:00
-''');
+Time:        00:00:00''';
 
+        expect(
+          lastFrame,
+          anyOf(
+            endsWith(
+              '''
+$groupFailingTest
+$failingTest
+$testResults
+''',
+            ),
+            endsWith(
+              '''
+$failingTest
+$groupFailingTest
+$testResults
+''',
+            ),
+          ),
+        );
+
+        final lines = lastFrame.split('\n');
+        // Correct number of empty lines
+        expect(lines.where((line) => line.isEmpty).length, 4);
+        // Correct number of total lines
+        expect(lines.length, 23);
         expect(exitCode, 1);
       });
     },
