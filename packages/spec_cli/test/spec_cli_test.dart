@@ -1029,12 +1029,9 @@ Test Suites: 2 failed, 1 passed, 3 total
 Tests:       2 failed, 3 passed, 5 total
 Time:        00:00:00''';
 
-        if (lastFrame.endsWith('''
-$failingTest
-$testResults
-''')) {
-          expect(
-            lastFrame,
+        expect(
+          lastFrame,
+          anyOf(
             endsWith(
               '''
 $groupFailingTest
@@ -1042,10 +1039,6 @@ $failingTest
 $testResults
 ''',
             ),
-          );
-        } else {
-          expect(
-            lastFrame,
             endsWith(
               '''
 $failingTest
@@ -1053,9 +1046,14 @@ $groupFailingTest
 $testResults
 ''',
             ),
-          );
-        }
+          ),
+        );
 
+        final lines = lastFrame.split('\n');
+        // Correct number of empty lines
+        expect(lines.where((line) => line.isEmpty).length, 4);
+        // Correct number of total lines
+        expect(lines.length, 23);
         expect(exitCode, 1);
       });
     },
