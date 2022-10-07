@@ -27,4 +27,5 @@ dev_dependencies:
   freezed: ^2.1.1
 
 executables:
-  spec: main
+  spec: spec_cli
+  spec_cli: spec_cli
