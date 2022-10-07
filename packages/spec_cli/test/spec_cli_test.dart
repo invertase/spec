@@ -172,8 +172,8 @@ void main() {
         );
 
         final lastFrame = testRenderer.frames.last;
-        expect(lastFrame, contains('PASS  ../b/test/another_test.dart'));
-        expect(lastFrame, contains('PASS  test/my_test.dart'));
+        expect(lastFrame, contains(' PASS  ../b/test/another_test.dart\n'));
+        expect(lastFrame, contains(' PASS  test/my_test.dart\n'));
         expect(lastFrame, isNot(contains('PASS  ../c/test/skipped_test.dart')));
         expect(
           lastFrame,
@@ -183,6 +183,7 @@ Tests:       2 passed, 2 total
 Time:        00:00:00
 '''),
         );
+        expect(lastFrame.split('\n').length, 7);
 
         expect(exitCode, 0);
       });
