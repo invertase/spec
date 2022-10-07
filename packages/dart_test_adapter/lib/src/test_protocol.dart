@@ -1,3 +1,5 @@
+// ignore_for_file: invalid_annotation_target, false positive with Freezed
+
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'test_protocol.g.dart';
