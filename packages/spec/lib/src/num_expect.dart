@@ -45,4 +45,10 @@ extension NumExpectation<Return> on ExpectationBase<Object?, Return, num> {
   Return greaterThanOrEqualTo(num value) {
     return runMatcher(dart_test.greaterThanOrEqualTo(value));
   }
+
+  /// Returns a matcher which matches if the match argument is within
+  /// [delta] of some [value].
+  Return toBeCloseTo(num value, num delta) {
+    return runMatcher(dart_test.closeTo(value, delta));
+  }
 }

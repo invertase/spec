@@ -8,6 +8,7 @@ part 'error_expect.dart';
 part 'function_expect.dart';
 part 'future_expect.dart';
 part 'num_expect.dart';
+part 'map_expect.dart';
 part 'stream_expect.dart';
 part 'string_expect.dart';
 
@@ -119,6 +120,34 @@ abstract class ExpectationBase<Actual, Return, Param> {
         dart_test.anyOf(dart_test.isFalse, dart_test.isNull),
       ),
     );
+  }
+
+  /// Returns a matcher that matches if the match argument contains the
+  /// expected value.
+  ///
+  /// For [String]s this means substring matching;
+  /// for [Map]s it means the map has the key, and for [Iterable]s it means
+  /// the iterable has a matching element.
+  /// In the case of iterables, [expected] can itself be a matcher.
+  ///
+  /// ```dart
+  /// expect('Hello world').toContain('Hello');
+  /// expect([1,2]).toContain(2);
+  /// expect({  'hello': 'world' }).toContain('hello');
+  /// ```
+  Return toContain(Object? expected) {
+    return runMatcher(dart_test.contains(expected));
+  }
+
+  /// Returns a matcher that matches if an object has a length property that
+  /// matches [matcher].
+  /// ```dart
+  /// expect('Hello').toHaveLength(5);
+  /// expect([1, 2]).toHaveLength(2);
+  /// expect({'hello': 'world'}).toHaveLength(1);
+  /// ```
+  Return toHaveLength(Object? matcher) {
+    return runMatcher(dart_test.hasLength(matcher));
   }
 }
 
