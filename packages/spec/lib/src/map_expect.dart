@@ -12,12 +12,11 @@ extension MapExpectationX<Return, KeyParam, ValueParam> on ExpectationBase<
   /// with any value.
   Return containsKey(KeyParam key) => toContain(key);
 
-  /// Returns a matcher which matches maps containing the key-value pair
-  /// with [key] => [valueOrMatcher].
+  /// Returns a matcher which matches maps containing the given [value].
   /// ```dart
-  /// expect({'hello': 'world'}).toHaveKeyValuePair('hello', 'world');
+  /// expect({'hello': 'world'}).containsValue('world');
   /// ```
-  Return containsValue(ValueParam? valueOrMatcher) {
-    return runMatcher(dart_test.containsValue(valueOrMatcher));
+  Return containsValue(ValueParam? value) {
+    return runMatcher(dart_test.containsValue(value));
   }
 }
