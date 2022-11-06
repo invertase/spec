@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:collection/collection.dart';
 import 'package:dart_test_adapter/dart_test_adapter.dart';
 import 'package:riverpod/riverpod.dart';
@@ -91,7 +93,7 @@ final $hasAllSuites = Provider.autoDispose<bool>(
     final suites = ref.watch($suites);
     return suites.length == suiteCount;
   },
-  dependencies: [$suites, $suiteCount, $filteredPackages],
+  dependencies: [$suites, $suiteCount],
 );
 
 final $suite = Provider.autoDispose
@@ -129,7 +131,7 @@ final $isPackageDone =
     Provider.family.autoDispose<bool, String>((ref, packagePath) {
   return !ref.watch($packageExitCode(packagePath)).isLoading &&
       !ref.watch($coverageForPackage(packagePath)).isLoading;
-}, dependencies: [$events, $packageExitCode]);
+}, dependencies: [$packageExitCode, $coverageForPackage]);
 
 final $suiteStatus = Provider.family
     .autoDispose<SuiteStatus, Packaged<SuiteKey>>((ref, suiteKey) {
@@ -178,55 +180,57 @@ final $suiteStatus = Provider.family
   $isPackageDone,
 ]);
 
-final $exitCode = Provider.autoDispose<AsyncValue<int>>(
-  (ref) {
-    // The exit code will be preemptively obtained when a signal is sent.
-    // No matter whether all tests executed are passing or not, since the command
-    // didn't have the time to complete, we consider the command as failing
-    if (ref.watch($isEarlyAbort)) return const AsyncData(-1);
-
-    if (!ref.watch($hasAllSuites)) {
-      return const AsyncLoading();
-    }
-
-    final packages = ref.watch($filteredPackages);
-    if (packages.isLoading) return const AsyncLoading();
-
-    final coverageReports = packages.value!
-        .map((p) => ref.watch($coverageForPackage(p.path)))
-        .toList();
-    if (coverageReports.any((element) => element.isLoading)) {
-      return const AsyncLoading();
-    }
-    if (coverageReports.any((element) => element.hasError)) {
-      // TODO print error
-      return const AsyncData(-1);
-    }
-
-    final hasPendingPackage = packages.value!.any(
-      (package) => !ref.watch($isPackageDone(package.path)),
-    );
-    if (hasPendingPackage) return const AsyncLoading();
-
-    final exitCode = packages.value!
-        .map((package) => ref.watch($packageExitCode(package.path)).value!)
-        .firstWhereOrNull((exitCode) => exitCode != 0);
-
-    return AsyncData(exitCode ?? 0);
-  },
+final $exitCode = AsyncNotifierProvider.autoDispose<ExitCode, int>(
+  ExitCode.new,
   dependencies: [
-    $suites,
     $filteredPackages,
-    $suiteStatus,
     $isEarlyAbort,
     $hasAllSuites,
-    $events,
     $isPackageDone,
     $coverageForPackage,
     $packageExitCode,
   ],
   name: 'exitCode',
 );
+
+class ExitCode extends AutoDisposeAsyncNotifier<int> {
+  @override
+  FutureOr<int> build() {
+    // The exit code will be preemptively obtained when a signal is sent.
+    // No matter whether all tests executed are passing or not, since the command
+    // didn't have the time to complete, we consider the command as failing
+    if (ref.watch($isEarlyAbort)) return -1;
+
+    if (!ref.watch($hasAllSuites)) {
+      return future;
+    }
+
+    final packages = ref.watch($filteredPackages);
+    if (packages.isLoading) return future;
+
+    final coverageReports = packages.value!
+        .map((p) => ref.watch($coverageForPackage(p.path)))
+        .toList();
+    if (coverageReports.any((element) => element.isLoading)) {
+      return future;
+    }
+    if (coverageReports.any((element) => element.hasError)) {
+      // TODO print error
+      return -1;
+    }
+
+    final hasPendingPackage = packages.value!.any(
+      (package) => !ref.watch($isPackageDone(package.path)),
+    );
+    if (hasPendingPackage) return future;
+
+    final exitCode = packages.value!
+        .map((package) => ref.watch($packageExitCode(package.path)).value!)
+        .firstWhereOrNull((exitCode) => exitCode != 0);
+
+    return exitCode ?? 0;
+  }
+}
 
 final $isDone = Provider.autoDispose<bool>(
   (ref) {

@@ -32,10 +32,9 @@ scripts:
     description: Run a build_runner build in the example apps.
     select-package:
       depends-on: "build_runner"
+
   test:
-    run: |
-      melos exec -- \
-        "dart test"
+    run: melos exec -- "dart test"
     description: Run Dart tests.
     select-package:
       dir-exists: "test"

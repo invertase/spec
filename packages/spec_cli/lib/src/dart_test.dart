@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:cli_util/cli_logging.dart';
 import 'package:dart_test_adapter/dart_test_adapter.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:melos/melos.dart';
@@ -28,7 +29,7 @@ final $events = StateNotifierProvider<TestEventsNotifier, TestEventsState>(
   TestEventsNotifier.new,
   dependencies: [
     $filteredPackages,
-    $filteredPackages.future,
+    $filteredPackages,
     $testNameFilters,
     $filePathFilters,
     $failedTestLocationToExecute,
@@ -174,16 +175,15 @@ final $coverageForPackage =
     reportOn: ['$packagePath/lib'],
     output: '$packagePath/coverage/lcov.info',
   );
-}, dependencies: [$package, $isCoverageMode]);
+}, dependencies: [$package, $isCoverageMode, $events]);
 
 final $allPackages = FutureProvider<List<_Package>>((ref) async {
   final workingDir = ref.watch($workingDirectory);
   try {
     final melosWorkspace = await MelosWorkspace.fromConfig(
       await MelosWorkspaceConfig.fromDirectory(workingDir),
-      filter: PackageFilter(
-        dirExists: ['test'],
-      ),
+      filter: PackageFilter(dirExists: const ['test']),
+      logger: MelosLogger(Logger.standard()),
     );
 
     return melosWorkspace.filteredPackages.values
@@ -221,7 +221,7 @@ final $filteredPackages = FutureProvider<List<_Package>>(
 
     return result;
   },
-  dependencies: [$allPackages.future, $filePathFilters],
+  dependencies: [$allPackages, $filePathFilters],
 );
 
 final $package =

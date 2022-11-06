@@ -1,3 +1,7 @@
+## 0.2.2
+
+- Added `contains`, `containsKey`, `containsPair` and `containsAll` matchers (thanks to @trejdych)
+
 ## 0.2.1
 
  - **FEAT**: Add support for --coverage (#15). ([f41b0692](https://github.com/invertase/spec/commit/f41b0692de74fba162db2c1dac5d8f8a84dd6524))

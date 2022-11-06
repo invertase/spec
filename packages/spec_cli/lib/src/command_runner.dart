@@ -177,7 +177,7 @@ Future<int> spec({
             data: (value) => ref.read(_$lastFailedTests.notifier).state = value,
             loading: () => ref.read(_$lastFailedTests.notifier).state = [],
             error: (err, stack) {
-              Zone.current.handleUncaughtError(err, stack!);
+              Zone.current.handleUncaughtError(err, stack);
             },
           );
         });
@@ -206,7 +206,7 @@ Future<int> spec({
           output.when(
             loading: () {}, // nothing to do
             error: (err, stack) {
-              Zone.current.handleUncaughtError(err, stack!);
+              Zone.current.handleUncaughtError(err, stack);
             },
             data: (output) {
               if (output.trim().isNotEmpty) renderer.renderFrame(output);
@@ -228,10 +228,10 @@ Future<int> spec({
         return await completer.future;
       } else {
         // making sure the exitCode provider isn't disposed while the future is pending
-        ref.listen($exitCode.future, (previous, current) {});
+        final sub = ref.listen($exitCode.future, (previous, current) {});
 
-        // Outside of watch mode, quite as soon we know what the exit code should be
-        return await ref.read($exitCode.future);
+        // Outside of watch mode, quit as soon we know what the exit code should be
+        return sub.read();
       }
     } finally {
       stdout

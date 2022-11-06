@@ -14,10 +14,10 @@ AsyncValue<T> merge<T>(T Function(R Function<R>(AsyncValue<R>) unwrap) cb) {
 
     return AsyncData(cb(unwrap));
   } on AsyncError catch (e) {
-    return AsyncError(e.error, stackTrace: e.stackTrace);
+    return AsyncError(e.error, e.stackTrace);
   } on AsyncLoading {
     return AsyncLoading<T>();
   } catch (err, stack) {
-    return AsyncError<T>(err, stackTrace: stack);
+    return AsyncError<T>(err, stack);
   }
 }
