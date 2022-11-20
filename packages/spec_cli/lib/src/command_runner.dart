@@ -200,6 +200,7 @@ Future<int> spec({
 
       final renderer = rendererOverride ?? BacktrackingRenderer();
 
+      const i = 0;
       ref.listen<AsyncValue<String>>(
         $output,
         (lastOutput, output) {
@@ -209,7 +210,8 @@ Future<int> spec({
               Zone.current.handleUncaughtError(err, stack);
             },
             data: (output) {
-              if (output.trim().isNotEmpty) renderer.renderFrame(output);
+              print('----> t=$i <----');
+              print(output);
             },
           );
         },
