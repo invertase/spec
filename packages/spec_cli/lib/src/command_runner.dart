@@ -231,12 +231,11 @@ Future<int> spec({
         final sub = ref.listen($exitCode.future, (previous, current) {});
 
         // Outside of watch mode, quit as soon we know what the exit code should be
-        return () {
-          return sub.read()
-            ..then((_) => stdout
-              ..write(VT100.showCursor)
-              ..write('\n'));
-        }();
+        final future = sub.read();
+        unawaited(future.then((_) => stdout
+          ..write(VT100.showCursor)
+          ..write('\n')));
+        return future;
       }
     } finally {
       stdout
