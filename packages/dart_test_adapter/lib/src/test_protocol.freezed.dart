@@ -74,27 +74,27 @@ mixin _$TestEvent {
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function(
+    TResult Function(
             String protocolVersion, int pid, int time, String? runnerVersion)?
         start,
-    TResult? Function(bool? success, int time)? done,
-    TResult? Function(int count, int time)? allSuites,
-    TResult? Function(Suite suite, int time)? suite,
-    TResult? Function(Group group, int time)? group,
-    TResult? Function(Test test, int time)? testStart,
-    TResult? Function(int time, int testID, bool hidden, bool skipped,
+    TResult Function(bool? success, int time)? done,
+    TResult Function(int count, int time)? allSuites,
+    TResult Function(Suite suite, int time)? suite,
+    TResult Function(Group group, int time)? group,
+    TResult Function(Test test, int time)? testStart,
+    TResult Function(int time, int testID, bool hidden, bool skipped,
             TestDoneStatus result)?
         testDone,
-    TResult? Function(int time, int testID, String messageType, String message)?
+    TResult Function(int time, int testID, String messageType, String message)?
         print,
-    TResult? Function(int time, int testID, String error, String stackTrace,
+    TResult Function(int time, int testID, String error, String stackTrace,
             bool isFailure)?
         error,
-    TResult? Function(
+    TResult Function(
             int time, int suiteID, String? observatory, String? remoteDebugger)?
         debug,
-    TResult? Function(int exitCode)? processDone,
-    TResult? Function()? unknown,
+    TResult Function(int exitCode)? processDone,
+    TResult Function()? unknown,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
@@ -141,18 +141,18 @@ mixin _$TestEvent {
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
-    TResult? Function(TestEventStart value)? start,
-    TResult? Function(TestEventDone value)? done,
-    TResult? Function(TestEventAllSuites value)? allSuites,
-    TResult? Function(TestEventSuite value)? suite,
-    TResult? Function(TestEventGroup value)? group,
-    TResult? Function(TestEventTestStart value)? testStart,
-    TResult? Function(TestEventTestDone value)? testDone,
-    TResult? Function(TestEventMessage value)? print,
-    TResult? Function(TestEventTestError value)? error,
-    TResult? Function(TestEventDebug value)? debug,
-    TResult? Function(TestProcessDone value)? processDone,
-    TResult? Function(TestEventUnknown value)? unknown,
+    TResult Function(TestEventStart value)? start,
+    TResult Function(TestEventDone value)? done,
+    TResult Function(TestEventAllSuites value)? allSuites,
+    TResult Function(TestEventSuite value)? suite,
+    TResult Function(TestEventGroup value)? group,
+    TResult Function(TestEventTestStart value)? testStart,
+    TResult Function(TestEventTestDone value)? testDone,
+    TResult Function(TestEventMessage value)? print,
+    TResult Function(TestEventTestError value)? error,
+    TResult Function(TestEventDebug value)? debug,
+    TResult Function(TestProcessDone value)? processDone,
+    TResult Function(TestEventUnknown value)? unknown,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
@@ -178,18 +178,16 @@ mixin _$TestEvent {
 /// @nodoc
 abstract class $TestEventCopyWith<$Res> {
   factory $TestEventCopyWith(TestEvent value, $Res Function(TestEvent) then) =
-      _$TestEventCopyWithImpl<$Res, TestEvent>;
+      _$TestEventCopyWithImpl<$Res>;
 }
 
 /// @nodoc
-class _$TestEventCopyWithImpl<$Res, $Val extends TestEvent>
-    implements $TestEventCopyWith<$Res> {
+class _$TestEventCopyWithImpl<$Res> implements $TestEventCopyWith<$Res> {
   _$TestEventCopyWithImpl(this._value, this._then);
 
+  final TestEvent _value;
   // ignore: unused_field
-  final $Val _value;
-  // ignore: unused_field
-  final $Res Function($Val) _then;
+  final $Res Function(TestEvent) _then;
 }
 
 /// @nodoc
@@ -197,40 +195,40 @@ abstract class _$$TestEventStartCopyWith<$Res> {
   factory _$$TestEventStartCopyWith(
           _$TestEventStart value, $Res Function(_$TestEventStart) then) =
       __$$TestEventStartCopyWithImpl<$Res>;
-  @useResult
   $Res call({String protocolVersion, int pid, int time, String? runnerVersion});
 }
 
 /// @nodoc
-class __$$TestEventStartCopyWithImpl<$Res>
-    extends _$TestEventCopyWithImpl<$Res, _$TestEventStart>
+class __$$TestEventStartCopyWithImpl<$Res> extends _$TestEventCopyWithImpl<$Res>
     implements _$$TestEventStartCopyWith<$Res> {
   __$$TestEventStartCopyWithImpl(
       _$TestEventStart _value, $Res Function(_$TestEventStart) _then)
-      : super(_value, _then);
+      : super(_value, (v) => _then(v as _$TestEventStart));
 
-  @pragma('vm:prefer-inline')
+  @override
+  _$TestEventStart get _value => super._value as _$TestEventStart;
+
   @override
   $Res call({
-    Object? protocolVersion = null,
-    Object? pid = null,
-    Object? time = null,
+    Object? protocolVersion = freezed,
+    Object? pid = freezed,
+    Object? time = freezed,
     Object? runnerVersion = freezed,
   }) {
     return _then(_$TestEventStart(
-      protocolVersion: null == protocolVersion
+      protocolVersion: protocolVersion == freezed
           ? _value.protocolVersion
           : protocolVersion // ignore: cast_nullable_to_non_nullable
               as String,
-      pid: null == pid
+      pid: pid == freezed
           ? _value.pid
           : pid // ignore: cast_nullable_to_non_nullable
               as int,
-      time: null == time
+      time: time == freezed
           ? _value.time
           : time // ignore: cast_nullable_to_non_nullable
               as int,
-      runnerVersion: freezed == runnerVersion
+      runnerVersion: runnerVersion == freezed
           ? _value.runnerVersion
           : runnerVersion // ignore: cast_nullable_to_non_nullable
               as String?,
@@ -274,22 +272,25 @@ class _$TestEventStart implements TestEventStart {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$TestEventStart &&
-            (identical(other.protocolVersion, protocolVersion) ||
-                other.protocolVersion == protocolVersion) &&
-            (identical(other.pid, pid) || other.pid == pid) &&
-            (identical(other.time, time) || other.time == time) &&
-            (identical(other.runnerVersion, runnerVersion) ||
-                other.runnerVersion == runnerVersion));
+            const DeepCollectionEquality()
+                .equals(other.protocolVersion, protocolVersion) &&
+            const DeepCollectionEquality().equals(other.pid, pid) &&
+            const DeepCollectionEquality().equals(other.time, time) &&
+            const DeepCollectionEquality()
+                .equals(other.runnerVersion, runnerVersion));
   }
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, protocolVersion, pid, time, runnerVersion);
+  int get hashCode => Object.hash(
+      runtimeType,
+      const DeepCollectionEquality().hash(protocolVersion),
+      const DeepCollectionEquality().hash(pid),
+      const DeepCollectionEquality().hash(time),
+      const DeepCollectionEquality().hash(runnerVersion));
 
   @JsonKey(ignore: true)
   @override
-  @pragma('vm:prefer-inline')
   _$$TestEventStartCopyWith<_$TestEventStart> get copyWith =>
       __$$TestEventStartCopyWithImpl<_$TestEventStart>(this, _$identity);
 
@@ -325,27 +326,27 @@ class _$TestEventStart implements TestEventStart {
   @override
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function(
+    TResult Function(
             String protocolVersion, int pid, int time, String? runnerVersion)?
         start,
-    TResult? Function(bool? success, int time)? done,
-    TResult? Function(int count, int time)? allSuites,
-    TResult? Function(Suite suite, int time)? suite,
-    TResult? Function(Group group, int time)? group,
-    TResult? Function(Test test, int time)? testStart,
-    TResult? Function(int time, int testID, bool hidden, bool skipped,
+    TResult Function(bool? success, int time)? done,
+    TResult Function(int count, int time)? allSuites,
+    TResult Function(Suite suite, int time)? suite,
+    TResult Function(Group group, int time)? group,
+    TResult Function(Test test, int time)? testStart,
+    TResult Function(int time, int testID, bool hidden, bool skipped,
             TestDoneStatus result)?
         testDone,
-    TResult? Function(int time, int testID, String messageType, String message)?
+    TResult Function(int time, int testID, String messageType, String message)?
         print,
-    TResult? Function(int time, int testID, String error, String stackTrace,
+    TResult Function(int time, int testID, String error, String stackTrace,
             bool isFailure)?
         error,
-    TResult? Function(
+    TResult Function(
             int time, int suiteID, String? observatory, String? remoteDebugger)?
         debug,
-    TResult? Function(int exitCode)? processDone,
-    TResult? Function()? unknown,
+    TResult Function(int exitCode)? processDone,
+    TResult Function()? unknown,
   }) {
     return start?.call(protocolVersion, pid, time, runnerVersion);
   }
@@ -404,18 +405,18 @@ class _$TestEventStart implements TestEventStart {
   @override
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
-    TResult? Function(TestEventStart value)? start,
-    TResult? Function(TestEventDone value)? done,
-    TResult? Function(TestEventAllSuites value)? allSuites,
-    TResult? Function(TestEventSuite value)? suite,
-    TResult? Function(TestEventGroup value)? group,
-    TResult? Function(TestEventTestStart value)? testStart,
-    TResult? Function(TestEventTestDone value)? testDone,
-    TResult? Function(TestEventMessage value)? print,
-    TResult? Function(TestEventTestError value)? error,
-    TResult? Function(TestEventDebug value)? debug,
-    TResult? Function(TestProcessDone value)? processDone,
-    TResult? Function(TestEventUnknown value)? unknown,
+    TResult Function(TestEventStart value)? start,
+    TResult Function(TestEventDone value)? done,
+    TResult Function(TestEventAllSuites value)? allSuites,
+    TResult Function(TestEventSuite value)? suite,
+    TResult Function(TestEventGroup value)? group,
+    TResult Function(TestEventTestStart value)? testStart,
+    TResult Function(TestEventTestDone value)? testDone,
+    TResult Function(TestEventMessage value)? print,
+    TResult Function(TestEventTestError value)? error,
+    TResult Function(TestEventDebug value)? debug,
+    TResult Function(TestProcessDone value)? processDone,
+    TResult Function(TestEventUnknown value)? unknown,
   }) {
     return start?.call(this);
   }
@@ -475,30 +476,30 @@ abstract class _$$TestEventDoneCopyWith<$Res> {
   factory _$$TestEventDoneCopyWith(
           _$TestEventDone value, $Res Function(_$TestEventDone) then) =
       __$$TestEventDoneCopyWithImpl<$Res>;
-  @useResult
   $Res call({bool? success, int time});
 }
 
 /// @nodoc
-class __$$TestEventDoneCopyWithImpl<$Res>
-    extends _$TestEventCopyWithImpl<$Res, _$TestEventDone>
+class __$$TestEventDoneCopyWithImpl<$Res> extends _$TestEventCopyWithImpl<$Res>
     implements _$$TestEventDoneCopyWith<$Res> {
   __$$TestEventDoneCopyWithImpl(
       _$TestEventDone _value, $Res Function(_$TestEventDone) _then)
-      : super(_value, _then);
+      : super(_value, (v) => _then(v as _$TestEventDone));
 
-  @pragma('vm:prefer-inline')
+  @override
+  _$TestEventDone get _value => super._value as _$TestEventDone;
+
   @override
   $Res call({
     Object? success = freezed,
-    Object? time = null,
+    Object? time = freezed,
   }) {
     return _then(_$TestEventDone(
-      success: freezed == success
+      success: success == freezed
           ? _value.success
           : success // ignore: cast_nullable_to_non_nullable
               as bool?,
-      time: null == time
+      time: time == freezed
           ? _value.time
           : time // ignore: cast_nullable_to_non_nullable
               as int,
@@ -538,17 +539,19 @@ class _$TestEventDone implements TestEventDone {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$TestEventDone &&
-            (identical(other.success, success) || other.success == success) &&
-            (identical(other.time, time) || other.time == time));
+            const DeepCollectionEquality().equals(other.success, success) &&
+            const DeepCollectionEquality().equals(other.time, time));
   }
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode => Object.hash(runtimeType, success, time);
+  int get hashCode => Object.hash(
+      runtimeType,
+      const DeepCollectionEquality().hash(success),
+      const DeepCollectionEquality().hash(time));
 
   @JsonKey(ignore: true)
   @override
-  @pragma('vm:prefer-inline')
   _$$TestEventDoneCopyWith<_$TestEventDone> get copyWith =>
       __$$TestEventDoneCopyWithImpl<_$TestEventDone>(this, _$identity);
 
@@ -584,27 +587,27 @@ class _$TestEventDone implements TestEventDone {
   @override
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function(
+    TResult Function(
             String protocolVersion, int pid, int time, String? runnerVersion)?
         start,
-    TResult? Function(bool? success, int time)? done,
-    TResult? Function(int count, int time)? allSuites,
-    TResult? Function(Suite suite, int time)? suite,
-    TResult? Function(Group group, int time)? group,
-    TResult? Function(Test test, int time)? testStart,
-    TResult? Function(int time, int testID, bool hidden, bool skipped,
+    TResult Function(bool? success, int time)? done,
+    TResult Function(int count, int time)? allSuites,
+    TResult Function(Suite suite, int time)? suite,
+    TResult Function(Group group, int time)? group,
+    TResult Function(Test test, int time)? testStart,
+    TResult Function(int time, int testID, bool hidden, bool skipped,
             TestDoneStatus result)?
         testDone,
-    TResult? Function(int time, int testID, String messageType, String message)?
+    TResult Function(int time, int testID, String messageType, String message)?
         print,
-    TResult? Function(int time, int testID, String error, String stackTrace,
+    TResult Function(int time, int testID, String error, String stackTrace,
             bool isFailure)?
         error,
-    TResult? Function(
+    TResult Function(
             int time, int suiteID, String? observatory, String? remoteDebugger)?
         debug,
-    TResult? Function(int exitCode)? processDone,
-    TResult? Function()? unknown,
+    TResult Function(int exitCode)? processDone,
+    TResult Function()? unknown,
   }) {
     return done?.call(success, time);
   }
@@ -663,18 +666,18 @@ class _$TestEventDone implements TestEventDone {
   @override
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
-    TResult? Function(TestEventStart value)? start,
-    TResult? Function(TestEventDone value)? done,
-    TResult? Function(TestEventAllSuites value)? allSuites,
-    TResult? Function(TestEventSuite value)? suite,
-    TResult? Function(TestEventGroup value)? group,
-    TResult? Function(TestEventTestStart value)? testStart,
-    TResult? Function(TestEventTestDone value)? testDone,
-    TResult? Function(TestEventMessage value)? print,
-    TResult? Function(TestEventTestError value)? error,
-    TResult? Function(TestEventDebug value)? debug,
-    TResult? Function(TestProcessDone value)? processDone,
-    TResult? Function(TestEventUnknown value)? unknown,
+    TResult Function(TestEventStart value)? start,
+    TResult Function(TestEventDone value)? done,
+    TResult Function(TestEventAllSuites value)? allSuites,
+    TResult Function(TestEventSuite value)? suite,
+    TResult Function(TestEventGroup value)? group,
+    TResult Function(TestEventTestStart value)? testStart,
+    TResult Function(TestEventTestDone value)? testDone,
+    TResult Function(TestEventMessage value)? print,
+    TResult Function(TestEventTestError value)? error,
+    TResult Function(TestEventDebug value)? debug,
+    TResult Function(TestProcessDone value)? processDone,
+    TResult Function(TestEventUnknown value)? unknown,
   }) {
     return done?.call(this);
   }
@@ -734,30 +737,31 @@ abstract class _$$TestEventAllSuitesCopyWith<$Res> {
   factory _$$TestEventAllSuitesCopyWith(_$TestEventAllSuites value,
           $Res Function(_$TestEventAllSuites) then) =
       __$$TestEventAllSuitesCopyWithImpl<$Res>;
-  @useResult
   $Res call({int count, int time});
 }
 
 /// @nodoc
 class __$$TestEventAllSuitesCopyWithImpl<$Res>
-    extends _$TestEventCopyWithImpl<$Res, _$TestEventAllSuites>
+    extends _$TestEventCopyWithImpl<$Res>
     implements _$$TestEventAllSuitesCopyWith<$Res> {
   __$$TestEventAllSuitesCopyWithImpl(
       _$TestEventAllSuites _value, $Res Function(_$TestEventAllSuites) _then)
-      : super(_value, _then);
+      : super(_value, (v) => _then(v as _$TestEventAllSuites));
 
-  @pragma('vm:prefer-inline')
+  @override
+  _$TestEventAllSuites get _value => super._value as _$TestEventAllSuites;
+
   @override
   $Res call({
-    Object? count = null,
-    Object? time = null,
+    Object? count = freezed,
+    Object? time = freezed,
   }) {
     return _then(_$TestEventAllSuites(
-      count: null == count
+      count: count == freezed
           ? _value.count
           : count // ignore: cast_nullable_to_non_nullable
               as int,
-      time: null == time
+      time: time == freezed
           ? _value.time
           : time // ignore: cast_nullable_to_non_nullable
               as int,
@@ -793,17 +797,19 @@ class _$TestEventAllSuites implements TestEventAllSuites {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$TestEventAllSuites &&
-            (identical(other.count, count) || other.count == count) &&
-            (identical(other.time, time) || other.time == time));
+            const DeepCollectionEquality().equals(other.count, count) &&
+            const DeepCollectionEquality().equals(other.time, time));
   }
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode => Object.hash(runtimeType, count, time);
+  int get hashCode => Object.hash(
+      runtimeType,
+      const DeepCollectionEquality().hash(count),
+      const DeepCollectionEquality().hash(time));
 
   @JsonKey(ignore: true)
   @override
-  @pragma('vm:prefer-inline')
   _$$TestEventAllSuitesCopyWith<_$TestEventAllSuites> get copyWith =>
       __$$TestEventAllSuitesCopyWithImpl<_$TestEventAllSuites>(
           this, _$identity);
@@ -840,27 +846,27 @@ class _$TestEventAllSuites implements TestEventAllSuites {
   @override
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function(
+    TResult Function(
             String protocolVersion, int pid, int time, String? runnerVersion)?
         start,
-    TResult? Function(bool? success, int time)? done,
-    TResult? Function(int count, int time)? allSuites,
-    TResult? Function(Suite suite, int time)? suite,
-    TResult? Function(Group group, int time)? group,
-    TResult? Function(Test test, int time)? testStart,
-    TResult? Function(int time, int testID, bool hidden, bool skipped,
+    TResult Function(bool? success, int time)? done,
+    TResult Function(int count, int time)? allSuites,
+    TResult Function(Suite suite, int time)? suite,
+    TResult Function(Group group, int time)? group,
+    TResult Function(Test test, int time)? testStart,
+    TResult Function(int time, int testID, bool hidden, bool skipped,
             TestDoneStatus result)?
         testDone,
-    TResult? Function(int time, int testID, String messageType, String message)?
+    TResult Function(int time, int testID, String messageType, String message)?
         print,
-    TResult? Function(int time, int testID, String error, String stackTrace,
+    TResult Function(int time, int testID, String error, String stackTrace,
             bool isFailure)?
         error,
-    TResult? Function(
+    TResult Function(
             int time, int suiteID, String? observatory, String? remoteDebugger)?
         debug,
-    TResult? Function(int exitCode)? processDone,
-    TResult? Function()? unknown,
+    TResult Function(int exitCode)? processDone,
+    TResult Function()? unknown,
   }) {
     return allSuites?.call(count, time);
   }
@@ -919,18 +925,18 @@ class _$TestEventAllSuites implements TestEventAllSuites {
   @override
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
-    TResult? Function(TestEventStart value)? start,
-    TResult? Function(TestEventDone value)? done,
-    TResult? Function(TestEventAllSuites value)? allSuites,
-    TResult? Function(TestEventSuite value)? suite,
-    TResult? Function(TestEventGroup value)? group,
-    TResult? Function(TestEventTestStart value)? testStart,
-    TResult? Function(TestEventTestDone value)? testDone,
-    TResult? Function(TestEventMessage value)? print,
-    TResult? Function(TestEventTestError value)? error,
-    TResult? Function(TestEventDebug value)? debug,
-    TResult? Function(TestProcessDone value)? processDone,
-    TResult? Function(TestEventUnknown value)? unknown,
+    TResult Function(TestEventStart value)? start,
+    TResult Function(TestEventDone value)? done,
+    TResult Function(TestEventAllSuites value)? allSuites,
+    TResult Function(TestEventSuite value)? suite,
+    TResult Function(TestEventGroup value)? group,
+    TResult Function(TestEventTestStart value)? testStart,
+    TResult Function(TestEventTestDone value)? testDone,
+    TResult Function(TestEventMessage value)? print,
+    TResult Function(TestEventTestError value)? error,
+    TResult Function(TestEventDebug value)? debug,
+    TResult Function(TestProcessDone value)? processDone,
+    TResult Function(TestEventUnknown value)? unknown,
   }) {
     return allSuites?.call(this);
   }
@@ -986,32 +992,32 @@ abstract class _$$TestEventSuiteCopyWith<$Res> {
   factory _$$TestEventSuiteCopyWith(
           _$TestEventSuite value, $Res Function(_$TestEventSuite) then) =
       __$$TestEventSuiteCopyWithImpl<$Res>;
-  @useResult
   $Res call({Suite suite, int time});
 
   $SuiteCopyWith<$Res> get suite;
 }
 
 /// @nodoc
-class __$$TestEventSuiteCopyWithImpl<$Res>
-    extends _$TestEventCopyWithImpl<$Res, _$TestEventSuite>
+class __$$TestEventSuiteCopyWithImpl<$Res> extends _$TestEventCopyWithImpl<$Res>
     implements _$$TestEventSuiteCopyWith<$Res> {
   __$$TestEventSuiteCopyWithImpl(
       _$TestEventSuite _value, $Res Function(_$TestEventSuite) _then)
-      : super(_value, _then);
+      : super(_value, (v) => _then(v as _$TestEventSuite));
 
-  @pragma('vm:prefer-inline')
+  @override
+  _$TestEventSuite get _value => super._value as _$TestEventSuite;
+
   @override
   $Res call({
-    Object? suite = null,
-    Object? time = null,
+    Object? suite = freezed,
+    Object? time = freezed,
   }) {
     return _then(_$TestEventSuite(
-      null == suite
+      suite == freezed
           ? _value.suite
           : suite // ignore: cast_nullable_to_non_nullable
               as Suite,
-      time: null == time
+      time: time == freezed
           ? _value.time
           : time // ignore: cast_nullable_to_non_nullable
               as int,
@@ -1019,7 +1025,6 @@ class __$$TestEventSuiteCopyWithImpl<$Res>
   }
 
   @override
-  @pragma('vm:prefer-inline')
   $SuiteCopyWith<$Res> get suite {
     return $SuiteCopyWith<$Res>(_value.suite, (value) {
       return _then(_value.copyWith(suite: value));
@@ -1054,17 +1059,19 @@ class _$TestEventSuite implements TestEventSuite {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$TestEventSuite &&
-            (identical(other.suite, suite) || other.suite == suite) &&
-            (identical(other.time, time) || other.time == time));
+            const DeepCollectionEquality().equals(other.suite, suite) &&
+            const DeepCollectionEquality().equals(other.time, time));
   }
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode => Object.hash(runtimeType, suite, time);
+  int get hashCode => Object.hash(
+      runtimeType,
+      const DeepCollectionEquality().hash(suite),
+      const DeepCollectionEquality().hash(time));
 
   @JsonKey(ignore: true)
   @override
-  @pragma('vm:prefer-inline')
   _$$TestEventSuiteCopyWith<_$TestEventSuite> get copyWith =>
       __$$TestEventSuiteCopyWithImpl<_$TestEventSuite>(this, _$identity);
 
@@ -1100,27 +1107,27 @@ class _$TestEventSuite implements TestEventSuite {
   @override
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function(
+    TResult Function(
             String protocolVersion, int pid, int time, String? runnerVersion)?
         start,
-    TResult? Function(bool? success, int time)? done,
-    TResult? Function(int count, int time)? allSuites,
-    TResult? Function(Suite suite, int time)? suite,
-    TResult? Function(Group group, int time)? group,
-    TResult? Function(Test test, int time)? testStart,
-    TResult? Function(int time, int testID, bool hidden, bool skipped,
+    TResult Function(bool? success, int time)? done,
+    TResult Function(int count, int time)? allSuites,
+    TResult Function(Suite suite, int time)? suite,
+    TResult Function(Group group, int time)? group,
+    TResult Function(Test test, int time)? testStart,
+    TResult Function(int time, int testID, bool hidden, bool skipped,
             TestDoneStatus result)?
         testDone,
-    TResult? Function(int time, int testID, String messageType, String message)?
+    TResult Function(int time, int testID, String messageType, String message)?
         print,
-    TResult? Function(int time, int testID, String error, String stackTrace,
+    TResult Function(int time, int testID, String error, String stackTrace,
             bool isFailure)?
         error,
-    TResult? Function(
+    TResult Function(
             int time, int suiteID, String? observatory, String? remoteDebugger)?
         debug,
-    TResult? Function(int exitCode)? processDone,
-    TResult? Function()? unknown,
+    TResult Function(int exitCode)? processDone,
+    TResult Function()? unknown,
   }) {
     return suite?.call(this.suite, time);
   }
@@ -1179,18 +1186,18 @@ class _$TestEventSuite implements TestEventSuite {
   @override
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
-    TResult? Function(TestEventStart value)? start,
-    TResult? Function(TestEventDone value)? done,
-    TResult? Function(TestEventAllSuites value)? allSuites,
-    TResult? Function(TestEventSuite value)? suite,
-    TResult? Function(TestEventGroup value)? group,
-    TResult? Function(TestEventTestStart value)? testStart,
-    TResult? Function(TestEventTestDone value)? testDone,
-    TResult? Function(TestEventMessage value)? print,
-    TResult? Function(TestEventTestError value)? error,
-    TResult? Function(TestEventDebug value)? debug,
-    TResult? Function(TestProcessDone value)? processDone,
-    TResult? Function(TestEventUnknown value)? unknown,
+    TResult Function(TestEventStart value)? start,
+    TResult Function(TestEventDone value)? done,
+    TResult Function(TestEventAllSuites value)? allSuites,
+    TResult Function(TestEventSuite value)? suite,
+    TResult Function(TestEventGroup value)? group,
+    TResult Function(TestEventTestStart value)? testStart,
+    TResult Function(TestEventTestDone value)? testDone,
+    TResult Function(TestEventMessage value)? print,
+    TResult Function(TestEventTestError value)? error,
+    TResult Function(TestEventDebug value)? debug,
+    TResult Function(TestProcessDone value)? processDone,
+    TResult Function(TestEventUnknown value)? unknown,
   }) {
     return suite?.call(this);
   }
@@ -1245,32 +1252,32 @@ abstract class _$$TestEventGroupCopyWith<$Res> {
   factory _$$TestEventGroupCopyWith(
           _$TestEventGroup value, $Res Function(_$TestEventGroup) then) =
       __$$TestEventGroupCopyWithImpl<$Res>;
-  @useResult
   $Res call({Group group, int time});
 
   $GroupCopyWith<$Res> get group;
 }
 
 /// @nodoc
-class __$$TestEventGroupCopyWithImpl<$Res>
-    extends _$TestEventCopyWithImpl<$Res, _$TestEventGroup>
+class __$$TestEventGroupCopyWithImpl<$Res> extends _$TestEventCopyWithImpl<$Res>
     implements _$$TestEventGroupCopyWith<$Res> {
   __$$TestEventGroupCopyWithImpl(
       _$TestEventGroup _value, $Res Function(_$TestEventGroup) _then)
-      : super(_value, _then);
+      : super(_value, (v) => _then(v as _$TestEventGroup));
 
-  @pragma('vm:prefer-inline')
+  @override
+  _$TestEventGroup get _value => super._value as _$TestEventGroup;
+
   @override
   $Res call({
-    Object? group = null,
-    Object? time = null,
+    Object? group = freezed,
+    Object? time = freezed,
   }) {
     return _then(_$TestEventGroup(
-      null == group
+      group == freezed
           ? _value.group
           : group // ignore: cast_nullable_to_non_nullable
               as Group,
-      time: null == time
+      time: time == freezed
           ? _value.time
           : time // ignore: cast_nullable_to_non_nullable
               as int,
@@ -1278,7 +1285,6 @@ class __$$TestEventGroupCopyWithImpl<$Res>
   }
 
   @override
-  @pragma('vm:prefer-inline')
   $GroupCopyWith<$Res> get group {
     return $GroupCopyWith<$Res>(_value.group, (value) {
       return _then(_value.copyWith(group: value));
@@ -1313,17 +1319,19 @@ class _$TestEventGroup implements TestEventGroup {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$TestEventGroup &&
-            (identical(other.group, group) || other.group == group) &&
-            (identical(other.time, time) || other.time == time));
+            const DeepCollectionEquality().equals(other.group, group) &&
+            const DeepCollectionEquality().equals(other.time, time));
   }
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode => Object.hash(runtimeType, group, time);
+  int get hashCode => Object.hash(
+      runtimeType,
+      const DeepCollectionEquality().hash(group),
+      const DeepCollectionEquality().hash(time));
 
   @JsonKey(ignore: true)
   @override
-  @pragma('vm:prefer-inline')
   _$$TestEventGroupCopyWith<_$TestEventGroup> get copyWith =>
       __$$TestEventGroupCopyWithImpl<_$TestEventGroup>(this, _$identity);
 
@@ -1359,27 +1367,27 @@ class _$TestEventGroup implements TestEventGroup {
   @override
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function(
+    TResult Function(
             String protocolVersion, int pid, int time, String? runnerVersion)?
         start,
-    TResult? Function(bool? success, int time)? done,
-    TResult? Function(int count, int time)? allSuites,
-    TResult? Function(Suite suite, int time)? suite,
-    TResult? Function(Group group, int time)? group,
-    TResult? Function(Test test, int time)? testStart,
-    TResult? Function(int time, int testID, bool hidden, bool skipped,
+    TResult Function(bool? success, int time)? done,
+    TResult Function(int count, int time)? allSuites,
+    TResult Function(Suite suite, int time)? suite,
+    TResult Function(Group group, int time)? group,
+    TResult Function(Test test, int time)? testStart,
+    TResult Function(int time, int testID, bool hidden, bool skipped,
             TestDoneStatus result)?
         testDone,
-    TResult? Function(int time, int testID, String messageType, String message)?
+    TResult Function(int time, int testID, String messageType, String message)?
         print,
-    TResult? Function(int time, int testID, String error, String stackTrace,
+    TResult Function(int time, int testID, String error, String stackTrace,
             bool isFailure)?
         error,
-    TResult? Function(
+    TResult Function(
             int time, int suiteID, String? observatory, String? remoteDebugger)?
         debug,
-    TResult? Function(int exitCode)? processDone,
-    TResult? Function()? unknown,
+    TResult Function(int exitCode)? processDone,
+    TResult Function()? unknown,
   }) {
     return group?.call(this.group, time);
   }
@@ -1438,18 +1446,18 @@ class _$TestEventGroup implements TestEventGroup {
   @override
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
-    TResult? Function(TestEventStart value)? start,
-    TResult? Function(TestEventDone value)? done,
-    TResult? Function(TestEventAllSuites value)? allSuites,
-    TResult? Function(TestEventSuite value)? suite,
-    TResult? Function(TestEventGroup value)? group,
-    TResult? Function(TestEventTestStart value)? testStart,
-    TResult? Function(TestEventTestDone value)? testDone,
-    TResult? Function(TestEventMessage value)? print,
-    TResult? Function(TestEventTestError value)? error,
-    TResult? Function(TestEventDebug value)? debug,
-    TResult? Function(TestProcessDone value)? processDone,
-    TResult? Function(TestEventUnknown value)? unknown,
+    TResult Function(TestEventStart value)? start,
+    TResult Function(TestEventDone value)? done,
+    TResult Function(TestEventAllSuites value)? allSuites,
+    TResult Function(TestEventSuite value)? suite,
+    TResult Function(TestEventGroup value)? group,
+    TResult Function(TestEventTestStart value)? testStart,
+    TResult Function(TestEventTestDone value)? testDone,
+    TResult Function(TestEventMessage value)? print,
+    TResult Function(TestEventTestError value)? error,
+    TResult Function(TestEventDebug value)? debug,
+    TResult Function(TestProcessDone value)? processDone,
+    TResult Function(TestEventUnknown value)? unknown,
   }) {
     return group?.call(this);
   }
@@ -1504,7 +1512,6 @@ abstract class _$$TestEventTestStartCopyWith<$Res> {
   factory _$$TestEventTestStartCopyWith(_$TestEventTestStart value,
           $Res Function(_$TestEventTestStart) then) =
       __$$TestEventTestStartCopyWithImpl<$Res>;
-  @useResult
   $Res call({Test test, int time});
 
   $TestCopyWith<$Res> get test;
@@ -1512,24 +1519,26 @@ abstract class _$$TestEventTestStartCopyWith<$Res> {
 
 /// @nodoc
 class __$$TestEventTestStartCopyWithImpl<$Res>
-    extends _$TestEventCopyWithImpl<$Res, _$TestEventTestStart>
+    extends _$TestEventCopyWithImpl<$Res>
     implements _$$TestEventTestStartCopyWith<$Res> {
   __$$TestEventTestStartCopyWithImpl(
       _$TestEventTestStart _value, $Res Function(_$TestEventTestStart) _then)
-      : super(_value, _then);
+      : super(_value, (v) => _then(v as _$TestEventTestStart));
 
-  @pragma('vm:prefer-inline')
+  @override
+  _$TestEventTestStart get _value => super._value as _$TestEventTestStart;
+
   @override
   $Res call({
-    Object? test = null,
-    Object? time = null,
+    Object? test = freezed,
+    Object? time = freezed,
   }) {
     return _then(_$TestEventTestStart(
-      null == test
+      test == freezed
           ? _value.test
           : test // ignore: cast_nullable_to_non_nullable
               as Test,
-      time: null == time
+      time: time == freezed
           ? _value.time
           : time // ignore: cast_nullable_to_non_nullable
               as int,
@@ -1537,7 +1546,6 @@ class __$$TestEventTestStartCopyWithImpl<$Res>
   }
 
   @override
-  @pragma('vm:prefer-inline')
   $TestCopyWith<$Res> get test {
     return $TestCopyWith<$Res>(_value.test, (value) {
       return _then(_value.copyWith(test: value));
@@ -1572,17 +1580,19 @@ class _$TestEventTestStart implements TestEventTestStart {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$TestEventTestStart &&
-            (identical(other.test, test) || other.test == test) &&
-            (identical(other.time, time) || other.time == time));
+            const DeepCollectionEquality().equals(other.test, test) &&
+            const DeepCollectionEquality().equals(other.time, time));
   }
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode => Object.hash(runtimeType, test, time);
+  int get hashCode => Object.hash(
+      runtimeType,
+      const DeepCollectionEquality().hash(test),
+      const DeepCollectionEquality().hash(time));
 
   @JsonKey(ignore: true)
   @override
-  @pragma('vm:prefer-inline')
   _$$TestEventTestStartCopyWith<_$TestEventTestStart> get copyWith =>
       __$$TestEventTestStartCopyWithImpl<_$TestEventTestStart>(
           this, _$identity);
@@ -1619,27 +1629,27 @@ class _$TestEventTestStart implements TestEventTestStart {
   @override
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function(
+    TResult Function(
             String protocolVersion, int pid, int time, String? runnerVersion)?
         start,
-    TResult? Function(bool? success, int time)? done,
-    TResult? Function(int count, int time)? allSuites,
-    TResult? Function(Suite suite, int time)? suite,
-    TResult? Function(Group group, int time)? group,
-    TResult? Function(Test test, int time)? testStart,
-    TResult? Function(int time, int testID, bool hidden, bool skipped,
+    TResult Function(bool? success, int time)? done,
+    TResult Function(int count, int time)? allSuites,
+    TResult Function(Suite suite, int time)? suite,
+    TResult Function(Group group, int time)? group,
+    TResult Function(Test test, int time)? testStart,
+    TResult Function(int time, int testID, bool hidden, bool skipped,
             TestDoneStatus result)?
         testDone,
-    TResult? Function(int time, int testID, String messageType, String message)?
+    TResult Function(int time, int testID, String messageType, String message)?
         print,
-    TResult? Function(int time, int testID, String error, String stackTrace,
+    TResult Function(int time, int testID, String error, String stackTrace,
             bool isFailure)?
         error,
-    TResult? Function(
+    TResult Function(
             int time, int suiteID, String? observatory, String? remoteDebugger)?
         debug,
-    TResult? Function(int exitCode)? processDone,
-    TResult? Function()? unknown,
+    TResult Function(int exitCode)? processDone,
+    TResult Function()? unknown,
   }) {
     return testStart?.call(test, time);
   }
@@ -1698,18 +1708,18 @@ class _$TestEventTestStart implements TestEventTestStart {
   @override
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
-    TResult? Function(TestEventStart value)? start,
-    TResult? Function(TestEventDone value)? done,
-    TResult? Function(TestEventAllSuites value)? allSuites,
-    TResult? Function(TestEventSuite value)? suite,
-    TResult? Function(TestEventGroup value)? group,
-    TResult? Function(TestEventTestStart value)? testStart,
-    TResult? Function(TestEventTestDone value)? testDone,
-    TResult? Function(TestEventMessage value)? print,
-    TResult? Function(TestEventTestError value)? error,
-    TResult? Function(TestEventDebug value)? debug,
-    TResult? Function(TestProcessDone value)? processDone,
-    TResult? Function(TestEventUnknown value)? unknown,
+    TResult Function(TestEventStart value)? start,
+    TResult Function(TestEventDone value)? done,
+    TResult Function(TestEventAllSuites value)? allSuites,
+    TResult Function(TestEventSuite value)? suite,
+    TResult Function(TestEventGroup value)? group,
+    TResult Function(TestEventTestStart value)? testStart,
+    TResult Function(TestEventTestDone value)? testDone,
+    TResult Function(TestEventMessage value)? print,
+    TResult Function(TestEventTestError value)? error,
+    TResult Function(TestEventDebug value)? debug,
+    TResult Function(TestProcessDone value)? processDone,
+    TResult Function(TestEventUnknown value)? unknown,
   }) {
     return testStart?.call(this);
   }
@@ -1764,46 +1774,47 @@ abstract class _$$TestEventTestDoneCopyWith<$Res> {
   factory _$$TestEventTestDoneCopyWith(
           _$TestEventTestDone value, $Res Function(_$TestEventTestDone) then) =
       __$$TestEventTestDoneCopyWithImpl<$Res>;
-  @useResult
   $Res call(
       {int time, int testID, bool hidden, bool skipped, TestDoneStatus result});
 }
 
 /// @nodoc
 class __$$TestEventTestDoneCopyWithImpl<$Res>
-    extends _$TestEventCopyWithImpl<$Res, _$TestEventTestDone>
+    extends _$TestEventCopyWithImpl<$Res>
     implements _$$TestEventTestDoneCopyWith<$Res> {
   __$$TestEventTestDoneCopyWithImpl(
       _$TestEventTestDone _value, $Res Function(_$TestEventTestDone) _then)
-      : super(_value, _then);
+      : super(_value, (v) => _then(v as _$TestEventTestDone));
 
-  @pragma('vm:prefer-inline')
+  @override
+  _$TestEventTestDone get _value => super._value as _$TestEventTestDone;
+
   @override
   $Res call({
-    Object? time = null,
-    Object? testID = null,
-    Object? hidden = null,
-    Object? skipped = null,
-    Object? result = null,
+    Object? time = freezed,
+    Object? testID = freezed,
+    Object? hidden = freezed,
+    Object? skipped = freezed,
+    Object? result = freezed,
   }) {
     return _then(_$TestEventTestDone(
-      time: null == time
+      time: time == freezed
           ? _value.time
           : time // ignore: cast_nullable_to_non_nullable
               as int,
-      testID: null == testID
+      testID: testID == freezed
           ? _value.testID
           : testID // ignore: cast_nullable_to_non_nullable
               as int,
-      hidden: null == hidden
+      hidden: hidden == freezed
           ? _value.hidden
           : hidden // ignore: cast_nullable_to_non_nullable
               as bool,
-      skipped: null == skipped
+      skipped: skipped == freezed
           ? _value.skipped
           : skipped // ignore: cast_nullable_to_non_nullable
               as bool,
-      result: null == result
+      result: result == freezed
           ? _value.result
           : result // ignore: cast_nullable_to_non_nullable
               as TestDoneStatus,
@@ -1850,21 +1861,25 @@ class _$TestEventTestDone implements TestEventTestDone {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$TestEventTestDone &&
-            (identical(other.time, time) || other.time == time) &&
-            (identical(other.testID, testID) || other.testID == testID) &&
-            (identical(other.hidden, hidden) || other.hidden == hidden) &&
-            (identical(other.skipped, skipped) || other.skipped == skipped) &&
-            (identical(other.result, result) || other.result == result));
+            const DeepCollectionEquality().equals(other.time, time) &&
+            const DeepCollectionEquality().equals(other.testID, testID) &&
+            const DeepCollectionEquality().equals(other.hidden, hidden) &&
+            const DeepCollectionEquality().equals(other.skipped, skipped) &&
+            const DeepCollectionEquality().equals(other.result, result));
   }
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, time, testID, hidden, skipped, result);
+  int get hashCode => Object.hash(
+      runtimeType,
+      const DeepCollectionEquality().hash(time),
+      const DeepCollectionEquality().hash(testID),
+      const DeepCollectionEquality().hash(hidden),
+      const DeepCollectionEquality().hash(skipped),
+      const DeepCollectionEquality().hash(result));
 
   @JsonKey(ignore: true)
   @override
-  @pragma('vm:prefer-inline')
   _$$TestEventTestDoneCopyWith<_$TestEventTestDone> get copyWith =>
       __$$TestEventTestDoneCopyWithImpl<_$TestEventTestDone>(this, _$identity);
 
@@ -1900,27 +1915,27 @@ class _$TestEventTestDone implements TestEventTestDone {
   @override
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function(
+    TResult Function(
             String protocolVersion, int pid, int time, String? runnerVersion)?
         start,
-    TResult? Function(bool? success, int time)? done,
-    TResult? Function(int count, int time)? allSuites,
-    TResult? Function(Suite suite, int time)? suite,
-    TResult? Function(Group group, int time)? group,
-    TResult? Function(Test test, int time)? testStart,
-    TResult? Function(int time, int testID, bool hidden, bool skipped,
+    TResult Function(bool? success, int time)? done,
+    TResult Function(int count, int time)? allSuites,
+    TResult Function(Suite suite, int time)? suite,
+    TResult Function(Group group, int time)? group,
+    TResult Function(Test test, int time)? testStart,
+    TResult Function(int time, int testID, bool hidden, bool skipped,
             TestDoneStatus result)?
         testDone,
-    TResult? Function(int time, int testID, String messageType, String message)?
+    TResult Function(int time, int testID, String messageType, String message)?
         print,
-    TResult? Function(int time, int testID, String error, String stackTrace,
+    TResult Function(int time, int testID, String error, String stackTrace,
             bool isFailure)?
         error,
-    TResult? Function(
+    TResult Function(
             int time, int suiteID, String? observatory, String? remoteDebugger)?
         debug,
-    TResult? Function(int exitCode)? processDone,
-    TResult? Function()? unknown,
+    TResult Function(int exitCode)? processDone,
+    TResult Function()? unknown,
   }) {
     return testDone?.call(time, testID, hidden, skipped, result);
   }
@@ -1979,18 +1994,18 @@ class _$TestEventTestDone implements TestEventTestDone {
   @override
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
-    TResult? Function(TestEventStart value)? start,
-    TResult? Function(TestEventDone value)? done,
-    TResult? Function(TestEventAllSuites value)? allSuites,
-    TResult? Function(TestEventSuite value)? suite,
-    TResult? Function(TestEventGroup value)? group,
-    TResult? Function(TestEventTestStart value)? testStart,
-    TResult? Function(TestEventTestDone value)? testDone,
-    TResult? Function(TestEventMessage value)? print,
-    TResult? Function(TestEventTestError value)? error,
-    TResult? Function(TestEventDebug value)? debug,
-    TResult? Function(TestProcessDone value)? processDone,
-    TResult? Function(TestEventUnknown value)? unknown,
+    TResult Function(TestEventStart value)? start,
+    TResult Function(TestEventDone value)? done,
+    TResult Function(TestEventAllSuites value)? allSuites,
+    TResult Function(TestEventSuite value)? suite,
+    TResult Function(TestEventGroup value)? group,
+    TResult Function(TestEventTestStart value)? testStart,
+    TResult Function(TestEventTestDone value)? testDone,
+    TResult Function(TestEventMessage value)? print,
+    TResult Function(TestEventTestError value)? error,
+    TResult Function(TestEventDebug value)? debug,
+    TResult Function(TestProcessDone value)? processDone,
+    TResult Function(TestEventUnknown value)? unknown,
   }) {
     return testDone?.call(this);
   }
@@ -2052,40 +2067,41 @@ abstract class _$$TestEventMessageCopyWith<$Res> {
   factory _$$TestEventMessageCopyWith(
           _$TestEventMessage value, $Res Function(_$TestEventMessage) then) =
       __$$TestEventMessageCopyWithImpl<$Res>;
-  @useResult
   $Res call({int time, int testID, String messageType, String message});
 }
 
 /// @nodoc
 class __$$TestEventMessageCopyWithImpl<$Res>
-    extends _$TestEventCopyWithImpl<$Res, _$TestEventMessage>
+    extends _$TestEventCopyWithImpl<$Res>
     implements _$$TestEventMessageCopyWith<$Res> {
   __$$TestEventMessageCopyWithImpl(
       _$TestEventMessage _value, $Res Function(_$TestEventMessage) _then)
-      : super(_value, _then);
+      : super(_value, (v) => _then(v as _$TestEventMessage));
 
-  @pragma('vm:prefer-inline')
+  @override
+  _$TestEventMessage get _value => super._value as _$TestEventMessage;
+
   @override
   $Res call({
-    Object? time = null,
-    Object? testID = null,
-    Object? messageType = null,
-    Object? message = null,
+    Object? time = freezed,
+    Object? testID = freezed,
+    Object? messageType = freezed,
+    Object? message = freezed,
   }) {
     return _then(_$TestEventMessage(
-      time: null == time
+      time: time == freezed
           ? _value.time
           : time // ignore: cast_nullable_to_non_nullable
               as int,
-      testID: null == testID
+      testID: testID == freezed
           ? _value.testID
           : testID // ignore: cast_nullable_to_non_nullable
               as int,
-      messageType: null == messageType
+      messageType: messageType == freezed
           ? _value.messageType
           : messageType // ignore: cast_nullable_to_non_nullable
               as String,
-      message: null == message
+      message: message == freezed
           ? _value.message
           : message // ignore: cast_nullable_to_non_nullable
               as String,
@@ -2129,21 +2145,24 @@ class _$TestEventMessage implements TestEventMessage {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$TestEventMessage &&
-            (identical(other.time, time) || other.time == time) &&
-            (identical(other.testID, testID) || other.testID == testID) &&
-            (identical(other.messageType, messageType) ||
-                other.messageType == messageType) &&
-            (identical(other.message, message) || other.message == message));
+            const DeepCollectionEquality().equals(other.time, time) &&
+            const DeepCollectionEquality().equals(other.testID, testID) &&
+            const DeepCollectionEquality()
+                .equals(other.messageType, messageType) &&
+            const DeepCollectionEquality().equals(other.message, message));
   }
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, time, testID, messageType, message);
+  int get hashCode => Object.hash(
+      runtimeType,
+      const DeepCollectionEquality().hash(time),
+      const DeepCollectionEquality().hash(testID),
+      const DeepCollectionEquality().hash(messageType),
+      const DeepCollectionEquality().hash(message));
 
   @JsonKey(ignore: true)
   @override
-  @pragma('vm:prefer-inline')
   _$$TestEventMessageCopyWith<_$TestEventMessage> get copyWith =>
       __$$TestEventMessageCopyWithImpl<_$TestEventMessage>(this, _$identity);
 
@@ -2179,27 +2198,27 @@ class _$TestEventMessage implements TestEventMessage {
   @override
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function(
+    TResult Function(
             String protocolVersion, int pid, int time, String? runnerVersion)?
         start,
-    TResult? Function(bool? success, int time)? done,
-    TResult? Function(int count, int time)? allSuites,
-    TResult? Function(Suite suite, int time)? suite,
-    TResult? Function(Group group, int time)? group,
-    TResult? Function(Test test, int time)? testStart,
-    TResult? Function(int time, int testID, bool hidden, bool skipped,
+    TResult Function(bool? success, int time)? done,
+    TResult Function(int count, int time)? allSuites,
+    TResult Function(Suite suite, int time)? suite,
+    TResult Function(Group group, int time)? group,
+    TResult Function(Test test, int time)? testStart,
+    TResult Function(int time, int testID, bool hidden, bool skipped,
             TestDoneStatus result)?
         testDone,
-    TResult? Function(int time, int testID, String messageType, String message)?
+    TResult Function(int time, int testID, String messageType, String message)?
         print,
-    TResult? Function(int time, int testID, String error, String stackTrace,
+    TResult Function(int time, int testID, String error, String stackTrace,
             bool isFailure)?
         error,
-    TResult? Function(
+    TResult Function(
             int time, int suiteID, String? observatory, String? remoteDebugger)?
         debug,
-    TResult? Function(int exitCode)? processDone,
-    TResult? Function()? unknown,
+    TResult Function(int exitCode)? processDone,
+    TResult Function()? unknown,
   }) {
     return print?.call(time, testID, messageType, message);
   }
@@ -2258,18 +2277,18 @@ class _$TestEventMessage implements TestEventMessage {
   @override
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
-    TResult? Function(TestEventStart value)? start,
-    TResult? Function(TestEventDone value)? done,
-    TResult? Function(TestEventAllSuites value)? allSuites,
-    TResult? Function(TestEventSuite value)? suite,
-    TResult? Function(TestEventGroup value)? group,
-    TResult? Function(TestEventTestStart value)? testStart,
-    TResult? Function(TestEventTestDone value)? testDone,
-    TResult? Function(TestEventMessage value)? print,
-    TResult? Function(TestEventTestError value)? error,
-    TResult? Function(TestEventDebug value)? debug,
-    TResult? Function(TestProcessDone value)? processDone,
-    TResult? Function(TestEventUnknown value)? unknown,
+    TResult Function(TestEventStart value)? start,
+    TResult Function(TestEventDone value)? done,
+    TResult Function(TestEventAllSuites value)? allSuites,
+    TResult Function(TestEventSuite value)? suite,
+    TResult Function(TestEventGroup value)? group,
+    TResult Function(TestEventTestStart value)? testStart,
+    TResult Function(TestEventTestDone value)? testDone,
+    TResult Function(TestEventMessage value)? print,
+    TResult Function(TestEventTestError value)? error,
+    TResult Function(TestEventDebug value)? debug,
+    TResult Function(TestProcessDone value)? processDone,
+    TResult Function(TestEventUnknown value)? unknown,
   }) {
     return print?.call(this);
   }
@@ -2329,46 +2348,47 @@ abstract class _$$TestEventTestErrorCopyWith<$Res> {
   factory _$$TestEventTestErrorCopyWith(_$TestEventTestError value,
           $Res Function(_$TestEventTestError) then) =
       __$$TestEventTestErrorCopyWithImpl<$Res>;
-  @useResult
   $Res call(
       {int time, int testID, String error, String stackTrace, bool isFailure});
 }
 
 /// @nodoc
 class __$$TestEventTestErrorCopyWithImpl<$Res>
-    extends _$TestEventCopyWithImpl<$Res, _$TestEventTestError>
+    extends _$TestEventCopyWithImpl<$Res>
     implements _$$TestEventTestErrorCopyWith<$Res> {
   __$$TestEventTestErrorCopyWithImpl(
       _$TestEventTestError _value, $Res Function(_$TestEventTestError) _then)
-      : super(_value, _then);
+      : super(_value, (v) => _then(v as _$TestEventTestError));
 
-  @pragma('vm:prefer-inline')
+  @override
+  _$TestEventTestError get _value => super._value as _$TestEventTestError;
+
   @override
   $Res call({
-    Object? time = null,
-    Object? testID = null,
-    Object? error = null,
-    Object? stackTrace = null,
-    Object? isFailure = null,
+    Object? time = freezed,
+    Object? testID = freezed,
+    Object? error = freezed,
+    Object? stackTrace = freezed,
+    Object? isFailure = freezed,
   }) {
     return _then(_$TestEventTestError(
-      time: null == time
+      time: time == freezed
           ? _value.time
           : time // ignore: cast_nullable_to_non_nullable
               as int,
-      testID: null == testID
+      testID: testID == freezed
           ? _value.testID
           : testID // ignore: cast_nullable_to_non_nullable
               as int,
-      error: null == error
+      error: error == freezed
           ? _value.error
           : error // ignore: cast_nullable_to_non_nullable
               as String,
-      stackTrace: null == stackTrace
+      stackTrace: stackTrace == freezed
           ? _value.stackTrace
           : stackTrace // ignore: cast_nullable_to_non_nullable
               as String,
-      isFailure: null == isFailure
+      isFailure: isFailure == freezed
           ? _value.isFailure
           : isFailure // ignore: cast_nullable_to_non_nullable
               as bool,
@@ -2415,23 +2435,26 @@ class _$TestEventTestError implements TestEventTestError {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$TestEventTestError &&
-            (identical(other.time, time) || other.time == time) &&
-            (identical(other.testID, testID) || other.testID == testID) &&
-            (identical(other.error, error) || other.error == error) &&
-            (identical(other.stackTrace, stackTrace) ||
-                other.stackTrace == stackTrace) &&
-            (identical(other.isFailure, isFailure) ||
-                other.isFailure == isFailure));
+            const DeepCollectionEquality().equals(other.time, time) &&
+            const DeepCollectionEquality().equals(other.testID, testID) &&
+            const DeepCollectionEquality().equals(other.error, error) &&
+            const DeepCollectionEquality()
+                .equals(other.stackTrace, stackTrace) &&
+            const DeepCollectionEquality().equals(other.isFailure, isFailure));
   }
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, time, testID, error, stackTrace, isFailure);
+  int get hashCode => Object.hash(
+      runtimeType,
+      const DeepCollectionEquality().hash(time),
+      const DeepCollectionEquality().hash(testID),
+      const DeepCollectionEquality().hash(error),
+      const DeepCollectionEquality().hash(stackTrace),
+      const DeepCollectionEquality().hash(isFailure));
 
   @JsonKey(ignore: true)
   @override
-  @pragma('vm:prefer-inline')
   _$$TestEventTestErrorCopyWith<_$TestEventTestError> get copyWith =>
       __$$TestEventTestErrorCopyWithImpl<_$TestEventTestError>(
           this, _$identity);
@@ -2468,27 +2491,27 @@ class _$TestEventTestError implements TestEventTestError {
   @override
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function(
+    TResult Function(
             String protocolVersion, int pid, int time, String? runnerVersion)?
         start,
-    TResult? Function(bool? success, int time)? done,
-    TResult? Function(int count, int time)? allSuites,
-    TResult? Function(Suite suite, int time)? suite,
-    TResult? Function(Group group, int time)? group,
-    TResult? Function(Test test, int time)? testStart,
-    TResult? Function(int time, int testID, bool hidden, bool skipped,
+    TResult Function(bool? success, int time)? done,
+    TResult Function(int count, int time)? allSuites,
+    TResult Function(Suite suite, int time)? suite,
+    TResult Function(Group group, int time)? group,
+    TResult Function(Test test, int time)? testStart,
+    TResult Function(int time, int testID, bool hidden, bool skipped,
             TestDoneStatus result)?
         testDone,
-    TResult? Function(int time, int testID, String messageType, String message)?
+    TResult Function(int time, int testID, String messageType, String message)?
         print,
-    TResult? Function(int time, int testID, String error, String stackTrace,
+    TResult Function(int time, int testID, String error, String stackTrace,
             bool isFailure)?
         error,
-    TResult? Function(
+    TResult Function(
             int time, int suiteID, String? observatory, String? remoteDebugger)?
         debug,
-    TResult? Function(int exitCode)? processDone,
-    TResult? Function()? unknown,
+    TResult Function(int exitCode)? processDone,
+    TResult Function()? unknown,
   }) {
     return error?.call(time, testID, this.error, stackTrace, isFailure);
   }
@@ -2547,18 +2570,18 @@ class _$TestEventTestError implements TestEventTestError {
   @override
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
-    TResult? Function(TestEventStart value)? start,
-    TResult? Function(TestEventDone value)? done,
-    TResult? Function(TestEventAllSuites value)? allSuites,
-    TResult? Function(TestEventSuite value)? suite,
-    TResult? Function(TestEventGroup value)? group,
-    TResult? Function(TestEventTestStart value)? testStart,
-    TResult? Function(TestEventTestDone value)? testDone,
-    TResult? Function(TestEventMessage value)? print,
-    TResult? Function(TestEventTestError value)? error,
-    TResult? Function(TestEventDebug value)? debug,
-    TResult? Function(TestProcessDone value)? processDone,
-    TResult? Function(TestEventUnknown value)? unknown,
+    TResult Function(TestEventStart value)? start,
+    TResult Function(TestEventDone value)? done,
+    TResult Function(TestEventAllSuites value)? allSuites,
+    TResult Function(TestEventSuite value)? suite,
+    TResult Function(TestEventGroup value)? group,
+    TResult Function(TestEventTestStart value)? testStart,
+    TResult Function(TestEventTestDone value)? testDone,
+    TResult Function(TestEventMessage value)? print,
+    TResult Function(TestEventTestError value)? error,
+    TResult Function(TestEventDebug value)? debug,
+    TResult Function(TestProcessDone value)? processDone,
+    TResult Function(TestEventUnknown value)? unknown,
   }) {
     return error?.call(this);
   }
@@ -2620,41 +2643,41 @@ abstract class _$$TestEventDebugCopyWith<$Res> {
   factory _$$TestEventDebugCopyWith(
           _$TestEventDebug value, $Res Function(_$TestEventDebug) then) =
       __$$TestEventDebugCopyWithImpl<$Res>;
-  @useResult
   $Res call(
       {int time, int suiteID, String? observatory, String? remoteDebugger});
 }
 
 /// @nodoc
-class __$$TestEventDebugCopyWithImpl<$Res>
-    extends _$TestEventCopyWithImpl<$Res, _$TestEventDebug>
+class __$$TestEventDebugCopyWithImpl<$Res> extends _$TestEventCopyWithImpl<$Res>
     implements _$$TestEventDebugCopyWith<$Res> {
   __$$TestEventDebugCopyWithImpl(
       _$TestEventDebug _value, $Res Function(_$TestEventDebug) _then)
-      : super(_value, _then);
+      : super(_value, (v) => _then(v as _$TestEventDebug));
 
-  @pragma('vm:prefer-inline')
+  @override
+  _$TestEventDebug get _value => super._value as _$TestEventDebug;
+
   @override
   $Res call({
-    Object? time = null,
-    Object? suiteID = null,
+    Object? time = freezed,
+    Object? suiteID = freezed,
     Object? observatory = freezed,
     Object? remoteDebugger = freezed,
   }) {
     return _then(_$TestEventDebug(
-      time: null == time
+      time: time == freezed
           ? _value.time
           : time // ignore: cast_nullable_to_non_nullable
               as int,
-      suiteID: null == suiteID
+      suiteID: suiteID == freezed
           ? _value.suiteID
           : suiteID // ignore: cast_nullable_to_non_nullable
               as int,
-      observatory: freezed == observatory
+      observatory: observatory == freezed
           ? _value.observatory
           : observatory // ignore: cast_nullable_to_non_nullable
               as String?,
-      remoteDebugger: freezed == remoteDebugger
+      remoteDebugger: remoteDebugger == freezed
           ? _value.remoteDebugger
           : remoteDebugger // ignore: cast_nullable_to_non_nullable
               as String?,
@@ -2698,22 +2721,25 @@ class _$TestEventDebug implements TestEventDebug {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$TestEventDebug &&
-            (identical(other.time, time) || other.time == time) &&
-            (identical(other.suiteID, suiteID) || other.suiteID == suiteID) &&
-            (identical(other.observatory, observatory) ||
-                other.observatory == observatory) &&
-            (identical(other.remoteDebugger, remoteDebugger) ||
-                other.remoteDebugger == remoteDebugger));
+            const DeepCollectionEquality().equals(other.time, time) &&
+            const DeepCollectionEquality().equals(other.suiteID, suiteID) &&
+            const DeepCollectionEquality()
+                .equals(other.observatory, observatory) &&
+            const DeepCollectionEquality()
+                .equals(other.remoteDebugger, remoteDebugger));
   }
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, time, suiteID, observatory, remoteDebugger);
+  int get hashCode => Object.hash(
+      runtimeType,
+      const DeepCollectionEquality().hash(time),
+      const DeepCollectionEquality().hash(suiteID),
+      const DeepCollectionEquality().hash(observatory),
+      const DeepCollectionEquality().hash(remoteDebugger));
 
   @JsonKey(ignore: true)
   @override
-  @pragma('vm:prefer-inline')
   _$$TestEventDebugCopyWith<_$TestEventDebug> get copyWith =>
       __$$TestEventDebugCopyWithImpl<_$TestEventDebug>(this, _$identity);
 
@@ -2749,27 +2775,27 @@ class _$TestEventDebug implements TestEventDebug {
   @override
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function(
+    TResult Function(
             String protocolVersion, int pid, int time, String? runnerVersion)?
         start,
-    TResult? Function(bool? success, int time)? done,
-    TResult? Function(int count, int time)? allSuites,
-    TResult? Function(Suite suite, int time)? suite,
-    TResult? Function(Group group, int time)? group,
-    TResult? Function(Test test, int time)? testStart,
-    TResult? Function(int time, int testID, bool hidden, bool skipped,
+    TResult Function(bool? success, int time)? done,
+    TResult Function(int count, int time)? allSuites,
+    TResult Function(Suite suite, int time)? suite,
+    TResult Function(Group group, int time)? group,
+    TResult Function(Test test, int time)? testStart,
+    TResult Function(int time, int testID, bool hidden, bool skipped,
             TestDoneStatus result)?
         testDone,
-    TResult? Function(int time, int testID, String messageType, String message)?
+    TResult Function(int time, int testID, String messageType, String message)?
         print,
-    TResult? Function(int time, int testID, String error, String stackTrace,
+    TResult Function(int time, int testID, String error, String stackTrace,
             bool isFailure)?
         error,
-    TResult? Function(
+    TResult Function(
             int time, int suiteID, String? observatory, String? remoteDebugger)?
         debug,
-    TResult? Function(int exitCode)? processDone,
-    TResult? Function()? unknown,
+    TResult Function(int exitCode)? processDone,
+    TResult Function()? unknown,
   }) {
     return debug?.call(time, suiteID, observatory, remoteDebugger);
   }
@@ -2828,18 +2854,18 @@ class _$TestEventDebug implements TestEventDebug {
   @override
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
-    TResult? Function(TestEventStart value)? start,
-    TResult? Function(TestEventDone value)? done,
-    TResult? Function(TestEventAllSuites value)? allSuites,
-    TResult? Function(TestEventSuite value)? suite,
-    TResult? Function(TestEventGroup value)? group,
-    TResult? Function(TestEventTestStart value)? testStart,
-    TResult? Function(TestEventTestDone value)? testDone,
-    TResult? Function(TestEventMessage value)? print,
-    TResult? Function(TestEventTestError value)? error,
-    TResult? Function(TestEventDebug value)? debug,
-    TResult? Function(TestProcessDone value)? processDone,
-    TResult? Function(TestEventUnknown value)? unknown,
+    TResult Function(TestEventStart value)? start,
+    TResult Function(TestEventDone value)? done,
+    TResult Function(TestEventAllSuites value)? allSuites,
+    TResult Function(TestEventSuite value)? suite,
+    TResult Function(TestEventGroup value)? group,
+    TResult Function(TestEventTestStart value)? testStart,
+    TResult Function(TestEventTestDone value)? testDone,
+    TResult Function(TestEventMessage value)? print,
+    TResult Function(TestEventTestError value)? error,
+    TResult Function(TestEventDebug value)? debug,
+    TResult Function(TestProcessDone value)? processDone,
+    TResult Function(TestEventUnknown value)? unknown,
   }) {
     return debug?.call(this);
   }
@@ -2899,25 +2925,26 @@ abstract class _$$TestProcessDoneCopyWith<$Res> {
   factory _$$TestProcessDoneCopyWith(
           _$TestProcessDone value, $Res Function(_$TestProcessDone) then) =
       __$$TestProcessDoneCopyWithImpl<$Res>;
-  @useResult
   $Res call({int exitCode});
 }
 
 /// @nodoc
 class __$$TestProcessDoneCopyWithImpl<$Res>
-    extends _$TestEventCopyWithImpl<$Res, _$TestProcessDone>
+    extends _$TestEventCopyWithImpl<$Res>
     implements _$$TestProcessDoneCopyWith<$Res> {
   __$$TestProcessDoneCopyWithImpl(
       _$TestProcessDone _value, $Res Function(_$TestProcessDone) _then)
-      : super(_value, _then);
+      : super(_value, (v) => _then(v as _$TestProcessDone));
 
-  @pragma('vm:prefer-inline')
+  @override
+  _$TestProcessDone get _value => super._value as _$TestProcessDone;
+
   @override
   $Res call({
-    Object? exitCode = null,
+    Object? exitCode = freezed,
   }) {
     return _then(_$TestProcessDone(
-      exitCode: null == exitCode
+      exitCode: exitCode == freezed
           ? _value.exitCode
           : exitCode // ignore: cast_nullable_to_non_nullable
               as int,
@@ -2950,17 +2977,16 @@ class _$TestProcessDone implements TestProcessDone {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$TestProcessDone &&
-            (identical(other.exitCode, exitCode) ||
-                other.exitCode == exitCode));
+            const DeepCollectionEquality().equals(other.exitCode, exitCode));
   }
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode => Object.hash(runtimeType, exitCode);
+  int get hashCode =>
+      Object.hash(runtimeType, const DeepCollectionEquality().hash(exitCode));
 
   @JsonKey(ignore: true)
   @override
-  @pragma('vm:prefer-inline')
   _$$TestProcessDoneCopyWith<_$TestProcessDone> get copyWith =>
       __$$TestProcessDoneCopyWithImpl<_$TestProcessDone>(this, _$identity);
 
@@ -2996,27 +3022,27 @@ class _$TestProcessDone implements TestProcessDone {
   @override
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function(
+    TResult Function(
             String protocolVersion, int pid, int time, String? runnerVersion)?
         start,
-    TResult? Function(bool? success, int time)? done,
-    TResult? Function(int count, int time)? allSuites,
-    TResult? Function(Suite suite, int time)? suite,
-    TResult? Function(Group group, int time)? group,
-    TResult? Function(Test test, int time)? testStart,
-    TResult? Function(int time, int testID, bool hidden, bool skipped,
+    TResult Function(bool? success, int time)? done,
+    TResult Function(int count, int time)? allSuites,
+    TResult Function(Suite suite, int time)? suite,
+    TResult Function(Group group, int time)? group,
+    TResult Function(Test test, int time)? testStart,
+    TResult Function(int time, int testID, bool hidden, bool skipped,
             TestDoneStatus result)?
         testDone,
-    TResult? Function(int time, int testID, String messageType, String message)?
+    TResult Function(int time, int testID, String messageType, String message)?
         print,
-    TResult? Function(int time, int testID, String error, String stackTrace,
+    TResult Function(int time, int testID, String error, String stackTrace,
             bool isFailure)?
         error,
-    TResult? Function(
+    TResult Function(
             int time, int suiteID, String? observatory, String? remoteDebugger)?
         debug,
-    TResult? Function(int exitCode)? processDone,
-    TResult? Function()? unknown,
+    TResult Function(int exitCode)? processDone,
+    TResult Function()? unknown,
   }) {
     return processDone?.call(exitCode);
   }
@@ -3075,18 +3101,18 @@ class _$TestProcessDone implements TestProcessDone {
   @override
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
-    TResult? Function(TestEventStart value)? start,
-    TResult? Function(TestEventDone value)? done,
-    TResult? Function(TestEventAllSuites value)? allSuites,
-    TResult? Function(TestEventSuite value)? suite,
-    TResult? Function(TestEventGroup value)? group,
-    TResult? Function(TestEventTestStart value)? testStart,
-    TResult? Function(TestEventTestDone value)? testDone,
-    TResult? Function(TestEventMessage value)? print,
-    TResult? Function(TestEventTestError value)? error,
-    TResult? Function(TestEventDebug value)? debug,
-    TResult? Function(TestProcessDone value)? processDone,
-    TResult? Function(TestEventUnknown value)? unknown,
+    TResult Function(TestEventStart value)? start,
+    TResult Function(TestEventDone value)? done,
+    TResult Function(TestEventAllSuites value)? allSuites,
+    TResult Function(TestEventSuite value)? suite,
+    TResult Function(TestEventGroup value)? group,
+    TResult Function(TestEventTestStart value)? testStart,
+    TResult Function(TestEventTestDone value)? testDone,
+    TResult Function(TestEventMessage value)? print,
+    TResult Function(TestEventTestError value)? error,
+    TResult Function(TestEventDebug value)? debug,
+    TResult Function(TestProcessDone value)? processDone,
+    TResult Function(TestEventUnknown value)? unknown,
   }) {
     return processDone?.call(this);
   }
@@ -3143,11 +3169,14 @@ abstract class _$$TestEventUnknownCopyWith<$Res> {
 
 /// @nodoc
 class __$$TestEventUnknownCopyWithImpl<$Res>
-    extends _$TestEventCopyWithImpl<$Res, _$TestEventUnknown>
+    extends _$TestEventCopyWithImpl<$Res>
     implements _$$TestEventUnknownCopyWith<$Res> {
   __$$TestEventUnknownCopyWithImpl(
       _$TestEventUnknown _value, $Res Function(_$TestEventUnknown) _then)
-      : super(_value, _then);
+      : super(_value, (v) => _then(v as _$TestEventUnknown));
+
+  @override
+  _$TestEventUnknown get _value => super._value as _$TestEventUnknown;
 }
 
 /// @nodoc
@@ -3208,27 +3237,27 @@ class _$TestEventUnknown implements TestEventUnknown {
   @override
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function(
+    TResult Function(
             String protocolVersion, int pid, int time, String? runnerVersion)?
         start,
-    TResult? Function(bool? success, int time)? done,
-    TResult? Function(int count, int time)? allSuites,
-    TResult? Function(Suite suite, int time)? suite,
-    TResult? Function(Group group, int time)? group,
-    TResult? Function(Test test, int time)? testStart,
-    TResult? Function(int time, int testID, bool hidden, bool skipped,
+    TResult Function(bool? success, int time)? done,
+    TResult Function(int count, int time)? allSuites,
+    TResult Function(Suite suite, int time)? suite,
+    TResult Function(Group group, int time)? group,
+    TResult Function(Test test, int time)? testStart,
+    TResult Function(int time, int testID, bool hidden, bool skipped,
             TestDoneStatus result)?
         testDone,
-    TResult? Function(int time, int testID, String messageType, String message)?
+    TResult Function(int time, int testID, String messageType, String message)?
         print,
-    TResult? Function(int time, int testID, String error, String stackTrace,
+    TResult Function(int time, int testID, String error, String stackTrace,
             bool isFailure)?
         error,
-    TResult? Function(
+    TResult Function(
             int time, int suiteID, String? observatory, String? remoteDebugger)?
         debug,
-    TResult? Function(int exitCode)? processDone,
-    TResult? Function()? unknown,
+    TResult Function(int exitCode)? processDone,
+    TResult Function()? unknown,
   }) {
     return unknown?.call();
   }
@@ -3287,18 +3316,18 @@ class _$TestEventUnknown implements TestEventUnknown {
   @override
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
-    TResult? Function(TestEventStart value)? start,
-    TResult? Function(TestEventDone value)? done,
-    TResult? Function(TestEventAllSuites value)? allSuites,
-    TResult? Function(TestEventSuite value)? suite,
-    TResult? Function(TestEventGroup value)? group,
-    TResult? Function(TestEventTestStart value)? testStart,
-    TResult? Function(TestEventTestDone value)? testDone,
-    TResult? Function(TestEventMessage value)? print,
-    TResult? Function(TestEventTestError value)? error,
-    TResult? Function(TestEventDebug value)? debug,
-    TResult? Function(TestProcessDone value)? processDone,
-    TResult? Function(TestEventUnknown value)? unknown,
+    TResult Function(TestEventStart value)? start,
+    TResult Function(TestEventDone value)? done,
+    TResult Function(TestEventAllSuites value)? allSuites,
+    TResult Function(TestEventSuite value)? suite,
+    TResult Function(TestEventGroup value)? group,
+    TResult Function(TestEventTestStart value)? testStart,
+    TResult Function(TestEventTestDone value)? testDone,
+    TResult Function(TestEventMessage value)? print,
+    TResult Function(TestEventTestError value)? error,
+    TResult Function(TestEventDebug value)? debug,
+    TResult Function(TestProcessDone value)? processDone,
+    TResult Function(TestEventUnknown value)? unknown,
   }) {
     return unknown?.call(this);
   }
@@ -3400,8 +3429,7 @@ mixin _$Test {
 /// @nodoc
 abstract class $TestCopyWith<$Res> {
   factory $TestCopyWith(Test value, $Res Function(Test) then) =
-      _$TestCopyWithImpl<$Res, Test>;
-  @useResult
+      _$TestCopyWithImpl<$Res>;
   $Res call(
       {int id,
       String name,
@@ -3419,83 +3447,79 @@ abstract class $TestCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$TestCopyWithImpl<$Res, $Val extends Test>
-    implements $TestCopyWith<$Res> {
+class _$TestCopyWithImpl<$Res> implements $TestCopyWith<$Res> {
   _$TestCopyWithImpl(this._value, this._then);
 
+  final Test _value;
   // ignore: unused_field
-  final $Val _value;
-  // ignore: unused_field
-  final $Res Function($Val) _then;
+  final $Res Function(Test) _then;
 
-  @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? id = null,
-    Object? name = null,
-    Object? suiteID = null,
-    Object? groupIDs = null,
+    Object? id = freezed,
+    Object? name = freezed,
+    Object? suiteID = freezed,
+    Object? groupIDs = freezed,
     Object? line = freezed,
     Object? column = freezed,
     Object? url = freezed,
     Object? rootLine = freezed,
     Object? rootColumn = freezed,
     Object? rootUrl = freezed,
-    Object? metadata = null,
+    Object? metadata = freezed,
   }) {
     return _then(_value.copyWith(
-      id: null == id
+      id: id == freezed
           ? _value.id
           : id // ignore: cast_nullable_to_non_nullable
               as int,
-      name: null == name
+      name: name == freezed
           ? _value.name
           : name // ignore: cast_nullable_to_non_nullable
               as String,
-      suiteID: null == suiteID
+      suiteID: suiteID == freezed
           ? _value.suiteID
           : suiteID // ignore: cast_nullable_to_non_nullable
               as int,
-      groupIDs: null == groupIDs
+      groupIDs: groupIDs == freezed
           ? _value.groupIDs
           : groupIDs // ignore: cast_nullable_to_non_nullable
               as List<int>,
-      line: freezed == line
+      line: line == freezed
           ? _value.line
           : line // ignore: cast_nullable_to_non_nullable
               as int?,
-      column: freezed == column
+      column: column == freezed
           ? _value.column
           : column // ignore: cast_nullable_to_non_nullable
               as int?,
-      url: freezed == url
+      url: url == freezed
           ? _value.url
           : url // ignore: cast_nullable_to_non_nullable
               as String?,
-      rootLine: freezed == rootLine
+      rootLine: rootLine == freezed
           ? _value.rootLine
           : rootLine // ignore: cast_nullable_to_non_nullable
               as int?,
-      rootColumn: freezed == rootColumn
+      rootColumn: rootColumn == freezed
           ? _value.rootColumn
           : rootColumn // ignore: cast_nullable_to_non_nullable
               as int?,
-      rootUrl: freezed == rootUrl
+      rootUrl: rootUrl == freezed
           ? _value.rootUrl
           : rootUrl // ignore: cast_nullable_to_non_nullable
               as String?,
-      metadata: null == metadata
+      metadata: metadata == freezed
           ? _value.metadata
           : metadata // ignore: cast_nullable_to_non_nullable
               as Metadata,
-    ) as $Val);
+    ));
   }
 
   @override
-  @pragma('vm:prefer-inline')
   $MetadataCopyWith<$Res> get metadata {
     return $MetadataCopyWith<$Res>(_value.metadata, (value) {
-      return _then(_value.copyWith(metadata: value) as $Val);
+      return _then(_value.copyWith(metadata: value));
     });
   }
 }
@@ -3505,7 +3529,6 @@ abstract class _$$_TestCopyWith<$Res> implements $TestCopyWith<$Res> {
   factory _$$_TestCopyWith(_$_Test value, $Res Function(_$_Test) then) =
       __$$_TestCopyWithImpl<$Res>;
   @override
-  @useResult
   $Res call(
       {int id,
       String name,
@@ -3524,68 +3547,70 @@ abstract class _$$_TestCopyWith<$Res> implements $TestCopyWith<$Res> {
 }
 
 /// @nodoc
-class __$$_TestCopyWithImpl<$Res> extends _$TestCopyWithImpl<$Res, _$_Test>
+class __$$_TestCopyWithImpl<$Res> extends _$TestCopyWithImpl<$Res>
     implements _$$_TestCopyWith<$Res> {
   __$$_TestCopyWithImpl(_$_Test _value, $Res Function(_$_Test) _then)
-      : super(_value, _then);
+      : super(_value, (v) => _then(v as _$_Test));
 
-  @pragma('vm:prefer-inline')
+  @override
+  _$_Test get _value => super._value as _$_Test;
+
   @override
   $Res call({
-    Object? id = null,
-    Object? name = null,
-    Object? suiteID = null,
-    Object? groupIDs = null,
+    Object? id = freezed,
+    Object? name = freezed,
+    Object? suiteID = freezed,
+    Object? groupIDs = freezed,
     Object? line = freezed,
     Object? column = freezed,
     Object? url = freezed,
     Object? rootLine = freezed,
     Object? rootColumn = freezed,
     Object? rootUrl = freezed,
-    Object? metadata = null,
+    Object? metadata = freezed,
   }) {
     return _then(_$_Test(
-      id: null == id
+      id: id == freezed
           ? _value.id
           : id // ignore: cast_nullable_to_non_nullable
               as int,
-      name: null == name
+      name: name == freezed
           ? _value.name
           : name // ignore: cast_nullable_to_non_nullable
               as String,
-      suiteID: null == suiteID
+      suiteID: suiteID == freezed
           ? _value.suiteID
           : suiteID // ignore: cast_nullable_to_non_nullable
               as int,
-      groupIDs: null == groupIDs
+      groupIDs: groupIDs == freezed
           ? _value._groupIDs
           : groupIDs // ignore: cast_nullable_to_non_nullable
               as List<int>,
-      line: freezed == line
+      line: line == freezed
           ? _value.line
           : line // ignore: cast_nullable_to_non_nullable
               as int?,
-      column: freezed == column
+      column: column == freezed
           ? _value.column
           : column // ignore: cast_nullable_to_non_nullable
               as int?,
-      url: freezed == url
+      url: url == freezed
           ? _value.url
           : url // ignore: cast_nullable_to_non_nullable
               as String?,
-      rootLine: freezed == rootLine
+      rootLine: rootLine == freezed
           ? _value.rootLine
           : rootLine // ignore: cast_nullable_to_non_nullable
               as int?,
-      rootColumn: freezed == rootColumn
+      rootColumn: rootColumn == freezed
           ? _value.rootColumn
           : rootColumn // ignore: cast_nullable_to_non_nullable
               as int?,
-      rootUrl: freezed == rootUrl
+      rootUrl: rootUrl == freezed
           ? _value.rootUrl
           : rootUrl // ignore: cast_nullable_to_non_nullable
               as String?,
-      metadata: null == metadata
+      metadata: metadata == freezed
           ? _value.metadata
           : metadata // ignore: cast_nullable_to_non_nullable
               as Metadata,
@@ -3685,41 +3710,38 @@ class _$_Test implements _Test {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$_Test &&
-            (identical(other.id, id) || other.id == id) &&
-            (identical(other.name, name) || other.name == name) &&
-            (identical(other.suiteID, suiteID) || other.suiteID == suiteID) &&
+            const DeepCollectionEquality().equals(other.id, id) &&
+            const DeepCollectionEquality().equals(other.name, name) &&
+            const DeepCollectionEquality().equals(other.suiteID, suiteID) &&
             const DeepCollectionEquality().equals(other._groupIDs, _groupIDs) &&
-            (identical(other.line, line) || other.line == line) &&
-            (identical(other.column, column) || other.column == column) &&
-            (identical(other.url, url) || other.url == url) &&
-            (identical(other.rootLine, rootLine) ||
-                other.rootLine == rootLine) &&
-            (identical(other.rootColumn, rootColumn) ||
-                other.rootColumn == rootColumn) &&
-            (identical(other.rootUrl, rootUrl) || other.rootUrl == rootUrl) &&
-            (identical(other.metadata, metadata) ||
-                other.metadata == metadata));
+            const DeepCollectionEquality().equals(other.line, line) &&
+            const DeepCollectionEquality().equals(other.column, column) &&
+            const DeepCollectionEquality().equals(other.url, url) &&
+            const DeepCollectionEquality().equals(other.rootLine, rootLine) &&
+            const DeepCollectionEquality()
+                .equals(other.rootColumn, rootColumn) &&
+            const DeepCollectionEquality().equals(other.rootUrl, rootUrl) &&
+            const DeepCollectionEquality().equals(other.metadata, metadata));
   }
 
   @JsonKey(ignore: true)
   @override
   int get hashCode => Object.hash(
       runtimeType,
-      id,
-      name,
-      suiteID,
+      const DeepCollectionEquality().hash(id),
+      const DeepCollectionEquality().hash(name),
+      const DeepCollectionEquality().hash(suiteID),
       const DeepCollectionEquality().hash(_groupIDs),
-      line,
-      column,
-      url,
-      rootLine,
-      rootColumn,
-      rootUrl,
-      metadata);
+      const DeepCollectionEquality().hash(line),
+      const DeepCollectionEquality().hash(column),
+      const DeepCollectionEquality().hash(url),
+      const DeepCollectionEquality().hash(rootLine),
+      const DeepCollectionEquality().hash(rootColumn),
+      const DeepCollectionEquality().hash(rootUrl),
+      const DeepCollectionEquality().hash(metadata));
 
   @JsonKey(ignore: true)
   @override
-  @pragma('vm:prefer-inline')
   _$$_TestCopyWith<_$_Test> get copyWith =>
       __$$_TestCopyWithImpl<_$_Test>(this, _$identity);
 
@@ -3831,42 +3853,38 @@ mixin _$Suite {
 /// @nodoc
 abstract class $SuiteCopyWith<$Res> {
   factory $SuiteCopyWith(Suite value, $Res Function(Suite) then) =
-      _$SuiteCopyWithImpl<$Res, Suite>;
-  @useResult
+      _$SuiteCopyWithImpl<$Res>;
   $Res call({int id, String platform, String? path});
 }
 
 /// @nodoc
-class _$SuiteCopyWithImpl<$Res, $Val extends Suite>
-    implements $SuiteCopyWith<$Res> {
+class _$SuiteCopyWithImpl<$Res> implements $SuiteCopyWith<$Res> {
   _$SuiteCopyWithImpl(this._value, this._then);
 
+  final Suite _value;
   // ignore: unused_field
-  final $Val _value;
-  // ignore: unused_field
-  final $Res Function($Val) _then;
+  final $Res Function(Suite) _then;
 
-  @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? id = null,
-    Object? platform = null,
+    Object? id = freezed,
+    Object? platform = freezed,
     Object? path = freezed,
   }) {
     return _then(_value.copyWith(
-      id: null == id
+      id: id == freezed
           ? _value.id
           : id // ignore: cast_nullable_to_non_nullable
               as int,
-      platform: null == platform
+      platform: platform == freezed
           ? _value.platform
           : platform // ignore: cast_nullable_to_non_nullable
               as String,
-      path: freezed == path
+      path: path == freezed
           ? _value.path
           : path // ignore: cast_nullable_to_non_nullable
               as String?,
-    ) as $Val);
+    ));
   }
 }
 
@@ -3875,33 +3893,34 @@ abstract class _$$_SuiteCopyWith<$Res> implements $SuiteCopyWith<$Res> {
   factory _$$_SuiteCopyWith(_$_Suite value, $Res Function(_$_Suite) then) =
       __$$_SuiteCopyWithImpl<$Res>;
   @override
-  @useResult
   $Res call({int id, String platform, String? path});
 }
 
 /// @nodoc
-class __$$_SuiteCopyWithImpl<$Res> extends _$SuiteCopyWithImpl<$Res, _$_Suite>
+class __$$_SuiteCopyWithImpl<$Res> extends _$SuiteCopyWithImpl<$Res>
     implements _$$_SuiteCopyWith<$Res> {
   __$$_SuiteCopyWithImpl(_$_Suite _value, $Res Function(_$_Suite) _then)
-      : super(_value, _then);
+      : super(_value, (v) => _then(v as _$_Suite));
 
-  @pragma('vm:prefer-inline')
+  @override
+  _$_Suite get _value => super._value as _$_Suite;
+
   @override
   $Res call({
-    Object? id = null,
-    Object? platform = null,
+    Object? id = freezed,
+    Object? platform = freezed,
     Object? path = freezed,
   }) {
     return _then(_$_Suite(
-      id: null == id
+      id: id == freezed
           ? _value.id
           : id // ignore: cast_nullable_to_non_nullable
               as int,
-      platform: null == platform
+      platform: platform == freezed
           ? _value.platform
           : platform // ignore: cast_nullable_to_non_nullable
               as String,
-      path: freezed == path
+      path: path == freezed
           ? _value.path
           : path // ignore: cast_nullable_to_non_nullable
               as String?,
@@ -3939,19 +3958,21 @@ class _$_Suite implements _Suite {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$_Suite &&
-            (identical(other.id, id) || other.id == id) &&
-            (identical(other.platform, platform) ||
-                other.platform == platform) &&
-            (identical(other.path, path) || other.path == path));
+            const DeepCollectionEquality().equals(other.id, id) &&
+            const DeepCollectionEquality().equals(other.platform, platform) &&
+            const DeepCollectionEquality().equals(other.path, path));
   }
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode => Object.hash(runtimeType, id, platform, path);
+  int get hashCode => Object.hash(
+      runtimeType,
+      const DeepCollectionEquality().hash(id),
+      const DeepCollectionEquality().hash(platform),
+      const DeepCollectionEquality().hash(path));
 
   @JsonKey(ignore: true)
   @override
-  @pragma('vm:prefer-inline')
   _$$_SuiteCopyWith<_$_Suite> get copyWith =>
       __$$_SuiteCopyWithImpl<_$_Suite>(this, _$identity);
 
@@ -4030,8 +4051,7 @@ mixin _$Group {
 /// @nodoc
 abstract class $GroupCopyWith<$Res> {
   factory $GroupCopyWith(Group value, $Res Function(Group) then) =
-      _$GroupCopyWithImpl<$Res, Group>;
-  @useResult
+      _$GroupCopyWithImpl<$Res>;
   $Res call(
       {int id,
       String name,
@@ -4047,73 +4067,69 @@ abstract class $GroupCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$GroupCopyWithImpl<$Res, $Val extends Group>
-    implements $GroupCopyWith<$Res> {
+class _$GroupCopyWithImpl<$Res> implements $GroupCopyWith<$Res> {
   _$GroupCopyWithImpl(this._value, this._then);
 
+  final Group _value;
   // ignore: unused_field
-  final $Val _value;
-  // ignore: unused_field
-  final $Res Function($Val) _then;
+  final $Res Function(Group) _then;
 
-  @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? id = null,
-    Object? name = null,
-    Object? suiteID = null,
+    Object? id = freezed,
+    Object? name = freezed,
+    Object? suiteID = freezed,
     Object? parentID = freezed,
-    Object? testCount = null,
+    Object? testCount = freezed,
     Object? line = freezed,
     Object? column = freezed,
     Object? url = freezed,
-    Object? metadata = null,
+    Object? metadata = freezed,
   }) {
     return _then(_value.copyWith(
-      id: null == id
+      id: id == freezed
           ? _value.id
           : id // ignore: cast_nullable_to_non_nullable
               as int,
-      name: null == name
+      name: name == freezed
           ? _value.name
           : name // ignore: cast_nullable_to_non_nullable
               as String,
-      suiteID: null == suiteID
+      suiteID: suiteID == freezed
           ? _value.suiteID
           : suiteID // ignore: cast_nullable_to_non_nullable
               as int,
-      parentID: freezed == parentID
+      parentID: parentID == freezed
           ? _value.parentID
           : parentID // ignore: cast_nullable_to_non_nullable
               as int?,
-      testCount: null == testCount
+      testCount: testCount == freezed
           ? _value.testCount
           : testCount // ignore: cast_nullable_to_non_nullable
               as int,
-      line: freezed == line
+      line: line == freezed
           ? _value.line
           : line // ignore: cast_nullable_to_non_nullable
               as int?,
-      column: freezed == column
+      column: column == freezed
           ? _value.column
           : column // ignore: cast_nullable_to_non_nullable
               as int?,
-      url: freezed == url
+      url: url == freezed
           ? _value.url
           : url // ignore: cast_nullable_to_non_nullable
               as String?,
-      metadata: null == metadata
+      metadata: metadata == freezed
           ? _value.metadata
           : metadata // ignore: cast_nullable_to_non_nullable
               as Metadata,
-    ) as $Val);
+    ));
   }
 
   @override
-  @pragma('vm:prefer-inline')
   $MetadataCopyWith<$Res> get metadata {
     return $MetadataCopyWith<$Res>(_value.metadata, (value) {
-      return _then(_value.copyWith(metadata: value) as $Val);
+      return _then(_value.copyWith(metadata: value));
     });
   }
 }
@@ -4123,7 +4139,6 @@ abstract class _$$_GroupCopyWith<$Res> implements $GroupCopyWith<$Res> {
   factory _$$_GroupCopyWith(_$_Group value, $Res Function(_$_Group) then) =
       __$$_GroupCopyWithImpl<$Res>;
   @override
-  @useResult
   $Res call(
       {int id,
       String name,
@@ -4140,58 +4155,60 @@ abstract class _$$_GroupCopyWith<$Res> implements $GroupCopyWith<$Res> {
 }
 
 /// @nodoc
-class __$$_GroupCopyWithImpl<$Res> extends _$GroupCopyWithImpl<$Res, _$_Group>
+class __$$_GroupCopyWithImpl<$Res> extends _$GroupCopyWithImpl<$Res>
     implements _$$_GroupCopyWith<$Res> {
   __$$_GroupCopyWithImpl(_$_Group _value, $Res Function(_$_Group) _then)
-      : super(_value, _then);
+      : super(_value, (v) => _then(v as _$_Group));
 
-  @pragma('vm:prefer-inline')
+  @override
+  _$_Group get _value => super._value as _$_Group;
+
   @override
   $Res call({
-    Object? id = null,
-    Object? name = null,
-    Object? suiteID = null,
+    Object? id = freezed,
+    Object? name = freezed,
+    Object? suiteID = freezed,
     Object? parentID = freezed,
-    Object? testCount = null,
+    Object? testCount = freezed,
     Object? line = freezed,
     Object? column = freezed,
     Object? url = freezed,
-    Object? metadata = null,
+    Object? metadata = freezed,
   }) {
     return _then(_$_Group(
-      id: null == id
+      id: id == freezed
           ? _value.id
           : id // ignore: cast_nullable_to_non_nullable
               as int,
-      name: null == name
+      name: name == freezed
           ? _value.name
           : name // ignore: cast_nullable_to_non_nullable
               as String,
-      suiteID: null == suiteID
+      suiteID: suiteID == freezed
           ? _value.suiteID
           : suiteID // ignore: cast_nullable_to_non_nullable
               as int,
-      parentID: freezed == parentID
+      parentID: parentID == freezed
           ? _value.parentID
           : parentID // ignore: cast_nullable_to_non_nullable
               as int?,
-      testCount: null == testCount
+      testCount: testCount == freezed
           ? _value.testCount
           : testCount // ignore: cast_nullable_to_non_nullable
               as int,
-      line: freezed == line
+      line: line == freezed
           ? _value.line
           : line // ignore: cast_nullable_to_non_nullable
               as int?,
-      column: freezed == column
+      column: column == freezed
           ? _value.column
           : column // ignore: cast_nullable_to_non_nullable
               as int?,
-      url: freezed == url
+      url: url == freezed
           ? _value.url
           : url // ignore: cast_nullable_to_non_nullable
               as String?,
-      metadata: null == metadata
+      metadata: metadata == freezed
           ? _value.metadata
           : metadata // ignore: cast_nullable_to_non_nullable
               as Metadata,
@@ -4262,28 +4279,33 @@ class _$_Group implements _Group {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$_Group &&
-            (identical(other.id, id) || other.id == id) &&
-            (identical(other.name, name) || other.name == name) &&
-            (identical(other.suiteID, suiteID) || other.suiteID == suiteID) &&
-            (identical(other.parentID, parentID) ||
-                other.parentID == parentID) &&
-            (identical(other.testCount, testCount) ||
-                other.testCount == testCount) &&
-            (identical(other.line, line) || other.line == line) &&
-            (identical(other.column, column) || other.column == column) &&
-            (identical(other.url, url) || other.url == url) &&
-            (identical(other.metadata, metadata) ||
-                other.metadata == metadata));
+            const DeepCollectionEquality().equals(other.id, id) &&
+            const DeepCollectionEquality().equals(other.name, name) &&
+            const DeepCollectionEquality().equals(other.suiteID, suiteID) &&
+            const DeepCollectionEquality().equals(other.parentID, parentID) &&
+            const DeepCollectionEquality().equals(other.testCount, testCount) &&
+            const DeepCollectionEquality().equals(other.line, line) &&
+            const DeepCollectionEquality().equals(other.column, column) &&
+            const DeepCollectionEquality().equals(other.url, url) &&
+            const DeepCollectionEquality().equals(other.metadata, metadata));
   }
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode => Object.hash(runtimeType, id, name, suiteID, parentID,
-      testCount, line, column, url, metadata);
+  int get hashCode => Object.hash(
+      runtimeType,
+      const DeepCollectionEquality().hash(id),
+      const DeepCollectionEquality().hash(name),
+      const DeepCollectionEquality().hash(suiteID),
+      const DeepCollectionEquality().hash(parentID),
+      const DeepCollectionEquality().hash(testCount),
+      const DeepCollectionEquality().hash(line),
+      const DeepCollectionEquality().hash(column),
+      const DeepCollectionEquality().hash(url),
+      const DeepCollectionEquality().hash(metadata));
 
   @JsonKey(ignore: true)
   @override
-  @pragma('vm:prefer-inline')
   _$$_GroupCopyWith<_$_Group> get copyWith =>
       __$$_GroupCopyWithImpl<_$_Group>(this, _$identity);
 
@@ -4371,37 +4393,33 @@ mixin _$Metadata {
 /// @nodoc
 abstract class $MetadataCopyWith<$Res> {
   factory $MetadataCopyWith(Metadata value, $Res Function(Metadata) then) =
-      _$MetadataCopyWithImpl<$Res, Metadata>;
-  @useResult
+      _$MetadataCopyWithImpl<$Res>;
   $Res call({bool skip, String? skipReason});
 }
 
 /// @nodoc
-class _$MetadataCopyWithImpl<$Res, $Val extends Metadata>
-    implements $MetadataCopyWith<$Res> {
+class _$MetadataCopyWithImpl<$Res> implements $MetadataCopyWith<$Res> {
   _$MetadataCopyWithImpl(this._value, this._then);
 
+  final Metadata _value;
   // ignore: unused_field
-  final $Val _value;
-  // ignore: unused_field
-  final $Res Function($Val) _then;
+  final $Res Function(Metadata) _then;
 
-  @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? skip = null,
+    Object? skip = freezed,
     Object? skipReason = freezed,
   }) {
     return _then(_value.copyWith(
-      skip: null == skip
+      skip: skip == freezed
           ? _value.skip
           : skip // ignore: cast_nullable_to_non_nullable
               as bool,
-      skipReason: freezed == skipReason
+      skipReason: skipReason == freezed
           ? _value.skipReason
           : skipReason // ignore: cast_nullable_to_non_nullable
               as String?,
-    ) as $Val);
+    ));
   }
 }
 
@@ -4411,30 +4429,30 @@ abstract class _$$_MetadataCopyWith<$Res> implements $MetadataCopyWith<$Res> {
           _$_Metadata value, $Res Function(_$_Metadata) then) =
       __$$_MetadataCopyWithImpl<$Res>;
   @override
-  @useResult
   $Res call({bool skip, String? skipReason});
 }
 
 /// @nodoc
-class __$$_MetadataCopyWithImpl<$Res>
-    extends _$MetadataCopyWithImpl<$Res, _$_Metadata>
+class __$$_MetadataCopyWithImpl<$Res> extends _$MetadataCopyWithImpl<$Res>
     implements _$$_MetadataCopyWith<$Res> {
   __$$_MetadataCopyWithImpl(
       _$_Metadata _value, $Res Function(_$_Metadata) _then)
-      : super(_value, _then);
+      : super(_value, (v) => _then(v as _$_Metadata));
 
-  @pragma('vm:prefer-inline')
+  @override
+  _$_Metadata get _value => super._value as _$_Metadata;
+
   @override
   $Res call({
-    Object? skip = null,
+    Object? skip = freezed,
     Object? skipReason = freezed,
   }) {
     return _then(_$_Metadata(
-      skip: null == skip
+      skip: skip == freezed
           ? _value.skip
           : skip // ignore: cast_nullable_to_non_nullable
               as bool,
-      skipReason: freezed == skipReason
+      skipReason: skipReason == freezed
           ? _value.skipReason
           : skipReason // ignore: cast_nullable_to_non_nullable
               as String?,
@@ -4467,18 +4485,20 @@ class _$_Metadata implements _Metadata {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$_Metadata &&
-            (identical(other.skip, skip) || other.skip == skip) &&
-            (identical(other.skipReason, skipReason) ||
-                other.skipReason == skipReason));
+            const DeepCollectionEquality().equals(other.skip, skip) &&
+            const DeepCollectionEquality()
+                .equals(other.skipReason, skipReason));
   }
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode => Object.hash(runtimeType, skip, skipReason);
+  int get hashCode => Object.hash(
+      runtimeType,
+      const DeepCollectionEquality().hash(skip),
+      const DeepCollectionEquality().hash(skipReason));
 
   @JsonKey(ignore: true)
   @override
-  @pragma('vm:prefer-inline')
   _$$_MetadataCopyWith<_$_Metadata> get copyWith =>
       __$$_MetadataCopyWithImpl<_$_Metadata>(this, _$identity);
 

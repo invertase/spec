@@ -12,7 +12,7 @@ part of 'tests.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#custom-getters-and-methods');
+    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more informations: https://github.com/rrousselGit/freezed#custom-getters-and-methods');
 
 /// @nodoc
 mixin _$TestStatus {
@@ -26,10 +26,10 @@ mixin _$TestStatus {
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function()? pass,
-    TResult? Function(String error, String stackTrace)? fail,
-    TResult? Function(String? skipReason)? skip,
-    TResult? Function()? pending,
+    TResult Function()? pass,
+    TResult Function(String error, String stackTrace)? fail,
+    TResult Function(String? skipReason)? skip,
+    TResult Function()? pending,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
@@ -51,10 +51,10 @@ mixin _$TestStatus {
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
-    TResult? Function(_TestStatusPass value)? pass,
-    TResult? Function(_TestStatusFail value)? fail,
-    TResult? Function(_TestStatusSkip value)? skip,
-    TResult? Function(_TestStatusPending value)? pending,
+    TResult Function(_TestStatusPass value)? pass,
+    TResult Function(_TestStatusFail value)? fail,
+    TResult Function(_TestStatusSkip value)? skip,
+    TResult Function(_TestStatusPending value)? pending,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
@@ -72,18 +72,16 @@ mixin _$TestStatus {
 abstract class $TestStatusCopyWith<$Res> {
   factory $TestStatusCopyWith(
           TestStatus value, $Res Function(TestStatus) then) =
-      _$TestStatusCopyWithImpl<$Res, TestStatus>;
+      _$TestStatusCopyWithImpl<$Res>;
 }
 
 /// @nodoc
-class _$TestStatusCopyWithImpl<$Res, $Val extends TestStatus>
-    implements $TestStatusCopyWith<$Res> {
+class _$TestStatusCopyWithImpl<$Res> implements $TestStatusCopyWith<$Res> {
   _$TestStatusCopyWithImpl(this._value, this._then);
 
+  final TestStatus _value;
   // ignore: unused_field
-  final $Val _value;
-  // ignore: unused_field
-  final $Res Function($Val) _then;
+  final $Res Function(TestStatus) _then;
 }
 
 /// @nodoc
@@ -95,11 +93,14 @@ abstract class _$$_TestStatusPassCopyWith<$Res> {
 
 /// @nodoc
 class __$$_TestStatusPassCopyWithImpl<$Res>
-    extends _$TestStatusCopyWithImpl<$Res, _$_TestStatusPass>
+    extends _$TestStatusCopyWithImpl<$Res>
     implements _$$_TestStatusPassCopyWith<$Res> {
   __$$_TestStatusPassCopyWithImpl(
       _$_TestStatusPass _value, $Res Function(_$_TestStatusPass) _then)
-      : super(_value, _then);
+      : super(_value, (v) => _then(v as _$_TestStatusPass));
+
+  @override
+  _$_TestStatusPass get _value => super._value as _$_TestStatusPass;
 }
 
 /// @nodoc
@@ -135,10 +136,10 @@ class _$_TestStatusPass extends _TestStatusPass {
   @override
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function()? pass,
-    TResult? Function(String error, String stackTrace)? fail,
-    TResult? Function(String? skipReason)? skip,
-    TResult? Function()? pending,
+    TResult Function()? pass,
+    TResult Function(String error, String stackTrace)? fail,
+    TResult Function(String? skipReason)? skip,
+    TResult Function()? pending,
   }) {
     return pass?.call();
   }
@@ -172,10 +173,10 @@ class _$_TestStatusPass extends _TestStatusPass {
   @override
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
-    TResult? Function(_TestStatusPass value)? pass,
-    TResult? Function(_TestStatusFail value)? fail,
-    TResult? Function(_TestStatusSkip value)? skip,
-    TResult? Function(_TestStatusPending value)? pending,
+    TResult Function(_TestStatusPass value)? pass,
+    TResult Function(_TestStatusFail value)? fail,
+    TResult Function(_TestStatusSkip value)? skip,
+    TResult Function(_TestStatusPending value)? pending,
   }) {
     return pass?.call(this);
   }
@@ -206,30 +207,31 @@ abstract class _$$_TestStatusFailCopyWith<$Res> {
   factory _$$_TestStatusFailCopyWith(
           _$_TestStatusFail value, $Res Function(_$_TestStatusFail) then) =
       __$$_TestStatusFailCopyWithImpl<$Res>;
-  @useResult
   $Res call({String error, String stackTrace});
 }
 
 /// @nodoc
 class __$$_TestStatusFailCopyWithImpl<$Res>
-    extends _$TestStatusCopyWithImpl<$Res, _$_TestStatusFail>
+    extends _$TestStatusCopyWithImpl<$Res>
     implements _$$_TestStatusFailCopyWith<$Res> {
   __$$_TestStatusFailCopyWithImpl(
       _$_TestStatusFail _value, $Res Function(_$_TestStatusFail) _then)
-      : super(_value, _then);
+      : super(_value, (v) => _then(v as _$_TestStatusFail));
 
-  @pragma('vm:prefer-inline')
+  @override
+  _$_TestStatusFail get _value => super._value as _$_TestStatusFail;
+
   @override
   $Res call({
-    Object? error = null,
-    Object? stackTrace = null,
+    Object? error = freezed,
+    Object? stackTrace = freezed,
   }) {
     return _then(_$_TestStatusFail(
-      null == error
+      error == freezed
           ? _value.error
           : error // ignore: cast_nullable_to_non_nullable
               as String,
-      stackTrace: null == stackTrace
+      stackTrace: stackTrace == freezed
           ? _value.stackTrace
           : stackTrace // ignore: cast_nullable_to_non_nullable
               as String,
@@ -257,17 +259,19 @@ class _$_TestStatusFail extends _TestStatusFail {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$_TestStatusFail &&
-            (identical(other.error, error) || other.error == error) &&
-            (identical(other.stackTrace, stackTrace) ||
-                other.stackTrace == stackTrace));
+            const DeepCollectionEquality().equals(other.error, error) &&
+            const DeepCollectionEquality()
+                .equals(other.stackTrace, stackTrace));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, error, stackTrace);
+  int get hashCode => Object.hash(
+      runtimeType,
+      const DeepCollectionEquality().hash(error),
+      const DeepCollectionEquality().hash(stackTrace));
 
   @JsonKey(ignore: true)
   @override
-  @pragma('vm:prefer-inline')
   _$$_TestStatusFailCopyWith<_$_TestStatusFail> get copyWith =>
       __$$_TestStatusFailCopyWithImpl<_$_TestStatusFail>(this, _$identity);
 
@@ -285,10 +289,10 @@ class _$_TestStatusFail extends _TestStatusFail {
   @override
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function()? pass,
-    TResult? Function(String error, String stackTrace)? fail,
-    TResult? Function(String? skipReason)? skip,
-    TResult? Function()? pending,
+    TResult Function()? pass,
+    TResult Function(String error, String stackTrace)? fail,
+    TResult Function(String? skipReason)? skip,
+    TResult Function()? pending,
   }) {
     return fail?.call(error, stackTrace);
   }
@@ -322,10 +326,10 @@ class _$_TestStatusFail extends _TestStatusFail {
   @override
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
-    TResult? Function(_TestStatusPass value)? pass,
-    TResult? Function(_TestStatusFail value)? fail,
-    TResult? Function(_TestStatusSkip value)? skip,
-    TResult? Function(_TestStatusPending value)? pending,
+    TResult Function(_TestStatusPass value)? pass,
+    TResult Function(_TestStatusFail value)? fail,
+    TResult Function(_TestStatusSkip value)? skip,
+    TResult Function(_TestStatusPending value)? pending,
   }) {
     return fail?.call(this);
   }
@@ -363,25 +367,26 @@ abstract class _$$_TestStatusSkipCopyWith<$Res> {
   factory _$$_TestStatusSkipCopyWith(
           _$_TestStatusSkip value, $Res Function(_$_TestStatusSkip) then) =
       __$$_TestStatusSkipCopyWithImpl<$Res>;
-  @useResult
   $Res call({String? skipReason});
 }
 
 /// @nodoc
 class __$$_TestStatusSkipCopyWithImpl<$Res>
-    extends _$TestStatusCopyWithImpl<$Res, _$_TestStatusSkip>
+    extends _$TestStatusCopyWithImpl<$Res>
     implements _$$_TestStatusSkipCopyWith<$Res> {
   __$$_TestStatusSkipCopyWithImpl(
       _$_TestStatusSkip _value, $Res Function(_$_TestStatusSkip) _then)
-      : super(_value, _then);
+      : super(_value, (v) => _then(v as _$_TestStatusSkip));
 
-  @pragma('vm:prefer-inline')
+  @override
+  _$_TestStatusSkip get _value => super._value as _$_TestStatusSkip;
+
   @override
   $Res call({
     Object? skipReason = freezed,
   }) {
     return _then(_$_TestStatusSkip(
-      skipReason: freezed == skipReason
+      skipReason: skipReason == freezed
           ? _value.skipReason
           : skipReason // ignore: cast_nullable_to_non_nullable
               as String?,
@@ -407,16 +412,16 @@ class _$_TestStatusSkip extends _TestStatusSkip {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$_TestStatusSkip &&
-            (identical(other.skipReason, skipReason) ||
-                other.skipReason == skipReason));
+            const DeepCollectionEquality()
+                .equals(other.skipReason, skipReason));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, skipReason);
+  int get hashCode =>
+      Object.hash(runtimeType, const DeepCollectionEquality().hash(skipReason));
 
   @JsonKey(ignore: true)
   @override
-  @pragma('vm:prefer-inline')
   _$$_TestStatusSkipCopyWith<_$_TestStatusSkip> get copyWith =>
       __$$_TestStatusSkipCopyWithImpl<_$_TestStatusSkip>(this, _$identity);
 
@@ -434,10 +439,10 @@ class _$_TestStatusSkip extends _TestStatusSkip {
   @override
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function()? pass,
-    TResult? Function(String error, String stackTrace)? fail,
-    TResult? Function(String? skipReason)? skip,
-    TResult? Function()? pending,
+    TResult Function()? pass,
+    TResult Function(String error, String stackTrace)? fail,
+    TResult Function(String? skipReason)? skip,
+    TResult Function()? pending,
   }) {
     return skip?.call(skipReason);
   }
@@ -471,10 +476,10 @@ class _$_TestStatusSkip extends _TestStatusSkip {
   @override
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
-    TResult? Function(_TestStatusPass value)? pass,
-    TResult? Function(_TestStatusFail value)? fail,
-    TResult? Function(_TestStatusSkip value)? skip,
-    TResult? Function(_TestStatusPending value)? pending,
+    TResult Function(_TestStatusPass value)? pass,
+    TResult Function(_TestStatusFail value)? fail,
+    TResult Function(_TestStatusSkip value)? skip,
+    TResult Function(_TestStatusPending value)? pending,
   }) {
     return skip?.call(this);
   }
@@ -514,11 +519,14 @@ abstract class _$$_TestStatusPendingCopyWith<$Res> {
 
 /// @nodoc
 class __$$_TestStatusPendingCopyWithImpl<$Res>
-    extends _$TestStatusCopyWithImpl<$Res, _$_TestStatusPending>
+    extends _$TestStatusCopyWithImpl<$Res>
     implements _$$_TestStatusPendingCopyWith<$Res> {
   __$$_TestStatusPendingCopyWithImpl(
       _$_TestStatusPending _value, $Res Function(_$_TestStatusPending) _then)
-      : super(_value, _then);
+      : super(_value, (v) => _then(v as _$_TestStatusPending));
+
+  @override
+  _$_TestStatusPending get _value => super._value as _$_TestStatusPending;
 }
 
 /// @nodoc
@@ -554,10 +562,10 @@ class _$_TestStatusPending extends _TestStatusPending {
   @override
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function()? pass,
-    TResult? Function(String error, String stackTrace)? fail,
-    TResult? Function(String? skipReason)? skip,
-    TResult? Function()? pending,
+    TResult Function()? pass,
+    TResult Function(String error, String stackTrace)? fail,
+    TResult Function(String? skipReason)? skip,
+    TResult Function()? pending,
   }) {
     return pending?.call();
   }
@@ -591,10 +599,10 @@ class _$_TestStatusPending extends _TestStatusPending {
   @override
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
-    TResult? Function(_TestStatusPass value)? pass,
-    TResult? Function(_TestStatusFail value)? fail,
-    TResult? Function(_TestStatusSkip value)? skip,
-    TResult? Function(_TestStatusPending value)? pending,
+    TResult Function(_TestStatusPass value)? pass,
+    TResult Function(_TestStatusFail value)? fail,
+    TResult Function(_TestStatusSkip value)? skip,
+    TResult Function(_TestStatusPending value)? pending,
   }) {
     return pending?.call(this);
   }
