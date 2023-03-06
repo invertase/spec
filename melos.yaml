@@ -22,8 +22,8 @@ scripts:
     description: Run Dart formatter.
 
   format-check:
-    run: melos exec flutter format . --set-exit-if-changed
-    description: Run `flutter format` checks for all packages.
+    run: melos exec dart format . --set-exit-if-changed
+    description: Run `dart format` checks for all packages.
 
   build_runner:build:
     run: |
