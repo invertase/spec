@@ -105,7 +105,7 @@ final $spinner = Provider.autoDispose<String>((ref) {
       case 7:
         return '/';
       default:
-        throw FallThroughError();
+        throw ArgumentError.value(offset);
     }
   }
 

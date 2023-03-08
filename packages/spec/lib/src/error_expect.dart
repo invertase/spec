@@ -13,8 +13,14 @@ extension ErrorExpectation<Return, Actual>
     return runMatcher(dart_test.isConcurrentModificationError);
   }
 
+  // ignore: deprecated_member_use
   /// A matcher for [CyclicInitializationError].
+  @Deprecated(
+    'CyclicInitializationError is deprecated and will be removed in Dart 3. '
+    'Use `isA<Error>()` instead.',
+  )
   Return isCyclicInitializationError() {
+    // ignore: deprecated_member_use
     return runMatcher(dart_test.isCyclicInitializationError);
   }
 
@@ -33,8 +39,14 @@ extension ErrorExpectation<Return, Actual>
     return runMatcher(dart_test.isNoSuchMethodError);
   }
 
+  // ignore: deprecated_member_use
   /// A matcher for [NullThrownError].
+  @Deprecated(
+    'NullThrownError is deprecated and will be removed in Dart 3. '
+    'Use `isA<TypeError>()` instead.',
+  )
   Return isNullThrownError() {
+    // ignore: deprecated_member_use
     return runMatcher(dart_test.isNullThrownError);
   }
 
