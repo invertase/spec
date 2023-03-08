@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:cli_util/cli_logging.dart';
 import 'package:dart_test_adapter/dart_test_adapter.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:melos/melos.dart';
@@ -185,9 +186,8 @@ final $allPackages = FutureProvider<List<_Package>>((ref) async {
   try {
     final melosWorkspace = await MelosWorkspace.fromConfig(
       await MelosWorkspaceConfig.fromDirectory(workingDir),
-      filter: PackageFilter(
-        dirExists: ['test'],
-      ),
+      filter: PackageFilter(dirExists: const ['test']),
+      logger: MelosLogger(Logger.standard()),
     );
 
     return melosWorkspace.filteredPackages.values

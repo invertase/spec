@@ -55,8 +55,8 @@ class _SpecCommandRunner extends CommandRunner<int> {
       ..addFlag(
         'update-goldens',
         negatable: false,
-        help:
-            'Whether "matchesGoldenFile()" calls within your test methods should update the golden files rather than test for an existing match.',
+        help: 'Whether "matchesGoldenFile()" calls within your test methods '
+            'should update the golden files rather than test for an existing match.',
       )
       ..addMultiOption(
         'name',

@@ -15,8 +15,9 @@ final $fileChange = StreamProvider<void>((ref) {
 
   final dir = ref.watch($workingDirectory);
   final libChange = Directory(join(dir.path, 'lib')).watch(recursive: true);
-  final testChange =
-      Directory(join(dir.path, 'test')).watch(recursive: true).filterGoldens();
+  final testChange = Directory(join(dir.path, 'test'))
+      .watch(recursive: true)
+      .where((event) => event.path.endsWith('.dart'));
 
   final libSub = libChange.listen((event) => controller.add(null));
   ref.onDispose(libSub.cancel);
@@ -45,13 +46,3 @@ final $isEarlyAbort = Provider<bool>((ref) {
 ]);
 
 final $startTime = StateProvider<DateTime>((ref) => DateTime(0));
-
-extension StreamFileSystemEventX on Stream<FileSystemEvent> {
-  Stream<FileSystemEvent> filterGoldens() =>
-      where((event) => !_isGoldentTestFile(event));
-
-  bool _isGoldentTestFile(FileSystemEvent event) =>
-      event.path.endsWith('.png') &&
-      (event.type == FileSystemEvent.modify ||
-          event.type == FileSystemEvent.create);
-}

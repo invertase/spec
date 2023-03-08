@@ -1079,10 +1079,13 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Golden test', (WidgetTester tester) async {
-    await tester
-        .pumpWidget(Container(color: Colors.green, width: 100, height: 100));
+    await tester.pumpWidget(
+      Container(color: Colors.green, width: 100, height: 100),
+    );
     await expectLater(
-        find.byType(Container), matchesGoldenFile('container.png'));
+      find.byType(Container),
+      matchesGoldenFile('container.png'),
+    );
   });
 }
 

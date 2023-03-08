@@ -1,3 +1,7 @@
+## Unreleased minor
+
+- Added support for `--update-goldens` flag (thanks to @trejdych)
+
 ## 0.1.3
 
 Upgrade Riverpod dependency

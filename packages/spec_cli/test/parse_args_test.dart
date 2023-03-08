@@ -67,6 +67,7 @@ void main() {
         SpecOptions.fromArgs(const ['--update-goldens']),
         const SpecOptions(updateGoldens: true),
       );
+      expect(const SpecOptions().updateGoldens, false);
     });
   });
 }
