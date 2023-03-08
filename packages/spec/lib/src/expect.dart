@@ -73,6 +73,15 @@ abstract class ExpectationBase<Actual, Return, Param> {
     return runMatcher(dart_test.isNull);
   }
 
+  /// A matcher that matches any null value.
+  ///
+  /// ```dart
+  /// expect(value).toBeNull();
+  /// ```
+  Return toBeNull() {
+    return isNull();
+  }
+
   /// Returns a matcher that matches if the match argument is a string and
   /// matches the regular expression given by [re].
   ///
@@ -90,6 +99,56 @@ abstract class ExpectationBase<Actual, Return, Param> {
   /// ```
   Return isA<T>() {
     return runMatcher(dart_test.isA<T>());
+  }
+
+  /// Returns a matcher that matches any value to be false or null.
+  ///
+  /// ```dart
+  /// expect(value).toBeFalsy()
+  /// ```
+  Return toBeFalsy() {
+    return runMatcher(dart_test.anyOf(dart_test.isFalse, dart_test.isNull));
+  }
+
+  /// Returns a matcher that matches any value that is not false or null.
+  ///
+  /// ```dart
+  /// expect(value).toBeTruthy()
+  /// ```
+  Return toBeTruthy() {
+    return runMatcher(
+      dart_test.isNot(
+        dart_test.anyOf(dart_test.isFalse, dart_test.isNull),
+      ),
+    );
+  }
+
+  /// Returns a matcher that matches if the match argument contains the
+  /// expected value.
+  ///
+  /// For [String]s this means substring matching;
+  /// for [Map]s it means the map has the key, and for [Iterable]s it means
+  /// the iterable has a matching element.
+  /// In the case of iterables, [expected] can itself be a matcher.
+  ///
+  /// ```dart
+  /// expect('Hello world').toContain('Hello');
+  /// expect([1,2]).toContain(2);
+  /// expect({  'hello': 'world' }).toContain('hello');
+  /// ```
+  Return toContain(Object? expected) {
+    return runMatcher(dart_test.contains(expected));
+  }
+
+  /// Returns a matcher that matches if an object has a length property that
+  /// matches [matcher].
+  /// ```dart
+  /// expect('Hello').toHaveLength(5);
+  /// expect([1, 2]).toHaveLength(2);
+  /// expect({'hello': 'world'}).toHaveLength(1);
+  /// ```
+  Return toHaveLength(Object? matcher) {
+    return runMatcher(dart_test.hasLength(matcher));
   }
 }
 

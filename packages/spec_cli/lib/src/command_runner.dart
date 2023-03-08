@@ -52,6 +52,12 @@ class _SpecCommandRunner extends CommandRunner<int> {
         negatable: false,
         help: 'Whether to collect coverage information.',
       )
+      ..addFlag(
+        'update-goldens',
+        negatable: false,
+        help: 'Whether "matchesGoldenFile()" calls within your test methods '
+            'should update the golden files rather than test for an existing match.',
+      )
       ..addMultiOption(
         'name',
         abbr: 'n',
@@ -66,6 +72,7 @@ class _SpecCommandRunner extends CommandRunner<int> {
       testNameFilters: result['name'] as List<String>,
       ci: result['ci'] as bool?,
       coverage: result['coverage'] as bool,
+      updateGoldens: result['update-goldens'] as bool,
     );
   }
 
@@ -87,6 +94,7 @@ class SpecOptions {
     this.watch = false,
     this.ci,
     this.coverage = false,
+    this.updateGoldens = false,
   });
 
   factory SpecOptions.fromArgs(List<String> args) {
@@ -103,6 +111,7 @@ class SpecOptions {
   final bool watch;
   final bool coverage;
   final bool? ci;
+  final bool updateGoldens;
 
   @override
   bool operator ==(Object other) =>
@@ -111,6 +120,7 @@ class SpecOptions {
       other.ci == ci &&
       other.watch == watch &&
       other.coverage == coverage &&
+      other.updateGoldens == updateGoldens &&
       const DeepCollectionEquality().equals(other.fileFilters, fileFilters) &&
       const DeepCollectionEquality()
           .equals(testNameFilters, other.testNameFilters);
@@ -121,6 +131,7 @@ class SpecOptions {
         ci,
         watch,
         coverage,
+        updateGoldens,
         const DeepCollectionEquality().hash(fileFilters),
         const DeepCollectionEquality().hash(testNameFilters),
       );
@@ -132,6 +143,7 @@ class SpecOptions {
         'ci: $ci, '
         'fileFilters: $fileFilters, '
         'testNameFilters: $testNameFilters'
+        'updateGoldens: $updateGoldens'
         ')';
   }
 }
@@ -155,6 +167,7 @@ Future<int> spec({
         .map(normalize)
         .toList();
     ref.read($isWatchMode.notifier).state = options.watch;
+    ref.read($isUpdateGoldensMode.notifier).state = options.updateGoldens;
     ref.read($startTime.notifier).state = DateTime.now();
 
     try {
@@ -304,6 +317,12 @@ void _handleWatchKeyPress(List<int> keyCodes, DartRef ref) {
             ref.read($testNameFilters)?.pattern ?? '';
         ref.read($isEditingTestNameFilter.notifier).state = true;
         restartTests(ref);
+        break;
+      case KeyCode.g:
+        // pressed `g`, toggling --update-goldens mode
+
+        ref.read($isUpdateGoldensMode.notifier).update((state) => !state);
+
         break;
       case KeyCode.enter:
         // stop the watch mode

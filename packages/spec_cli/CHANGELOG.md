@@ -1,3 +1,7 @@
+## Unreleased minor
+
+- Added support for `--update-goldens` flag (thanks to @trejdych)
+
 ## 0.1.4
 
 - feat: Allow running spec_cli with `dart pub global run spec_cli` (#22)
