@@ -1,14 +1,14 @@
 ## Unreleased minor
 
-Introducing new matchers (thanks to @dtengeri):
-
-- toBeNull()
-- toBeFalsy()
-- toBeTruthy()
-- toContain()
-- toHaveLength()
-- containsKey()
-- toBeCloseTo()
+- Deprecated some error matchers associated with a deprecated error.
+- Introducing new matchers (thanks to @dtengeri):
+  - toBeNull()
+  - toBeFalsy()
+  - toBeTruthy()
+  - toContain()
+  - toHaveLength()
+  - containsKey()
+  - toBeCloseTo()
 
 ## 0.2.2
 
