@@ -1062,4 +1062,57 @@ $testResults
     overrides: [$spinner.overrideWithValue('...')],
     timeout: const Timeout.factor(2),
   );
+
+  testScope('creates golden files when --update-goldens option is enabled',
+      (ref) async {
+    final testRenderer = rendererOverride = TestRenderer();
+    addTearDown(() => rendererOverride = null);
+
+    final workingDir = await createProject([
+      PackageInfo(
+        name: 'a',
+        isFlutterPackage: true,
+        files: {
+          'test/my_test.dart': '''
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+void main() {
+  testWidgets('Golden test', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Container(color: Colors.green, width: 100, height: 100),
+    );
+    await expectLater(
+      find.byType(Container),
+      matchesGoldenFile('container.png'),
+    );
+  });
+}
+
+''',
+        },
+      ),
+    ]);
+
+    final exitCode = await spec(
+      workingDirectory: workingDir.path,
+      options: SpecOptions.fromArgs(const ['--update-goldens', '--no-ci']),
+    );
+
+    expect(
+      testRenderer.frames.last,
+      '''
+ PASS  packages/a/test/my_test.dart
+
+Test Suites: 1 passed, 1 total
+Tests:       1 passed, 1 total
+Time:        00:00:00
+''',
+    );
+    expect(
+      File('${workingDir.path}/packages/a/test/container.png').existsSync(),
+      true,
+    );
+    expect(exitCode, 0);
+  });
 }
