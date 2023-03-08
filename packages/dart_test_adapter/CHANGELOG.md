@@ -1,3 +1,7 @@
+# 0.2.1
+
+Fix oudated dependencies
+
 # 0.2.0
 
 - Added a `TestProcessDone` event, representing the test process completion with its `exitCode`.

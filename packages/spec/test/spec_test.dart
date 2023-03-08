@@ -75,4 +75,53 @@ void main() {
       );
     });
   });
+
+  group('list', () {
+    test('containsAll', () {
+      expect([1, 2, 3]).containsAll([1, 2]);
+
+      t.expect(
+        () => expect([1, 2, 3]).containsAll([1, 2, 4]),
+        throwsTestFailure,
+      );
+    });
+
+    test('not contains', () {
+      expect([1, 2, 3]).not.containsAll([1, 2, 4]);
+
+      t.expect(
+        () => expect([1, 2, 3]).not.containsAll([1, 2]),
+        throwsTestFailure,
+      );
+    });
+
+    test('contains', () {
+      expect([1, 2, 3]).contains(1);
+
+      t.expect(
+        () => expect([1, 2, 3]).contains(4),
+        throwsTestFailure,
+      );
+    });
+  });
+
+  group('map', () {
+    test('containsPair', () {
+      expect({'a': 1, 'b': 2}).containsPair('a', 1);
+
+      t.expect(
+        () => expect({'a': 1, 'b': 2}).containsPair('a', 2),
+        throwsTestFailure,
+      );
+    });
+
+    test('containsKey', () {
+      expect({'a': 1, 'b': 2}).containsKey('a');
+
+      t.expect(
+        () => expect({'a': 1, 'b': 2}).containsKey('c'),
+        throwsTestFailure,
+      );
+    });
+  });
 }
