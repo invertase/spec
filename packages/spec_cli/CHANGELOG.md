@@ -1,5 +1,4 @@
-## Unreleased minor
-
+## 0.1.5 - 2023-03-08
 - Added support for `--update-goldens` flag (thanks to @trejdych)
 
 ## 0.1.4

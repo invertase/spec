@@ -1,5 +1,4 @@
-## Unreleased minor
-
+## 0.2.3 - 2023-03-08
 - Deprecated some error matchers associated with a deprecated error.
 - Introducing new matchers (thanks to @dtengeri):
   - toBeNull()
