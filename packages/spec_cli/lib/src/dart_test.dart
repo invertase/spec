@@ -23,6 +23,7 @@ final $filePathFilters = StateProvider<List<String>>((ref) => []);
 final $isWatchMode = StateProvider<bool>((ref) => false);
 final $isRunningOnlyFailingTests = StateProvider<bool>((ref) => false);
 final $isCIMode = Provider((ref) => !stdin.supportsAnsiEscapes);
+final $isMelosMode = StateProvider<bool>((ref) => true);
 final $isCoverageMode = Provider<bool>((ref) => throw UnimplementedError());
 final $isUpdateGoldensMode = StateProvider<bool>((ref) => false);
 
@@ -183,17 +184,7 @@ final $coverageForPackage =
 
 final $allPackages = FutureProvider<List<_Package>>((ref) async {
   final workingDir = ref.watch($workingDirectory);
-  try {
-    final melosWorkspace = await MelosWorkspace.fromConfig(
-      await MelosWorkspaceConfig.fromDirectory(workingDir),
-      filter: PackageFilter(dirExists: const ['test']),
-      logger: MelosLogger(Logger.standard()),
-    );
-
-    return melosWorkspace.filteredPackages.values
-        .map((e) => _Package(isFlutter: e.isFlutterPackage, path: e.path))
-        .toList();
-  } on MelosException {
+  Future<List<_Package>> singlePackage() async {
     late final hasPubspec =
         File(join(workingDir.path, 'pubspec.yaml')).existsSync();
     late final hasTestFolder =
@@ -208,6 +199,25 @@ final $allPackages = FutureProvider<List<_Package>>((ref) async {
           path: normalize(workingDir.absolute.path),
         ),
     ];
+  }
+
+  final isMelosMode = ref.watch($isMelosMode);
+  if (!isMelosMode) {
+    return singlePackage();
+  }
+
+  try {
+    final melosWorkspace = await MelosWorkspace.fromConfig(
+      await MelosWorkspaceConfig.fromDirectory(workingDir),
+      filter: PackageFilter(dirExists: const ['test']),
+      logger: MelosLogger(Logger.standard()),
+    );
+
+    return melosWorkspace.filteredPackages.values
+        .map((e) => _Package(isFlutter: e.isFlutterPackage, path: e.path))
+        .toList();
+  } on MelosException {
+    return singlePackage();
   }
 }, dependencies: [$workingDirectory]);
 

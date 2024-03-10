@@ -62,6 +62,12 @@ class _SpecCommandRunner extends CommandRunner<int> {
         'name',
         abbr: 'n',
         help: 'Filters tests by name.',
+      )
+      ..addFlag(
+        'melos',
+        defaultsTo: true,
+        help: 'Whether to run the command in a melos workspace.'
+            ' Defaults to true.',
       );
   }
 
@@ -73,6 +79,7 @@ class _SpecCommandRunner extends CommandRunner<int> {
       ci: result['ci'] as bool?,
       coverage: result['coverage'] as bool,
       updateGoldens: result['update-goldens'] as bool,
+      melos: result['melos'] as bool,
     );
   }
 
@@ -95,6 +102,7 @@ class SpecOptions {
     this.ci,
     this.coverage = false,
     this.updateGoldens = false,
+    this.melos = true,
   });
 
   factory SpecOptions.fromArgs(List<String> args) {
@@ -112,6 +120,7 @@ class SpecOptions {
   final bool coverage;
   final bool? ci;
   final bool updateGoldens;
+  final bool melos;
 
   @override
   bool operator ==(Object other) =>
@@ -121,6 +130,7 @@ class SpecOptions {
       other.watch == watch &&
       other.coverage == coverage &&
       other.updateGoldens == updateGoldens &&
+      other.melos == melos &&
       const DeepCollectionEquality().equals(other.fileFilters, fileFilters) &&
       const DeepCollectionEquality()
           .equals(testNameFilters, other.testNameFilters);
@@ -132,6 +142,7 @@ class SpecOptions {
         watch,
         coverage,
         updateGoldens,
+        melos,
         const DeepCollectionEquality().hash(fileFilters),
         const DeepCollectionEquality().hash(testNameFilters),
       );
@@ -144,6 +155,7 @@ class SpecOptions {
         'fileFilters: $fileFilters, '
         'testNameFilters: $testNameFilters'
         'updateGoldens: $updateGoldens'
+        'melos: $melos'
         ')';
   }
 }
@@ -168,6 +180,7 @@ Future<int> spec({
         .toList();
     ref.read($isWatchMode.notifier).state = options.watch;
     ref.read($isUpdateGoldensMode.notifier).state = options.updateGoldens;
+    ref.read($isMelosMode.notifier).state = options.melos;
     ref.read($startTime.notifier).state = DateTime.now();
 
     try {

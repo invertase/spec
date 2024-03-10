@@ -69,5 +69,12 @@ void main() {
       );
       expect(const SpecOptions().updateGoldens, false);
     });
+
+    test('can specify --no-melos', () {
+      expect(
+        SpecOptions.fromArgs(const ['--no-melos']),
+        const SpecOptions(melos: false),
+      );
+    });
   });
 }
